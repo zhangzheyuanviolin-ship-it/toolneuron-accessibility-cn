@@ -38,7 +38,7 @@ fun GuideScreen(
     ) {
         Icon(
             imageVector = TnIcons.Sparkles,
-            contentDescription = tn("Action icon"),
+            contentDescription = null,
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.primary
         )
@@ -46,7 +46,7 @@ fun GuideScreen(
         Spacer(Modifier.height(Standards.SpacingXl))
 
         Text(
-            text = "Welcome to ToolNeuron",
+            text = tn("Welcome to ToolNeuron"),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -56,7 +56,7 @@ fun GuideScreen(
         Spacer(Modifier.height(Standards.SpacingMd))
 
         Text(
-            text = "Your privacy-first AI assistant.\nEverything runs on your device — no cloud, no telemetry.",
+            text = tn("Your privacy-first AI assistant.\nEverything runs on your device — no cloud, no telemetry."),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

@@ -70,19 +70,19 @@ fun ModelStoreScreen(
                     ActionButton(
                         onClickListener = onNavigateBack,
                         icon = TnIcons.ArrowLeft,
-                        contentDescription = "Back"
+                        contentDescription = tn("Back")
                     )
                 }, actions = {
                     if (selectedTab == StoreTab.MODELS) {
                         ActionButton(
                             onClickListener = { viewModel.refreshModels() },
                             icon = TnIcons.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = tn("Refresh")
                         )
                         ActionButton(
                             onClickListener = { showSearch = true },
                             icon = TnIcons.Search,
-                            contentDescription = "Search"
+                            contentDescription = tn("Search")
                         )
                     }
                 })
@@ -104,7 +104,7 @@ fun ModelStoreScreen(
                     onClick = { viewModel.selectTab(StoreTab.MODELS) },
                     text = {
                         Text(
-                            "Store",
+                            tn("Store"),
                             fontWeight = if (selectedTab == StoreTab.MODELS) FontWeight.SemiBold else FontWeight.Normal
                         )
                     })
@@ -113,7 +113,7 @@ fun ModelStoreScreen(
                     onClick = { viewModel.selectTab(StoreTab.INSTALLED) },
                     text = {
                         Text(
-                            "Installed",
+                            tn("Installed"),
                             fontWeight = if (selectedTab == StoreTab.INSTALLED) FontWeight.SemiBold else FontWeight.Normal
                         )
                     })
@@ -122,7 +122,7 @@ fun ModelStoreScreen(
                     onClick = { viewModel.selectTab(StoreTab.SETTINGS) },
                     text = {
                         Text(
-                            "Settings",
+                            tn("Settings"),
                             fontWeight = if (selectedTab == StoreTab.SETTINGS) FontWeight.SemiBold else FontWeight.Normal
                         )
                     })

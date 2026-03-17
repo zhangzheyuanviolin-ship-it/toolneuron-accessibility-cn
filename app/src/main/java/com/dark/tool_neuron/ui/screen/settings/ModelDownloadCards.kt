@@ -108,7 +108,7 @@ internal fun ModelDownloadCard(
                     FilledTonalButton(onClick = onDownload) {
                         Icon(
                             TnIcons.Download,
-                            contentDescription = tn("Action icon"),
+                            contentDescription = tn("Download model"),
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(Modifier.width(Standards.SpacingSm))

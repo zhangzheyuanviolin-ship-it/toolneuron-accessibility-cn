@@ -86,7 +86,7 @@ fun HomeDrawerScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Chats",
+                        tn("Chats"),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -95,6 +95,7 @@ fun HomeDrawerScreen(
                         ActionButton(
                             onClickListener = onVaultManagerClick,
                             icon = TnIcons.Sparkles,
+                            contentDescription = "Open vault manager",
                             modifier = Modifier.padding(end = 6.dp)
                         )
                         ActionButton(
@@ -104,6 +105,7 @@ fun HomeDrawerScreen(
                                 }
                             },
                             icon = TnIcons.Plus,
+                            contentDescription = "Create new chat",
                             modifier = Modifier.padding(end = 6.dp)
                         )
                     }
@@ -245,7 +247,7 @@ private fun ChatListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Chat ${chat.chatId.take(8)}",
+                    text = tn("Chat ${chat.chatId.take(8)}"),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -259,7 +261,7 @@ private fun ChatListItem(
                 )
 
                 Text(
-                    text = "${chat.messageCount} msgs",
+                    text = tn("${chat.messageCount} msgs"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -292,7 +294,7 @@ private fun ChatListItem(
                 ) {
                     Icon(
                         TnIcons.Trash,
-                        contentDescription = "Delete chat",
+                        contentDescription = tn("Delete chat"),
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(18.dp)
                     )
@@ -314,19 +316,19 @@ private fun EmptyState() {
         ) {
             Icon(
                 imageVector = TnIcons.Messages,
-                contentDescription = tn("Action icon"),
+                contentDescription = null,
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.primary.copy(0.4f)
             )
 
             Text(
-                "No chats yet",
+                tn("No chats yet"),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurface
             )
 
             Text(
-                "Tap + to start a new conversation",
+                tn("Tap + to start a new conversation"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -347,7 +349,7 @@ private fun LoadingState() {
         ) {
             LoadingIndicator()
             Text(
-                "Loading chats...",
+                tn("Loading chats..."),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -400,4 +402,3 @@ private fun ErrorSnackbar(
         }
     }
 }
-

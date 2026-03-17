@@ -81,7 +81,7 @@ internal fun MoreOptionsOverlay(
                 ) {
                     Icon(
                         imageVector = TnIcons.Database,
-                        contentDescription = tn("Action icon"),
+                        contentDescription = null,
                         modifier = Modifier.size(Standards.IconMd),
                         tint = if (loadedRagCount > 0) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
@@ -94,7 +94,7 @@ internal fun MoreOptionsOverlay(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = if (loadedRagCount > 0) "$loadedRagCount loaded" else "None loaded",
+                            text = if (loadedRagCount > 0) tn("$loadedRagCount loaded") else tn("None loaded"),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -102,7 +102,8 @@ internal fun MoreOptionsOverlay(
                     ActionTextButton(
                         onClickListener = onRagManage,
                         icon = TnIcons.Database,
-                        text = "Manage"
+                        text = "Manage",
+                        contentDescription = "Manage RAG"
                     )
                     ActionSwitch(
                         checked = isRagEnabled,
@@ -126,7 +127,7 @@ internal fun MoreOptionsOverlay(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = "Plugins",
+                            text = tn("Plugins"),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -150,7 +151,7 @@ internal fun MoreOptionsOverlay(
                                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                     )
                                     Text(
-                                        text = "${plugin.toolDefinitionBuilder.size} tools",
+                                        text = tn("${plugin.toolDefinitionBuilder.size} tools"),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                     )
@@ -166,7 +167,8 @@ internal fun MoreOptionsOverlay(
                         ActionTextButton(
                             onClickListener = onManagePlugins,
                             icon = TnIcons.Wrench,
-                            text = "Configure"
+                            text = "Configure",
+                            contentDescription = "Configure plugins"
                         )
                     }
                 }
@@ -207,7 +209,7 @@ internal fun QuickLookChipRow(
             }
             if (isWebSearchEnabled) {
                 StatusChip(
-                    label = "Web Search",
+                    label = tn("Web Search"),
                     color = MaterialTheme.colorScheme.tertiary,
                     onClick = onWebSearchChipClick
                 )
@@ -221,7 +223,7 @@ internal fun QuickLookChipRow(
             }
             if (isMemoryEnabled) {
                 StatusChip(
-                    label = "Memory",
+                    label = tn("Memory"),
                     color = MaterialTheme.colorScheme.secondary,
                     onClick = onMemoryChipClick
                 )
@@ -293,7 +295,7 @@ internal fun ReloadModelDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)) {
                 Text(
-                    "You previously had a model loaded. Would you like to load it again?",
+                    text = tn("You previously had a model loaded. Would you like to load it again?"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -304,7 +306,7 @@ internal fun ReloadModelDialog(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    typeLabel,
+                    tn(typeLabel),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

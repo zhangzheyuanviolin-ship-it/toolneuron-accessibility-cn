@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.ui.screen.guide
 
+import com.dark.tool_neuron.i18n.tn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -41,7 +42,7 @@ fun TermsAndConditionsScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "Terms & Conditions",
+                text = tn("Terms & Conditions"),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -50,7 +51,7 @@ fun TermsAndConditionsScreen(
             )
 
             Text(
-                text = "Please read carefully before using ToolNeuron",
+                text = tn("Please read carefully before using ToolNeuron"),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.padding(bottom = Standards.SpacingXl)
@@ -399,7 +400,7 @@ fun TermsAndConditionsScreen(
                 Spacer(modifier = Modifier.height(Standards.SpacingXl))
 
                 Text(
-                    text = "BY CLICKING 'I ACCEPT' BELOW, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS AND CONDITIONS. YOU ACCEPT FULL RESPONSIBILITY FOR ALL CONTENT GENERATED USING THIS APP.",
+                    text = tn("BY CLICKING 'I ACCEPT' BELOW, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS AND CONDITIONS. YOU ACCEPT FULL RESPONSIBILITY FOR ALL CONTENT GENERATED USING THIS APP."),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
@@ -428,8 +429,8 @@ fun TermsAndConditionsScreen(
                         }
                     },
                     icon = TnIcons.Check,
-                    text = if (isScrolledToBottom) "I Accept" else "Scroll to Continue",
-                    contentDescription = "Accept Terms",
+                    text = if (isScrolledToBottom) tn("I Accept") else tn("Scroll to Continue"),
+                    contentDescription = tn("Accept Terms"),
                     modifier = Modifier.fillMaxWidth(0.8f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isScrolledToBottom)
@@ -458,7 +459,7 @@ private fun TermsSection(
             .padding(bottom = 20.dp)
     ) {
         Text(
-            text = title,
+            text = tn(title),
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace
@@ -468,7 +469,7 @@ private fun TermsSection(
         )
 
         Text(
-            text = content,
+            text = tn(content),
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontFamily = FontFamily.Monospace,
                 lineHeight = 20.sp

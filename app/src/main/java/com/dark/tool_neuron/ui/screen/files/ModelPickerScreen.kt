@@ -73,12 +73,12 @@ fun ModelPickerScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(TnIcons.ArrowLeft, "Back")
+                        Icon(TnIcons.ArrowLeft, tn("Back"))
                     }
                 },
                 title = {
                     Text(
-                        "Model Picker",
+                        tn("Model Picker"),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -96,10 +96,9 @@ fun ModelPickerScreen(
         ) {
             PickerCard(
                 icon = TnIcons.File,
-                title = "GGUF Model",
-                description = "Pick a .gguf model file for text generation. " +
-                    "The file will be accessed via a secure file descriptor — no broad storage permission needed.",
-                buttonLabel = "Pick Model File",
+                title = tn("GGUF Model"),
+                description = tn("Pick a .gguf model file for text generation. The file will be accessed via a secure file descriptor - no broad storage permission needed."),
+                buttonLabel = tn("Pick Model File"),
                 buttonIcon = TnIcons.Upload,
                 onClick = { ggufPickerLauncher.launch(arrayOf("application/octet-stream", "*/*")) }
             )
@@ -141,7 +140,7 @@ private fun PickerCard(
                 ) {
                     Icon(
                         imageVector = icon,
-                        contentDescription = tn("Action icon"),
+                        contentDescription = null,
                         modifier = Modifier.size(22.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )

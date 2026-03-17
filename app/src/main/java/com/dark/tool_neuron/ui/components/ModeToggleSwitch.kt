@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dark.tool_neuron.global.Standards
+import com.dark.tool_neuron.i18n.tn
 import com.dark.tool_neuron.ui.icons.TnIcons
 
 @Composable
@@ -87,7 +88,7 @@ fun ModeToggleSwitch(
                     isSelected = !isImageMode,
                     isEnabled = textModelLoaded,
                     icon = TnIcons.Code,
-                    contentDescription = if (textModelLoaded) "Switch to text chat" else "Load a text model to enable chat",
+                    contentDescription = if (textModelLoaded) tn("Switch to text chat") else tn("Load a text model to enable chat"),
                     onClick = {
                         if (!isImageMode) return@IconButton
                         onModeChange(false)
@@ -99,7 +100,7 @@ fun ModeToggleSwitch(
                     isSelected = isImageMode,
                     isEnabled = imageModelLoaded,
                     icon = TnIcons.Photo,
-                    contentDescription = if (imageModelLoaded) "Switch to image generation" else "Load an image model to enable",
+                    contentDescription = if (imageModelLoaded) tn("Switch to image generation") else tn("Load an image model to enable"),
                     onClick = {
                         if (isImageMode) return@IconButton
                         onModeChange(true)

@@ -78,12 +78,12 @@ internal fun InstalledModelsTab(
             ) {
                 Icon(
                     imageVector = TnIcons.Database,
-                    contentDescription = tn("Action icon"),
+                    contentDescription = null,
                     modifier = Modifier.size(64.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "No installed models",
+                    text = tn("No installed models"),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -166,7 +166,7 @@ internal fun InstalledModelCard(
                     ProviderType.GGUF -> TnIcons.Sparkles
                     else -> TnIcons.Photo
                 },
-                contentDescription = tn("Action icon"),
+                contentDescription = null,
                 modifier = Modifier.size(Standards.IconMd),
                 tint = if (model.isActive) MaterialTheme.colorScheme.primary
                        else MaterialTheme.colorScheme.onSurfaceVariant
@@ -206,7 +206,7 @@ internal fun InstalledModelCard(
 
             // Status dot
             StatusBadge(
-                text = if (model.isActive) "Active" else "",
+                text = if (model.isActive) tn("Active") else "",
                 isActive = model.isActive
             )
 
@@ -227,7 +227,7 @@ internal fun InstalledModelCard(
                         ActionItem(
                             icon = ActionIcon.Vector(TnIcons.InfoCircle),
                             onClick = onShowDetails,
-                            contentDescription = "Details"
+                            contentDescription = tn("Details")
                         ),
                         ActionItem(
                             icon = ActionIcon.Vector(TnIcons.Trash),

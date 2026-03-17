@@ -161,7 +161,7 @@ private fun SetupOptionsContent(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (downloading) {
                         Text(
-                            "Downloading...",
+                            tn("Downloading..."),
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
@@ -169,7 +169,7 @@ private fun SetupOptionsContent(
                         )
                         Spacer(Modifier.height(Standards.SpacingSm))
                         Text(
-                            "You can Minimize the app, Will Notify You",
+                            tn("You can Minimize the app, Will Notify You"),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -211,7 +211,7 @@ private fun SetupOptionsContent(
                         }
                     } else {
                         Text(
-                            "Welcome User",
+                            tn("Welcome User"),
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
@@ -219,7 +219,7 @@ private fun SetupOptionsContent(
                         )
                         Spacer(Modifier.height(Standards.SpacingSm))
                         Text(
-                            "Choose Your Setup!",
+                            tn("Choose Your Setup!"),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -238,10 +238,10 @@ private fun SetupOptionsContent(
             )
 
             val options = listOf(
-                SetupCard(SetupOption.TEXT, TnIcons.Sparkles, "Text Generation", "LFM2 350M · ~200 MB"),
-                SetupCard(SetupOption.TEXT_TTS, TnIcons.Volume, "Text + Speech", "LFM2 + Supertonic TTS · ~460 MB"),
-                SetupCard(SetupOption.IMAGE_GEN, TnIcons.Photo, "Image Generation", "AbsoluteReality · ~1.1 GB"),
-                SetupCard(SetupOption.POWER_MODE, TnIcons.Bolt, "Power Mode", "Set up later in Store")
+                SetupCard(SetupOption.TEXT, TnIcons.Sparkles, tn("Text Generation"), "LFM2 350M · ~200 MB"),
+                SetupCard(SetupOption.TEXT_TTS, TnIcons.Volume, tn("Text + Speech"), "LFM2 + Supertonic TTS · ~460 MB"),
+                SetupCard(SetupOption.IMAGE_GEN, TnIcons.Photo, tn("Image Generation"), "AbsoluteReality · ~1.1 GB"),
+                SetupCard(SetupOption.POWER_MODE, TnIcons.Bolt, tn("Power Mode"), tn("Set up later in Store"))
             )
 
             options.forEachIndexed { index, card ->
@@ -343,13 +343,13 @@ private fun PerformancePickerContent(viewModel: SetupViewModel) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                "Optimize Performance",
+                tn("Optimize Performance"),
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(Standards.SpacingSm))
             Text(
-                "Choose how your device runs AI models",
+                tn("Choose how your device runs AI models"),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -357,7 +357,7 @@ private fun PerformancePickerContent(viewModel: SetupViewModel) {
             clusterInfo?.let {
                 Spacer(Modifier.height(Standards.SpacingXs))
                 Text(
-                    "Detected: $it",
+                    tn("Detected: $it"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
@@ -366,9 +366,9 @@ private fun PerformancePickerContent(viewModel: SetupViewModel) {
             Spacer(Modifier.height(Standards.SpacingXxl))
 
             val modes = listOf(
-                Triple(PerformanceMode.PERFORMANCE, TnIcons.Gauge, "Maximum speed, higher battery usage"),
-                Triple(PerformanceMode.BALANCED, TnIcons.Adjustments, "Good speed with reasonable battery life"),
-                Triple(PerformanceMode.POWER_SAVING, TnIcons.Shield, "Slower but saves battery")
+                Triple(PerformanceMode.PERFORMANCE, TnIcons.Gauge, tn("Maximum speed, higher battery usage")),
+                Triple(PerformanceMode.BALANCED, TnIcons.Adjustments, tn("Good speed with reasonable battery life")),
+                Triple(PerformanceMode.POWER_SAVING, TnIcons.Shield, tn("Slower but saves battery"))
             )
 
             modes.forEachIndexed { index, (mode, icon, description) ->
@@ -459,11 +459,11 @@ private fun RestoreFromBackupCard(viewModel: SetupViewModel) {
                 LoadingIndicator(modifier = Modifier.size(20.dp))
                 Text(
                     text = when (progress) {
-                        is SystemBackupManager.BackupProgress.Starting -> "Restoring..."
+                        is SystemBackupManager.BackupProgress.Starting -> tn("Restoring...")
                         is SystemBackupManager.BackupProgress.Collecting -> progress.component
-                        is SystemBackupManager.BackupProgress.Processing -> "Restoring ${(progress.progress * 100).toInt()}%"
-                        is SystemBackupManager.BackupProgress.Complete -> "Restore complete!"
-                        is SystemBackupManager.BackupProgress.Error -> "Restoring..."
+                        is SystemBackupManager.BackupProgress.Processing -> tn("Restoring ${(progress.progress * 100).toInt()}%")
+                        is SystemBackupManager.BackupProgress.Complete -> tn("Restore complete!")
+                        is SystemBackupManager.BackupProgress.Error -> tn("Restoring...")
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
@@ -489,7 +489,7 @@ private fun RestoreFromBackupCard(viewModel: SetupViewModel) {
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    "Restore from Backup",
+                    tn("Restore from Backup"),
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -521,14 +521,14 @@ private fun RestoreFromBackupCard(viewModel: SetupViewModel) {
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)) {
                     Text(
-                        "Enter your backup password, then select the backup file.",
+                        tn("Enter your backup password, then select the backup file."),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     PasswordTextField(
                         value = restorePassword,
                         onValueChange = { restorePassword = it },
-                        label = "Backup Password",
+                        label = tn("Backup Password"),
                         modifier = Modifier.fillMaxWidth(),
                         showToggle = false
                     )
@@ -575,9 +575,9 @@ private fun PerformanceModeCard(
     )
 
     val label = when (mode) {
-        PerformanceMode.PERFORMANCE -> "Performance"
-        PerformanceMode.BALANCED -> "Balanced"
-        PerformanceMode.POWER_SAVING -> "Power Saver"
+        PerformanceMode.PERFORMANCE -> tn("Performance")
+        PerformanceMode.BALANCED -> tn("Balanced")
+        PerformanceMode.POWER_SAVING -> tn("Power Saver")
     }
 
     Surface(
@@ -593,7 +593,7 @@ private fun PerformanceModeCard(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = tn("Action icon"),
+                contentDescription = null,
                 tint = if (isSelected) MaterialTheme.colorScheme.primary else contentColor.copy(alpha = 0.7f),
                 modifier = Modifier.size(28.dp)
             )
@@ -612,7 +612,7 @@ private fun PerformanceModeCard(
             if (isSelected) {
                 Icon(
                     imageVector = TnIcons.RadioButton,
-                    contentDescription = "Selected",
+                    contentDescription = tn("Selected"),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
@@ -666,7 +666,7 @@ private fun SetupOptionCard(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = tn("Action icon"),
+                contentDescription = null,
                 tint = if (isSelected && isDownloading) MaterialTheme.colorScheme.primary
                        else contentColor.copy(alpha = 0.7f),
                 modifier = Modifier.size(28.dp)
@@ -686,7 +686,7 @@ private fun SetupOptionCard(
             if (isSelected && isDownloading) {
                 Icon(
                     imageVector = TnIcons.RadioButton,
-                    contentDescription = "Downloading",
+                    contentDescription = tn("Downloading"),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )

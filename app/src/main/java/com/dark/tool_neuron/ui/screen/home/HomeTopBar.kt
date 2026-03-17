@@ -14,6 +14,7 @@ import com.dark.tool_neuron.activity.ModelPickerActivity
 import com.dark.tool_neuron.ui.components.ActionButton
 import com.dark.tool_neuron.ui.components.AnimatedTitle
 import com.dark.tool_neuron.ui.icons.TnIcons
+import com.dark.tool_neuron.i18n.tn
 
 // ── TopBar ──────────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,7 @@ internal fun TopBar(
         ActionButton(
             onClickListener = onMenuClick,
             icon = TnIcons.Menu,
+            contentDescription = tn("Open sidebar"),
             modifier = Modifier.padding(start = 6.dp)
         )
     }, actions = {
@@ -43,18 +45,25 @@ internal fun TopBar(
             ActionButton(
                 onClickListener = onSettingsClick,
                 icon = TnIcons.Settings,
+                contentDescription = tn("Open settings"),
                 modifier = Modifier.padding(end = 6.dp)
             )
             ActionButton(
                 onClickListener = {
                     onStoreButtonClicked()
-                }, icon = TnIcons.Download, modifier = Modifier.padding(end = 6.dp)
+                },
+                icon = TnIcons.Download,
+                contentDescription = tn("Open model store"),
+                modifier = Modifier.padding(end = 6.dp)
             )
             ActionButton(
                 onClickListener = {
                     // Open ModelPickerScreen with GGUF / VLM tabs
                     context.startActivity(Intent(context, ModelPickerActivity::class.java))
-                }, icon = TnIcons.Upload, modifier = Modifier.padding(end = 6.dp)
+                },
+                icon = TnIcons.Upload,
+                contentDescription = tn("Import local model"),
+                modifier = Modifier.padding(end = 6.dp)
             )
         }
     })

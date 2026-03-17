@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.dark.tool_neuron.global.AppPaths
+import com.dark.tool_neuron.i18n.tn
 import java.io.File
 
 @AndroidEntryPoint
@@ -72,10 +73,10 @@ class MainActivity : ComponentActivity() {
         if (!NotificationPermissionHelper.hasNotificationPermission(this)) {
             NotificationPermissionHelper.requestNotificationPermission(this) {
                 if (it) {
-                    Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT)
+                    Toast.makeText(this, tn("Notification permission granted"), Toast.LENGTH_SHORT)
                         .show()
                 } else {
-                    Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT)
+                    Toast.makeText(this, tn("Notification permission denied"), Toast.LENGTH_SHORT)
                         .show()
                 }
             }

@@ -65,13 +65,49 @@ import com.dark.tool_neuron.models.ui.ActionIcon
 import com.dark.tool_neuron.models.ui.ActionItem
 import com.dark.tool_neuron.ui.icons.TnIcons
 
+private fun isGenericDescription(text: String): Boolean {
+    return text == "Description" || text == "Action icon"
+}
+
+private fun fallbackDescription(icon: ImageVector): String {
+    return when (icon) {
+        TnIcons.Menu -> "Open sidebar"
+        TnIcons.Settings -> "Open settings"
+        TnIcons.Download -> "Open model store"
+        TnIcons.Upload -> "Import local model"
+        TnIcons.Adjustments -> "More options"
+        TnIcons.Stack2 -> "Select model"
+        TnIcons.World -> "Toggle web search"
+        TnIcons.Brain -> "Toggle thinking mode"
+        TnIcons.Send -> "Send message"
+        TnIcons.PlayerStop -> "Stop generation"
+        TnIcons.ArrowLeft -> "Back"
+        TnIcons.Refresh -> "Refresh"
+        TnIcons.Search -> "Search"
+        TnIcons.Plus -> "New"
+        TnIcons.Trash -> "Delete"
+        TnIcons.InfoCircle -> "Details"
+        TnIcons.Check -> "Confirm"
+        TnIcons.X -> "Close"
+        else -> "Action"
+    }
+}
+
+private fun resolvedDescription(icon: ImageVector, contentDescription: String): String {
+    return if (isGenericDescription(contentDescription)) fallbackDescription(icon) else contentDescription
+}
+
+private fun resolvedDescription(contentDescription: String): String {
+    return if (isGenericDescription(contentDescription)) "Action" else contentDescription
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("ModifierParameter")
 @Composable
 fun ActionButton(
     onClickListener: () -> Unit,
     icon: Int,
-    contentDescription: String = "Description",
+    contentDescription: String = "Action icon",
     modifier: Modifier = Modifier,
     shape: Shape = MaterialShapes.Square.toShape(),
     colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(
@@ -87,7 +123,7 @@ fun ActionButton(
     ) {
         Icon(
             painterResource(icon),
-            contentDescription = tn(contentDescription),
+            contentDescription = tn(resolvedDescription(contentDescription)),
             Modifier.padding(Standards.ActionIconPadding)
         )
     }
@@ -99,7 +135,7 @@ fun ActionButton(
 fun ActionProgressButton(
     onClickListener: () -> Unit,
     icon: ImageVector = TnIcons.PlayerStop,
-    contentDescription: String = "Description",
+    contentDescription: String = "Action icon",
     modifier: Modifier = Modifier,
     shape: Shape = MaterialShapes.Circle.toShape(),
     colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(
@@ -128,7 +164,7 @@ fun ActionProgressButton(
         ) {
             Icon(
                 icon,
-                contentDescription = tn(contentDescription),
+                contentDescription = tn(resolvedDescription(icon, contentDescription)),
                 modifier = Modifier.padding(Standards.ActionIconPadding)
             )
         }
@@ -142,7 +178,7 @@ fun ActionProgressButton(
 fun ActionButton(
     onClickListener: () -> Unit,
     icon: ImageVector,
-    contentDescription: String = "Description",
+    contentDescription: String = "Action icon",
     modifier: Modifier = Modifier,
     shape: Shape = MaterialShapes.Square.toShape(),
     colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(
@@ -158,7 +194,7 @@ fun ActionButton(
     ) {
         Icon(
             icon,
-            contentDescription = tn(contentDescription),
+            contentDescription = tn(resolvedDescription(icon, contentDescription)),
             Modifier.padding(Standards.ActionIconPadding)
         )
     }
@@ -241,7 +277,7 @@ fun ActionTextButton(
     onClickListener: () -> Unit,
     icon: Int,
     text: String,
-    contentDescription: String = "Description",
+    contentDescription: String = "Action icon",
     modifier: Modifier = Modifier,
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = MaterialTheme.colorScheme.primary.copy(0.06f),
@@ -256,7 +292,10 @@ fun ActionTextButton(
         modifier = modifier.height(Standards.ActionIconSize),
         contentPadding = PaddingValues(horizontal = 12.dp)
     ) {
-        Icon(painterResource(icon), tn(contentDescription))
+        Icon(
+            painterResource(icon),
+            tn(if (isGenericDescription(contentDescription)) text else contentDescription)
+        )
         Spacer(Modifier.width(6.dp))
         Text(tn(text))
     }
@@ -269,7 +308,7 @@ fun ActionTextButton(
     onClickListener: () -> Unit,
     icon: ImageVector,
     text: String,
-    contentDescription: String = "Description",
+    contentDescription: String = "Action icon",
     modifier: Modifier = Modifier,
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = MaterialTheme.colorScheme.primary.copy(0.06f),
@@ -286,7 +325,7 @@ fun ActionTextButton(
         contentPadding = PaddingValues(end = 12.dp),
         enabled = enabled
     ) {
-        Icon(icon, tn(contentDescription))
+        Icon(icon, tn(if (isGenericDescription(contentDescription)) text else contentDescription))
         Spacer(Modifier.width(6.dp))
         Text(tn(text))
     }
@@ -299,7 +338,7 @@ fun ActionToggleButton(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     icon: Int,
-    contentDescription: String = "Description",
+    contentDescription: String = "Action icon",
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: Shape = MaterialShapes.Square.toShape(),
@@ -319,7 +358,7 @@ fun ActionToggleButton(
     ) {
         Icon(
             painter = painterResource(icon),
-            contentDescription = tn(contentDescription),
+            contentDescription = tn(resolvedDescription(contentDescription)),
             modifier = Modifier.padding(Standards.ActionIconPadding)
         )
     }
@@ -331,7 +370,7 @@ fun ActionToggleButton(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     icon: ImageVector,
-    contentDescription: String = "Description",
+    contentDescription: String = "Action icon",
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: Shape = MaterialShapes.Square.toShape(),
@@ -351,7 +390,7 @@ fun ActionToggleButton(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = tn(contentDescription),
+            contentDescription = tn(resolvedDescription(icon, contentDescription)),
             modifier = Modifier.padding(Standards.ActionIconPadding)
         )
     }

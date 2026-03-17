@@ -86,12 +86,12 @@ internal fun ModelsTab(
                     ) {
                         Icon(
                             imageVector = TnIcons.AlertTriangle,
-                            contentDescription = tn("Action icon"),
+                            contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.error
                         )
                         Text(
-                            text = "Error loading models",
+                            text = tn("Error loading models"),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -117,12 +117,12 @@ internal fun ModelsTab(
                     ) {
                         Icon(
                             imageVector = TnIcons.SearchOff,
-                            contentDescription = tn("Action icon"),
+                            contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "No models found",
+                            text = tn("No models found"),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -258,7 +258,7 @@ internal fun StoreRepoCard(
                         CaptionText(text = "·")
                     }
                     CaptionText(
-                        text = "${info.modelCount} ${if (info.modelCount == 1) "model" else "models"}"
+                        text = tn("${info.modelCount} ${if (info.modelCount == 1) "model" else "models"}")
                     )
                     if (hasActiveDownload) {
                         CaptionText(text = "·")
@@ -272,7 +272,7 @@ internal fun StoreRepoCard(
 
             Icon(
                 imageVector = TnIcons.ArrowRight,
-                contentDescription = "View models",
+                contentDescription = tn("View models"),
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

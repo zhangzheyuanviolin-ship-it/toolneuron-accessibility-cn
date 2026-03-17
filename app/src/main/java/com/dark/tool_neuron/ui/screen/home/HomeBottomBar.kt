@@ -165,12 +165,12 @@ internal fun BottomBar(
                 ) {
                     Icon(
                         imageVector = TnIcons.AlertTriangle,
-                        contentDescription = tn("Action icon"),
+                        contentDescription = null,
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.onErrorContainer
                     )
                     Text(
-                        "No models installed. Download one from the store or load a local GGUF file.",
+                        tn("No models installed. Download one from the store or load a local GGUF file."),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -237,9 +237,9 @@ internal fun BottomBar(
                         placeholder = {
                             Text(
                                 text = when (chatState.generationType) {
-                                    ModelType.TEXT_GENERATION -> "Say Anything…"
-                                    ModelType.IMAGE_GENERATION -> "Describe the image you want…"
-                                    ModelType.AUDIO_GENERATION -> "Say Anything…"
+                                    ModelType.TEXT_GENERATION -> tn("Say Anything…")
+                                    ModelType.IMAGE_GENERATION -> tn("Describe the image you want…")
+                                    ModelType.AUDIO_GENERATION -> tn("Say Anything…")
                                 }
                             )
                         },
@@ -314,7 +314,8 @@ internal fun BottomBar(
                     ActionToggleButton(
                         onCheckedChange = { showMoreOptions = !showMoreOptions },
                         checked = showMoreOptions,
-                        icon = TnIcons.Adjustments
+                        icon = TnIcons.Adjustments,
+                        contentDescription = tn("More options")
                     )
 
                     // 3. Model selector
@@ -325,7 +326,10 @@ internal fun BottomBar(
                             } else {
                                 chatViewModel.showModelList()
                             }
-                        }, checked = config.showModelList, icon = TnIcons.Stack2
+                        },
+                        checked = config.showModelList,
+                        icon = TnIcons.Stack2,
+                        contentDescription = tn("Select model")
                     )
 
                     // 4. Web Search Toggle
@@ -334,7 +338,8 @@ internal fun BottomBar(
                             onCheckedChange = { pluginViewModel.toggleWebSearch(!isWebSearchEnabled) },
                             checked = isWebSearchEnabled,
                             enabled = isToolCallingModelLoaded,
-                            icon = TnIcons.World
+                            icon = TnIcons.World,
+                            contentDescription = tn("Toggle web search")
                         )
                     }
 
@@ -344,7 +349,8 @@ internal fun BottomBar(
                             onCheckedChange = { chatViewModel.toggleThinkingMode() },
                             checked = chatState.thinkingEnabled,
                             enabled = isTextModelLoaded,
-                            icon = TnIcons.Brain
+                            icon = TnIcons.Brain,
+                            contentDescription = tn("Toggle thinking mode")
                         )
                     }
 
@@ -357,6 +363,7 @@ internal fun BottomBar(
                                 onClickListener = {
                                     chatViewModel.stop()
                                 },
+                                contentDescription = tn("Stop generation"),
                                 modifier = Modifier.padding(end = Standards.SpacingMd),
                                 colors = IconButtonDefaults.filledIconButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primary.copy(0.3f),
@@ -402,6 +409,7 @@ internal fun BottomBar(
                                     }
                                 },
                                 icon = TnIcons.Send,
+                                contentDescription = tn("Send message"),
                                 shape = MaterialShapes.Ghostish.toShape(),
                                 modifier = Modifier.padding(end = Standards.SpacingMd),
                                 colors = IconButtonDefaults.filledIconButtonColors(

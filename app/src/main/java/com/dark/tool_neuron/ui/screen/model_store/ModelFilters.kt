@@ -60,7 +60,7 @@ fun SearchAppBar(
         )
     }, navigationIcon = {
         IconButton(onClick = onCloseSearch) {
-            Icon(TnIcons.ArrowLeft, "Close search")
+            Icon(TnIcons.ArrowLeft, tn("Close search"))
         }
     })
 }
@@ -228,7 +228,7 @@ fun ModelFiltersSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Show NSFW Content",
+                        text = tn("Show NSFW Content"),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     ActionSwitch(
@@ -240,7 +240,7 @@ fun ModelFiltersSection(
                 // Execution target filter
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        text = "Execution",
+                        text = tn("Execution"),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
