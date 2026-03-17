@@ -41,15 +41,13 @@ jobs:
       - name: Grant Gradle Execute Permission
         run: chmod +x ./gradlew
 
-      - name: Build Debug and Release APK
-        run: ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease
+      - name: Build Debug APK
+        run: ./gradlew --no-daemon :app:assembleDebug
 
       - name: Collect Build Outputs
         run: |
           mkdir -p out
           cp app/build/outputs/apk/debug/*.apk out/ || true
-          cp app/build/outputs/apk/release/*.apk out/ || true
-          cp app/build/outputs/mapping/release/mapping.txt out/ || true
           ls -la out
 
       - name: Upload APK Artifacts
