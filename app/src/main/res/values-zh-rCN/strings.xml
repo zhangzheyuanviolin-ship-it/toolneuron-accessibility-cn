@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Tool Neuron</string>
+    <string name="service_name">通知朗读服务</string>
+    <string name="title_activity_main">主界面</string>
+    <string name="a11y_action_icon">操作图标</string>
+    <string name="a11y_back">返回</string>
+    <string name="a11y_close">关闭</string>
+    <string name="a11y_open">打开</string>
+    <string name="a11y_menu">菜单</string>
+    <string name="common_loading">加载中...</string>
+    <string name="common_error">错误</string>
+    <string name="common_success">成功</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_confirm">确认</string>
+    <string name="common_settings">设置</string>
+    <string name="common_done">完成</string>
+    <string name="common_retry">重试</string>
+    <string name="common_save">保存</string>
+    <string name="chat_mode">聊天模式</string>
+    <string name="image_mode">图像模式</string>
+    <string name="send_message">发送消息</string>
+    <string name="type_message">输入消息...</string>
+    <string name="load_model">加载模型</string>
+    <string name="model_store">模型商店</string>
+    <string name="download_model">下载模型</string>
+    <string name="model_loaded">模型已加载</string>
+    <string name="model_load_failed">模型加载失败</string>
+    <string name="context_size">上下文长度</string>
+    <string name="temperature">温度</string>
+    <string name="top_k">Top-K</string>
+    <string name="top_p">Top-P</string>
+</resources>

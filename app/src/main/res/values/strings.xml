@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Tool Neuron</string>
+    <string name="service_name">Notification reader</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="a11y_action_icon">Action icon</string>
+    <string name="a11y_back">Back</string>
+    <string name="a11y_close">Close</string>
+    <string name="a11y_open">Open</string>
+    <string name="a11y_menu">Menu</string>
+    <string name="common_loading">Loading...</string>
+    <string name="common_error">Error</string>
+    <string name="common_success">Success</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_settings">Settings</string>
+    <string name="common_done">Done</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_save">Save</string>
+    <string name="chat_mode">Chat mode</string>
+    <string name="image_mode">Image mode</string>
+    <string name="send_message">Send message</string>
+    <string name="type_message">Type message...</string>
+    <string name="load_model">Load model</string>
+    <string name="model_store">Model Store</string>
+    <string name="download_model">Download model</string>
+    <string name="model_loaded">Model loaded</string>
+    <string name="model_load_failed">Model load failed</string>
+    <string name="context_size">Context Size</string>
+    <string name="temperature">Temperature</string>
+    <string name="top_k">Top-K</string>
+    <string name="top_p">Top-P</string>
+</resources>
