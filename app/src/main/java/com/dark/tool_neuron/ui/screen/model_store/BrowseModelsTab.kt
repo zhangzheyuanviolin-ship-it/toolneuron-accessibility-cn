@@ -243,7 +243,7 @@ internal fun StoreRepoCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = info.displayName,
+                    text = tn(info.displayName),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
@@ -319,7 +319,7 @@ internal fun RepoDetailView(
                 ModelTypeBadge(info.modelType)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = info.displayName,
+                        text = tn(info.displayName),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
@@ -329,7 +329,7 @@ internal fun RepoDetailView(
                         CaptionText(text = info.author)
                     }
                 }
-                CaptionText(text = "${info.modelCount} models")
+                CaptionText(text = tn("${info.modelCount} models"))
             }
         }
 

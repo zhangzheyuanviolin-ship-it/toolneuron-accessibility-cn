@@ -355,7 +355,7 @@ fun StatusBadge(
                 .background(dotColor, RoundedCornerShape(50))
         )
         Text(
-            text = text,
+            text = tn(text),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Medium,
             color = if (isActive) activeColor else inactiveColor

@@ -113,7 +113,7 @@ internal fun SettingsTab(
         // Repositories Section
         item {
             SectionHeader(
-                title = "Model Repositories",
+                title = tn("Model Repositories"),
                 action = {
                     ActionButton(
                         onClickListener = { showAddDialog = true },
@@ -171,7 +171,7 @@ internal fun ExplorerRepositoriesCard(
     var expanded by remember { mutableStateOf(true) }
 
     StandardCard(
-        title = "HuggingFace GGUF Explorer",
+        title = tn("HuggingFace GGUF Explorer"),
         icon = TnIcons.Search,
         trailing = {
             ActionButton(
@@ -222,7 +222,7 @@ internal fun ExplorerRepositoriesCard(
                                     strokeWidth = 1.5.dp,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                CaptionText(text = "Searching HuggingFace...")
+                                CaptionText(text = tn("Searching HuggingFace..."))
                             }
                         }
                         !err.isNullOrBlank() -> {
@@ -232,7 +232,7 @@ internal fun ExplorerRepositoriesCard(
                             )
                         }
                         count > 0 -> {
-                            CaptionText(text = "$count result${if (count != 1) "s" else ""} found")
+                            CaptionText(text = tn("$count result${if (count != 1) "s" else ""} found"))
                         }
                         else -> Spacer(modifier = Modifier.height(0.dp))
                     }
@@ -305,9 +305,9 @@ internal fun ExplorerResultRow(
                     horizontalArrangement = Arrangement.spacedBy(Standards.SpacingXs),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CaptionText(text = "${repo.downloads} downloads")
+                    CaptionText(text = tn("${repo.downloads} downloads"))
                     CaptionText(text = "·")
-                    CaptionText(text = "${repo.likes} likes")
+                    CaptionText(text = tn("${repo.likes} likes"))
                     if (repo.gated) {
                         CaptionText(text = "·")
                         StatusBadge(text = "Gated", isActive = true)
@@ -433,7 +433,7 @@ internal fun RepositoryCard(
                 )
 
                 CaptionText(text = "·")
-                CaptionText(text = repository.category.displayName)
+                CaptionText(text = tn(repository.category.displayName))
 
                 if (validationResult is ValidationResult.Valid) {
                     CaptionText(text = "·")
@@ -558,7 +558,7 @@ internal fun EditRepositoryDialog(
 
                 // Model Type
                 Text(
-                    text = "Model Type",
+                    text = tn("Model Type"),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -580,7 +580,7 @@ internal fun EditRepositoryDialog(
 
                 // Category Dropdown
                 Text(
-                    text = "Category",
+                    text = tn("Category"),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

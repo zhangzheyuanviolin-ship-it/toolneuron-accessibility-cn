@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.ui.screen.model_store
 
+import com.dark.tool_neuron.i18n.tn
 import androidx.compose.animation.AnimatedVisibility
 import com.dark.tool_neuron.ui.theme.Motion
 import androidx.compose.foundation.layout.Arrangement
@@ -31,27 +32,27 @@ internal fun DeviceInfoCard(deviceInfo: Map<String, String>) {
     val remainingEntries = entries.drop(3)
 
     StandardCard(
-        title = "Device Information",
+        title = tn("Device Information"),
         icon = TnIcons.Prompt,
         trailing = {
             if (remainingEntries.isNotEmpty()) {
                 ActionButton(
                     onClickListener = { expanded = !expanded },
                     icon = if (expanded) TnIcons.ChevronUp else TnIcons.ChevronDown,
-                    contentDescription = if (expanded) "Collapse" else "Expand"
+                    contentDescription = if (expanded) tn("Collapse") else tn("Expand")
                 )
             }
         }
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingXs)) {
             previewEntries.forEach { (key, value) ->
-                DeviceInfoRow(
-                    label = key.replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                    },
-                    value = value
-                )
-            }
+                    DeviceInfoRow(
+                        label = tn(key.replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                        }),
+                        value = value
+                    )
+                }
 
             AnimatedVisibility(
                 visible = expanded,
@@ -61,9 +62,9 @@ internal fun DeviceInfoCard(deviceInfo: Map<String, String>) {
                 Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingXs)) {
                     remainingEntries.forEach { (key, value) ->
                         DeviceInfoRow(
-                            label = key.replaceFirstChar {
+                            label = tn(key.replaceFirstChar {
                                 if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                            },
+                            }),
                             value = value
                         )
                     }

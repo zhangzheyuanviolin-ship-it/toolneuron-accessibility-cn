@@ -35,8 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -194,12 +192,12 @@ private fun RagOverlayHeader(
             SectionHeader(title = "RAG Management") {
                 Row(horizontalArrangement = Arrangement.spacedBy(Standards.SpacingXs)) {
                     InfoBadge(
-                        text = "$loadedCount active",
+                        text = tn("$loadedCount active"),
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
                         contentColor = MaterialTheme.colorScheme.primary
                     )
                     InfoBadge(
-                        text = "$installedCount installed",
+                        text = tn("$installedCount installed"),
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -238,13 +236,13 @@ private fun EmptyRagState(
         )
         Spacer(modifier = Modifier.height(Standards.SpacingLg))
         Text(
-            text = message,
+            text = tn(message),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(Standards.SpacingSm))
         Text(
-            text = suggestion,
+            text = tn(suggestion),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )
@@ -335,7 +333,7 @@ private fun RagListItem(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = "${rag.nodeCount} nodes | ${rag.getFormattedSize()}",
+                            text = "${tn("${rag.nodeCount} nodes")} | ${rag.getFormattedSize()}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -372,13 +370,10 @@ private fun RagListItem(
                         else -> {}
                     }
 
-                    Switch(
+                    ActionSwitch(
                         checked = rag.isEnabled,
                         onCheckedChange = onToggleEnabled,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                        switchLabel = rag.name
                     )
                 }
             }
@@ -465,7 +460,7 @@ private fun RagListItem(
                     ) {
                         Icon(
                             TnIcons.Trash,
-                            contentDescription = "Delete",
+                            contentDescription = tn("Delete"),
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.error
                         )
@@ -479,7 +474,7 @@ private fun RagListItem(
 @Composable
 private fun RagTag(tag: String) {
     InfoBadge(
-        text = tag,
+        text = tn(tag),
         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
         contentColor = MaterialTheme.colorScheme.primary
     )
@@ -494,4 +489,3 @@ private fun getRagSourceIcon(sourceType: RagSourceType) = when (sourceType) {
     RagSourceType.NEURON_PACKET -> TnIcons.Cpu
     RagSourceType.MEMORY_VAULT -> TnIcons.Database
 }
-

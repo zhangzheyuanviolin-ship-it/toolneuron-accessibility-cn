@@ -29,6 +29,7 @@ import com.neuronpacket.UserCredentials
 import kotlinx.coroutines.launch
 import com.dark.tool_neuron.ui.components.ExpandCollapseIcon
 import com.dark.tool_neuron.ui.components.PasswordTextField
+import com.dark.tool_neuron.ui.components.ActionSwitch
 import com.dark.tool_neuron.ui.icons.TnIcons
 import com.dark.tool_neuron.global.Standards
 
@@ -372,13 +373,13 @@ fun SecureRagCreationScreen(
                 Spacer(modifier = Modifier.width(Standards.SpacingSm))
                 Text(
                     text = when {
-                        state.isCreating -> "Creating..."
-                        canCreate -> "Create RAG"
-                        state.name.isBlank() && effectiveSourceType == null -> "Enter name & add content"
-                        state.name.isBlank() -> "Enter a name"
-                        !isEmbeddingReady -> "Embedding not ready"
-                        effectiveSourceType == null -> "Add content or pick a file"
-                        else -> "Fill required fields"
+                        state.isCreating -> tn("Creating...")
+                        canCreate -> tn("Create RAG")
+                        state.name.isBlank() && effectiveSourceType == null -> tn("Enter name & add content")
+                        state.name.isBlank() -> tn("Enter a name")
+                        !isEmbeddingReady -> tn("Embedding not ready")
+                        effectiveSourceType == null -> tn("Add content or pick a file")
+                        else -> tn("Fill required fields")
                     },
                     fontWeight = FontWeight.SemiBold
                 )
@@ -410,7 +411,7 @@ fun SecureRagCreationScreen(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            "Advanced Options",
+                            tn("Advanced Options"),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -628,7 +629,7 @@ private fun FileDropZone(
                 ) {
                     Icon(
                         TnIcons.ArrowsExchange,
-                        contentDescription = "Change file",
+                        contentDescription = tn("Change file"),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -644,7 +645,7 @@ private fun FileDropZone(
                 ) {
                     Icon(
                         TnIcons.X,
-                        contentDescription = "Remove file",
+                        contentDescription = tn("Remove file"),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -710,15 +711,15 @@ private fun EmbeddingModelCard(
                     )
                     Column {
                         Text(
-                            "Embedding Model",
+                            tn("Embedding Model"),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = when {
-                                isDownloading -> status
-                                isDownloaded -> "Downloaded — tap Initialize"
-                                else -> "Required for RAG features"
+                                isDownloading -> tn(status)
+                                isDownloaded -> tn("Downloaded — tap Initialize")
+                                else -> tn("Required for RAG features")
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -799,19 +800,20 @@ private fun EncryptionSection(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Encryption",
+                    tn("Encryption"),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    "Password-protect this RAG",
+                    tn("Password-protect this RAG"),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Switch(
+            ActionSwitch(
                 checked = state.isEncrypted,
-                onCheckedChange = { onStateChange(state.copy(isEncrypted = it)) }
+                onCheckedChange = { onStateChange(state.copy(isEncrypted = it)) },
+                switchLabel = "Encryption"
             )
         }
 
@@ -820,7 +822,7 @@ private fun EncryptionSection(
                 PasswordTextField(
                     value = state.adminPassword,
                     onValueChange = { onStateChange(state.copy(adminPassword = it)) },
-                    label = "Admin Password",
+                    label = tn("Admin Password"),
                     modifier = Modifier.fillMaxWidth(),
                     showPasswordState = showPasswordVisibility,
                     onToggleVisibility = onTogglePasswordVisibility
@@ -845,7 +847,7 @@ private fun EncryptionSection(
                         Icon(TnIcons.Database, contentDescription = tn("Action icon"), modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(Standards.SpacingXs))
                         Text(
-                            if (state.loadingMode == LoadingMode.EMBEDDED) "Embedded" else "Transient",
+                            if (state.loadingMode == LoadingMode.EMBEDDED) tn("Embedded") else tn("Transient"),
                             style = MaterialTheme.typography.labelMedium
                         )
                     }
@@ -970,7 +972,7 @@ private fun AddUserDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "Add a user who can access this RAG",
+                    text = tn("Add a user who can access this RAG"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -988,7 +990,7 @@ private fun AddUserDialog(
                 PasswordTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = "Password",
+                    label = tn("Password"),
                     modifier = Modifier.fillMaxWidth()
                 )
 

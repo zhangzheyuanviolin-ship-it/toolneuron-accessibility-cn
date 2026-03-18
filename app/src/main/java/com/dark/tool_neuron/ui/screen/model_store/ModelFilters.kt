@@ -148,7 +148,7 @@ fun ModelFiltersSection(
                     FilterChip(
                         selected = selectedCategory == category,
                         onClick = { viewModel.filterByCategory(category) },
-                        label = { Text(category.displayName) }
+                        label = { Text(tn(category.displayName)) }
                     )
                 }
             }
@@ -172,7 +172,7 @@ fun ModelFiltersSection(
                     FilterChip(
                         selected = tag in selectedTags,
                         onClick = { viewModel.toggleTagFilter(tag) },
-                        label = { Text(tag) }
+                        label = { Text(tn(tag)) }
                     )
                 }
             }
@@ -233,7 +233,8 @@ fun ModelFiltersSection(
                     )
                     ActionSwitch(
                         checked = showNsfw,
-                        onCheckedChange = { viewModel.setShowNsfw(it) }
+                        onCheckedChange = { viewModel.setShowNsfw(it) },
+                        switchLabel = "Show NSFW Content"
                     )
                 }
 
@@ -269,7 +270,7 @@ fun ModelFiltersSection(
                 if (selectedModelType == null || selectedModelType == ModelType.GGUF) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
-                            text = "Parameters",
+                            text = tn("Parameters"),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -291,7 +292,7 @@ fun ModelFiltersSection(
 
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
-                            text = "Quantization",
+                            text = tn("Quantization"),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -314,7 +315,7 @@ fun ModelFiltersSection(
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        text = "Size",
+                        text = tn("Size"),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -330,7 +331,7 @@ fun ModelFiltersSection(
                                         if (selectedSizeCategory == size) null else size
                                     )
                                 },
-                                label = { Text(size.displayName) }
+                                label = { Text(tn(size.displayName)) }
                             )
                         }
                     }
@@ -338,7 +339,7 @@ fun ModelFiltersSection(
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        text = "Sort By",
+                        text = tn("Sort By"),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

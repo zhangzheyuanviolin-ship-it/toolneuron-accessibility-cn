@@ -157,7 +157,7 @@ fun RagScreen(
             ragViewModel.installRagFromUri(uri)
             android.widget.Toast.makeText(
                 context,
-                "Importing RAG package...",
+                tn("Importing RAG package..."),
                 android.widget.Toast.LENGTH_SHORT
             ).show()
         }
@@ -178,12 +178,12 @@ fun RagScreen(
                 title = {
                     Column {
                         Text(
-                            "RAG Manager",
+                            tn("RAG Manager"),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            "$loadedCount loaded / $installedCount installed",
+                            tn("$loadedCount loaded / $installedCount installed"),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -273,7 +273,7 @@ fun RagScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = errorMsg,
+                            text = tn(errorMsg),
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.weight(1f)
                         )
@@ -412,7 +412,7 @@ fun RagScreen(
 
 private fun openRagDataReader(context: android.content.Context, rag: InstalledRag) {
     if (rag.filePath == null) {
-        android.widget.Toast.makeText(context, "RAG file path not found", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(context, tn("RAG file path not found"), android.widget.Toast.LENGTH_SHORT).show()
         return
     }
 
@@ -429,13 +429,13 @@ private fun openRagDataReader(context: android.content.Context, rag: InstalledRa
 
 private fun shareRag(context: android.content.Context, rag: InstalledRag) {
     if (rag.filePath == null) {
-        android.widget.Toast.makeText(context, "RAG file path not found", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(context, tn("RAG file path not found"), android.widget.Toast.LENGTH_SHORT).show()
         return
     }
 
     val ragFile = File(rag.filePath)
     if (!ragFile.exists()) {
-        android.widget.Toast.makeText(context, "RAG file not found", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(context, tn("RAG file not found"), android.widget.Toast.LENGTH_SHORT).show()
         return
     }
 
@@ -454,14 +454,14 @@ private fun shareRag(context: android.content.Context, rag: InstalledRag) {
             if (rag.description.isNotBlank()) {
                 append("${rag.description}\n\n")
             }
-            append("Nodes: ${rag.nodeCount}\n")
-            append("Size: ${rag.getFormattedSize()}\n")
-            append("Domain: ${rag.domain}")
+            append("${tn("Nodes")}: ${rag.nodeCount}\n")
+            append("${tn("Size")}: ${rag.getFormattedSize()}\n")
+            append("${tn("Domain")}: ${rag.domain}")
         })
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    context.startActivity(Intent.createChooser(shareIntent, "Share RAG"))
+    context.startActivity(Intent.createChooser(shareIntent, tn("Share RAG")))
 }
 
 @Composable
@@ -518,12 +518,12 @@ private fun EmptyRagListState(message: String, subMessage: String) {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
             Text(
-                text = message,
+                text = tn(message),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = subMessage,
+                text = tn(subMessage),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
@@ -602,7 +602,7 @@ private fun RagCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "${rag.nodeCount} nodes",
+                                text = tn("${rag.nodeCount} nodes"),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -751,7 +751,7 @@ private fun StatusBadge(status: RagStatus) {
                 )
             }
             Text(
-                text = text,
+                text = tn(text),
                 style = MaterialTheme.typography.labelSmall,
                 color = color,
                 fontWeight = FontWeight.SemiBold
@@ -824,11 +824,11 @@ private fun RagDetailBottomSheet(
 
             // Description
             if (rag.description.isNotBlank()) {
-                Text(
-                    text = "Description",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
+                    Text(
+                        text = tn("Description"),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = rag.description,
@@ -840,7 +840,7 @@ private fun RagDetailBottomSheet(
 
             // Stats
             Text(
-                text = "Statistics",
+                text = tn("Statistics"),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
@@ -868,7 +868,7 @@ private fun RagDetailBottomSheet(
             if (rag.getTagsList().isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Tags",
+                    text = tn("Tags"),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -982,12 +982,12 @@ private fun DetailRow(label: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = label,
+            text = tn(label),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = value,
+            text = tn(value),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -1021,7 +1021,7 @@ private fun PasswordDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "This RAG is encrypted. Enter the password to load it.",
+                    text = tn("This RAG is encrypted. Enter the password to load it."),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 PasswordTextField(

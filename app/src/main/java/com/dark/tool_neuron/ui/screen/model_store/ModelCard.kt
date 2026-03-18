@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.ui.screen.model_store
 
+import com.dark.tool_neuron.i18n.tn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -109,7 +110,7 @@ fun ModelCard(
                     isInstalled -> {
                         Icon(
                             imageVector = TnIcons.CircleCheck,
-                            contentDescription = "Installed",
+                            contentDescription = tn("Installed"),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -119,7 +120,7 @@ fun ModelCard(
                         ActionProgressButton(
                             onClickListener = onCancelDownload,
                             icon = TnIcons.PlayerStop,
-                            contentDescription = "Cancel Download"
+                            contentDescription = "Cancel download"
                         )
                     }
 
@@ -127,7 +128,7 @@ fun ModelCard(
                         ActionButton(
                             onClickListener = onDownload,
                             icon = TnIcons.Download,
-                            contentDescription = "Download Model"
+                            contentDescription = "Download model"
                         )
                     }
                 }
@@ -174,7 +175,7 @@ fun ModelCard(
                 // Key tags (max 2)
                 model.tags.take(2).forEach { tag ->
                     Text(
-                        text = tag,
+                        text = tn(tag),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
@@ -200,13 +201,13 @@ fun ModelCard(
                         } else 0f
 
                     val statusText = when {
-                        isProcessing -> "Processing..."
+                        isProcessing -> tn("Processing...")
                         isExtracting -> {
                             val es = downloadState as ModelDownloadService.DownloadState.Extracting
                             if (es.currentFile.isNotEmpty()) {
-                                "Unzipping ${es.currentFile} (${es.extractedCount + 1}/${es.totalFiles})"
+                                "${tn("Unzipping")} ${es.currentFile} (${es.extractedCount + 1}/${es.totalFiles})"
                             } else {
-                                "Extracting..."
+                                tn("Extracting...")
                             }
                         }
                         isDownloading -> {
@@ -221,8 +222,8 @@ fun ModelCard(
                             val etaText = if (ds.etaSeconds > 0) {
                                 val mins = ds.etaSeconds / 60
                                 val secs = ds.etaSeconds % 60
-                                if (mins > 0) " · ${mins}m ${secs}s left"
-                                else " · ${secs}s left"
+                                if (mins > 0) " · ${mins}m ${secs}s ${tn("left")}"
+                                else " · ${secs}s ${tn("left")}"
                             } else ""
                             "${downloadedMB}/${totalMB}MB ($pct%)$speedText$etaText"
                         }
