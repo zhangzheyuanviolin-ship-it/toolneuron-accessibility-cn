@@ -145,7 +145,7 @@ internal fun MoreOptionsOverlay(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = plugin.name,
+                                        text = tn(plugin.name),
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = if (isToolCallingModelLoaded) MaterialTheme.colorScheme.onSurface

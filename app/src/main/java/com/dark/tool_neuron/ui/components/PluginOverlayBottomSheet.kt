@@ -29,8 +29,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -39,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -285,7 +282,7 @@ private fun PluginListItem(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = plugin.name,
+                        text = tn(plugin.name),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -299,19 +296,12 @@ private fun PluginListItem(
                     )
                 }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Switch(
-                            checked = isEnabled,
-                            onCheckedChange = onToggle,
-                        modifier = Modifier.semantics {
-                            contentDescription = tn("${plugin.name} switch")
-                            stateDescription = if (isEnabled) tn("Switch On") else tn("Switch Off")
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.tertiary,
-                            checkedTrackColor = MaterialTheme.colorScheme.tertiaryContainer
-                        )
-                        )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ActionSwitch(
+                        checked = isEnabled,
+                        onCheckedChange = onToggle,
+                        switchLabel = plugin.name
+                    )
 
                     IconButton(
                         onClick = onExpand,

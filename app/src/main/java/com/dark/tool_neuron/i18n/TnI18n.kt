@@ -167,6 +167,8 @@ private val zhMap = mapOf(
     ,"Download model" to "下载模型"
     ,"You previously had a model loaded. Would you like to load it again?" to "你之前加载过模型，是否再次加载？"
     ,"None loaded" to "未加载"
+    ,"On" to "已开启"
+    ,"Off" to "已关闭"
     ,"Switch On" to "开关已开启"
     ,"Switch Off" to "开关已关闭"
     ,"Not selected" to "未选中"
@@ -249,6 +251,14 @@ private val zhMap = mapOf(
     ,"This will permanently delete all chats, memories, personas, RAG data, and settings. This cannot be undone." to "这将永久删除所有聊天、记忆、角色、知识库数据和设置，且无法撤销。"
     ,"Type DELETE to confirm" to "输入 DELETE 以确认"
     ,"Type DELETE" to "输入 DELETE"
+    ,"No Conversation Yet.!!" to "还没有会话记录"
+    ,"Select a Model & Start a conversation" to "选择一个模型并开始对话"
+    ,"File Manager" to "文件管理"
+    ,"Calculator" to "计算器"
+    ,"Date & Time" to "日期与时间"
+    ,"Dev Utils" to "开发工具"
+    ,"NotePad" to "记事本"
+    ,"System Info" to "系统信息"
 	)
 
 private val zhTokens = listOf(

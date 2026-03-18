@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -462,16 +463,17 @@ fun ActionSwitch(
             .background(trackColor)
             .semantics(mergeDescendants = true) {
                 switchLabel?.let { label ->
-                    contentDescription = tn("$label switch")
+                    contentDescription = tn(label)
                 }
-                stateDescription = if (checked) tn("Switch On") else tn("Switch Off")
+                stateDescription = if (checked) tn("On") else tn("Off")
             }
-            .clickable(
+            .toggleable(
+                value = checked,
+                onValueChange = onCheckedChange,
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled,
-                role = Role.Switch,
-                onClick = { onCheckedChange(!checked) }
+                role = Role.Switch
             ),
         contentAlignment = Alignment.CenterStart
     ) {

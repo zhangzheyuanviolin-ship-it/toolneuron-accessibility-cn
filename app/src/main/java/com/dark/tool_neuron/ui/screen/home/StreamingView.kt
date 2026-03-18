@@ -161,12 +161,12 @@ internal fun EmptyMessagesState() {
             )
             Spacer(Modifier.height(Standards.SpacingLg))
             Text(
-                "No Conversation Yet.!!",
+                tn("No Conversation Yet.!!"),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                "Select a Model & Start a conversation",
+                tn("Select a Model & Start a conversation"),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
