@@ -106,14 +106,14 @@ fun SwitchRow(
             if (icon != null) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = tn("Action icon"),
+                    contentDescription = null,
                     modifier = Modifier.size(Standards.IconMd),
                     tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             } else if (iconRes != null) {
                 Icon(
                     painter = painterResource(iconRes),
-                    contentDescription = tn("Action icon"),
+                    contentDescription = null,
                     modifier = Modifier.size(Standards.IconMd),
                     tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
@@ -122,14 +122,14 @@ fun SwitchRow(
             // Title + description
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = title,
+                    text = tn(title),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = titleColor ?: if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
                 if (description != null) {
                     Text(
-                        text = description,
+                        text = tn(description),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 0.7f else 0.38f)
                     )
@@ -140,6 +140,7 @@ fun SwitchRow(
             ActionSwitch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                switchLabel = title,
                 enabled = enabled
             )
         }
@@ -382,7 +383,7 @@ fun SectionHeader(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = title,
+            text = tn(title),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.primary

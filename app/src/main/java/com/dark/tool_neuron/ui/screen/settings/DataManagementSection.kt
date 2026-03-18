@@ -128,10 +128,10 @@ internal fun DataManagementSection(viewModel: SettingsViewModel) {
                     LoadingIndicator(modifier = Modifier.size(20.dp))
                     Text(
                         text = when (val p = backupProgress) {
-                            is SystemBackupManager.BackupProgress.Starting -> "Starting..."
-                            is SystemBackupManager.BackupProgress.Collecting -> p.component
+                            is SystemBackupManager.BackupProgress.Starting -> tn("Starting...")
+                            is SystemBackupManager.BackupProgress.Collecting -> tn(p.component)
                             is SystemBackupManager.BackupProgress.Processing -> {
-                                val stage = if (p.stage.isNotEmpty()) "${p.stage} " else ""
+                                val stage = if (p.stage.isNotEmpty()) "${tn(p.stage)} " else ""
                                 "${stage}${(p.progress * 100).toInt()}%"
                             }
                             else -> ""
@@ -152,7 +152,7 @@ internal fun DataManagementSection(viewModel: SettingsViewModel) {
                 shape = RoundedCornerShape(Standards.CardCornerRadius)
             ) {
                 Text(
-                    "Operation completed successfully",
+                    tn("Operation completed successfully"),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.tertiary,
@@ -167,7 +167,7 @@ internal fun DataManagementSection(viewModel: SettingsViewModel) {
                 shape = RoundedCornerShape(Standards.CardCornerRadius)
             ) {
                 Text(
-                    progressStatus.message,
+                    tn(progressStatus.message),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(Standards.CardPadding)
@@ -195,13 +195,13 @@ internal fun DataManagementSection(viewModel: SettingsViewModel) {
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Backup",
+                        tn("Backup"),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.tertiary
                     )
                     Text(
-                        "Create encrypted backup of all app data",
+                        tn("Create encrypted backup of all app data"),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -228,13 +228,13 @@ internal fun DataManagementSection(viewModel: SettingsViewModel) {
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Restore from Backup",
+                        tn("Restore from Backup"),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        "Restore from encrypted backup file",
+                        tn("Restore from encrypted backup file"),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -262,13 +262,13 @@ internal fun DataManagementSection(viewModel: SettingsViewModel) {
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Delete All Data",
+                        tn("Delete All Data"),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.error
                     )
                     Text(
-                        "Permanently delete all app data",
+                        tn("Permanently delete all app data"),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -292,7 +292,7 @@ internal fun DataManagementSection(viewModel: SettingsViewModel) {
             onConfirm = {
                 showBackupDialog = false
                 val timestamp = formatBackupTimestamp()
-                backupLauncher.launch("toolneuron_backup_$timestamp.tnbackup")
+                backupLauncher.launch("toolneuron_项目备份_$timestamp.tnbackup")
             },
             onDismiss = {
                 showBackupDialog = false
@@ -359,21 +359,21 @@ private fun BackupDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)) {
                 Text(
-                    "Set a password to encrypt your backup. You'll need this password to restore.",
+                    tn("Set a password to encrypt your backup. You'll need this password to restore."),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 PasswordTextField(
                     value = backupPassword,
                     onValueChange = onPasswordChange,
-                    label = "Password",
+                    label = tn("Password"),
                     modifier = Modifier.fillMaxWidth(),
                     showToggle = false
                 )
                 PasswordTextField(
                     value = backupPasswordConfirm,
                     onValueChange = onPasswordConfirmChange,
-                    label = "Confirm Password",
+                    label = tn("Confirm Password"),
                     modifier = Modifier.fillMaxWidth(),
                     showToggle = false,
                     isError = backupPasswordConfirm.isNotEmpty() && backupPassword != backupPasswordConfirm
@@ -436,7 +436,7 @@ private fun BackupDialog(
 
                 backupSizeEstimate?.let { estimate ->
                     Text(
-                        "Estimated size: ${formatBytes(estimate.totalSize)}",
+                        tn("Estimated size: ${formatBytes(estimate.totalSize)}"),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -477,14 +477,14 @@ private fun RestoreDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)) {
                 Text(
-                    "This will replace all current data with the backup. The app will restart after restore.",
+                    tn("This will replace all current data with the backup. The app will restart after restore."),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
                 PasswordTextField(
                     value = restorePassword,
                     onValueChange = onPasswordChange,
-                    label = "Backup Password",
+                    label = tn("Backup Password"),
                     modifier = Modifier.fillMaxWidth(),
                     showToggle = false
                 )
@@ -523,12 +523,12 @@ private fun DeleteAllDataDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)) {
                 Text(
-                    "This will permanently delete all chats, memories, personas, RAG data, and settings. This cannot be undone.",
+                    tn("This will permanently delete all chats, memories, personas, RAG data, and settings. This cannot be undone."),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    "Type DELETE to confirm",
+                    tn("Type DELETE to confirm"),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.error

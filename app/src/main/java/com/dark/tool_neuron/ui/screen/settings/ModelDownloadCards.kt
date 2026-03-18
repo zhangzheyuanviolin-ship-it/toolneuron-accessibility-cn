@@ -39,14 +39,14 @@ internal fun ModelDownloadCard(
     onDownload: () -> Unit,
     successText: String = "Downloaded"
 ) {
-    StandardCard(title = title) {
+    StandardCard(title = tn(title)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .animateContentSize(Motion.content()),
             verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)
         ) {
-            description.split("\n").forEach { line ->
+            tn(description).split("\n").forEach { line ->
                 CaptionText(text = line)
             }
 
@@ -90,7 +90,7 @@ internal fun ModelDownloadCard(
                 }
 
                 is ModelDownloadService.DownloadState.Success -> {
-                    CaptionText(text = successText)
+                    CaptionText(text = tn(successText))
                 }
 
                 is ModelDownloadService.DownloadState.Error -> {

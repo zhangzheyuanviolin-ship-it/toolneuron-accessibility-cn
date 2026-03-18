@@ -55,6 +55,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -408,6 +412,7 @@ fun ActionToggleButton(
 fun ActionSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    switchLabel: String? = null,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     width: Dp = 52.dp,
@@ -455,6 +460,12 @@ fun ActionSwitch(
             .height(height)
             .clip(shape)
             .background(trackColor)
+            .semantics(mergeDescendants = true) {
+                switchLabel?.let { label ->
+                    contentDescription = tn("$label switch")
+                }
+                stateDescription = if (checked) tn("Switch On") else tn("Switch Off")
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -558,6 +569,11 @@ fun <T> ActionToggleGroup(
                             .weight(1f)
                             .height(Standards.ActionIconSize)
                             .clip(RoundedCornerShape(Standards.SpacingXs))
+                            .semantics(mergeDescendants = true) {
+                                contentDescription = tn(itemLabel(item))
+                                selected = isSelected
+                                stateDescription = if (isSelected) tn("Selected") else tn("Not selected")
+                            }
                             .clickable(
                                 enabled = enabled,
                                 interactionSource = remember { MutableInteractionSource() },
@@ -567,7 +583,7 @@ fun <T> ActionToggleGroup(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = itemLabel(item),
+                            text = tn(itemLabel(item)),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                             color = contentColor,

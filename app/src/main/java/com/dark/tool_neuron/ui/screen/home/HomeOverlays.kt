@@ -88,7 +88,7 @@ internal fun MoreOptionsOverlay(
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "RAG",
+                            text = tn("RAG"),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -108,6 +108,7 @@ internal fun MoreOptionsOverlay(
                     ActionSwitch(
                         checked = isRagEnabled,
                         onCheckedChange = onRagToggle,
+                        switchLabel = "RAG",
                         enabled = loadedRagCount > 0
                     )
                 }
@@ -159,6 +160,7 @@ internal fun MoreOptionsOverlay(
                                 ActionSwitch(
                                     checked = isEnabled,
                                     onCheckedChange = { onPluginToggle(plugin.name, !isEnabled) },
+                                    switchLabel = plugin.name,
                                     enabled = isToolCallingModelLoaded
                                 )
                             }

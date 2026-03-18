@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.ui.components
 
+import com.dark.tool_neuron.i18n.tn
 import androidx.compose.animation.AnimatedVisibility
 import com.dark.tool_neuron.ui.theme.Motion
 import androidx.compose.foundation.background
@@ -36,6 +37,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -180,7 +184,7 @@ private fun ToolCallingConfigSection(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Max Rounds",
+                                text = tn("Max Rounds"),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -236,7 +240,7 @@ private fun PluginOverlayHeader(
         Column {
             SectionHeader(title = "Plugins") {
                 InfoBadge(
-                    text = "$enabledCount / $totalCount active",
+                    text = tn("$enabledCount / $totalCount active"),
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                     contentColor = MaterialTheme.colorScheme.tertiary
                 )
@@ -289,24 +293,40 @@ private fun PluginListItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${plugin.toolDefinitionBuilder.size} tool${if (plugin.toolDefinitionBuilder.size != 1) "s" else ""}",
+                        text = tn("${plugin.toolDefinitionBuilder.size} tool${if (plugin.toolDefinitionBuilder.size != 1) "s" else ""}"),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = isEnabled,
-                        onCheckedChange = onToggle,
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Switch(
+                            checked = isEnabled,
+                            onCheckedChange = onToggle,
+                        modifier = Modifier.semantics {
+                            contentDescription = tn("${plugin.name} switch")
+                            stateDescription = if (isEnabled) tn("Switch On") else tn("Switch Off")
+                        },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.tertiary,
                             checkedTrackColor = MaterialTheme.colorScheme.tertiaryContainer
                         )
-                    )
+                        )
 
-                    IconButton(onClick = onExpand) {
-                        ExpandCollapseIcon(isExpanded = isExpanded)
+                    IconButton(
+                        onClick = onExpand,
+                        modifier = Modifier.semantics {
+                            contentDescription = if (isExpanded) {
+                                tn("Collapse plugin details")
+                            } else {
+                                tn("Expand plugin details")
+                            }
+                        }
+                    ) {
+                        ExpandCollapseIcon(
+                            isExpanded = isExpanded,
+                            contentDescription = null
+                        )
                     }
                 }
             }
@@ -337,7 +357,7 @@ private fun PluginListItem(
                     // Tools
                     if (plugin.toolDefinitionBuilder.isNotEmpty()) {
                         Text(
-                            text = "Tools:",
+                            text = tn("Tools:"),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -389,13 +409,13 @@ private fun EmptyPluginState() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No Plugins Available",
+            text = tn("No Plugins Available"),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = Standards.SpacingSm)
         )
         Text(
-            text = "Plugins will appear here once they are registered",
+            text = tn("Plugins will appear here once they are registered"),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )

@@ -97,19 +97,19 @@ internal fun LazyListScope.generalSettingsSection(
                 ) {
                     Icon(
                         TnIcons.AlertTriangle,
-                        contentDescription = tn("Action icon"),
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "Bypass Model Check",
+                        text = tn("Bypass Model Check"),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
                 Text(
-                    text = "Force tool calling on models without a chat template. May cause errors or unexpected output.",
+                    text = tn("Force tool calling on models without a chat template. May cause errors or unexpected output."),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
@@ -210,7 +210,7 @@ internal fun LazyListScope.hardwareTuningSection(
     item {
         Column {
             Text(
-                text = "Performance Mode",
+                text = tn("Performance Mode"),
                 style = MaterialTheme.typography.titleSmall,
                 color = if (hardwareTuningEnabled) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -233,11 +233,11 @@ internal fun LazyListScope.hardwareTuningSection(
             Spacer(Modifier.height(Standards.SpacingXs))
             Text(
                 text = if (!hardwareTuningEnabled) {
-                    "Enable hardware tuning to use performance presets"
+                    tn("Enable hardware tuning to use performance presets")
                 } else when (performanceMode) {
-                    PerformanceMode.PERFORMANCE -> "Uses all fast cores. Best speed, higher battery use."
-                    PerformanceMode.BALANCED -> "Uses performance cores only. Good speed and battery balance."
-                    PerformanceMode.POWER_SAVING -> "Minimal threads and memory. Best battery life."
+                    PerformanceMode.PERFORMANCE -> tn("Uses all fast cores. Best speed, higher battery use.")
+                    PerformanceMode.BALANCED -> tn("Uses performance cores only. Good speed and battery balance.")
+                    PerformanceMode.POWER_SAVING -> tn("Minimal threads and memory. Best battery life.")
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -276,7 +276,7 @@ internal fun LazyListScope.hardwareTuningSection(
                     ActionTextButton(
                         onClickListener = { viewModel.rescanHardware() },
                         icon = TnIcons.Refresh,
-                        text = "Rescan",
+                        text = tn("Rescan"),
                         shape = RoundedCornerShape(Standards.CardSmallCornerRadius)
                     )
                 }
@@ -309,7 +309,7 @@ internal fun LazyListScope.modelConfigurationSection(
     if (hardwareTuningEnabled) {
         item {
             Text(
-                text = "Model parameters are managed by the performance engine. Disable hardware tuning to edit manually.",
+                text = tn("Model parameters are managed by the performance engine. Disable hardware tuning to edit manually."),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
@@ -320,7 +320,7 @@ internal fun LazyListScope.modelConfigurationSection(
     if (installedModels.isEmpty()) {
         item {
             StandardCard(
-                description = "No models installed. Download models from the store."
+                description = tn("No models installed. Download models from the store.")
             )
         }
     } else {
@@ -365,12 +365,12 @@ internal fun LazyListScope.aiMemorySection(
         ) {
             Column(modifier = Modifier.padding(Standards.SpacingLg)) {
                 Text(
-                    "View Memories",
+                    tn("View Memories"),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    "See, search, and manage what the AI remembers about you",
+                    tn("See, search, and manage what the AI remembers about you"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -408,11 +408,11 @@ internal fun LazyListScope.aboutSection(appVersion: String) {
 
     item {
         StandardCard(
-            title = "ToolNeuron",
-            description = "On-device AI — LLM, Image Generation, TTS"
+            title = tn("ToolNeuron"),
+            description = tn("On-device AI — LLM, Image Generation, TTS")
         ) {
             BodyLabel(
-                text = "Version $appVersion",
+                text = tn("Version $appVersion"),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

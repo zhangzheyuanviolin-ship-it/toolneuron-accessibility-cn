@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.ui.components
 
+import com.dark.tool_neuron.i18n.tn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +19,7 @@ fun ExpandCollapseIcon(
     modifier: Modifier = Modifier,
     size: Dp = 24.dp,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    contentDescription: String? = if (isExpanded) "Collapse" else "Expand"
+    contentDescription: String? = if (isExpanded) tn("Collapse") else tn("Expand")
 ) {
     Icon(
         imageVector = if (isExpanded) TnIcons.ChevronUp else TnIcons.ChevronDown,

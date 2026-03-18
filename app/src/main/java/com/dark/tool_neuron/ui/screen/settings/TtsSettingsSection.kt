@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.ui.screen.settings
 
+import com.dark.tool_neuron.i18n.tn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,7 +59,7 @@ internal fun LazyListScope.ttsSettingsSection(
                 description = "Supertonic v2 · ~263 MB",
                 downloadState = ttsDownloadState,
                 onDownload = { viewModel.downloadTts() },
-                successText = "Downloaded — loading model..."
+                successText = tn("Downloaded — loading model...")
             )
         }
     }
@@ -74,13 +75,13 @@ internal fun LazyListScope.ttsSettingsSection(
 
     // Voice picker
     item {
-        StandardCard(title = "Voice") {
+        StandardCard(title = tn("Voice")) {
             Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)) {
                 val femaleVoices = voices.filter { it.startsWith("F") }
                 val maleVoices = voices.filter { it.startsWith("M") }
 
                 if (femaleVoices.isNotEmpty()) {
-                    CaptionText(text = "Female")
+                    CaptionText(text = tn("Female"))
                     ActionToggleGroup(
                         items = femaleVoices,
                         selectedItem = ttsSettings.voice,
@@ -90,7 +91,7 @@ internal fun LazyListScope.ttsSettingsSection(
                     )
                 }
                 if (maleVoices.isNotEmpty()) {
-                    CaptionText(text = "Male")
+                    CaptionText(text = tn("Male"))
                     ActionToggleGroup(
                         items = maleVoices,
                         selectedItem = ttsSettings.voice,
@@ -105,7 +106,7 @@ internal fun LazyListScope.ttsSettingsSection(
 
     // Language selector
     item {
-        StandardCard(title = "Language") {
+        StandardCard(title = tn("Language")) {
             ActionToggleGroup(
                 items = SUPPORTED_LANGUAGES.map { it.first },
                 selectedItem = ttsSettings.language,
@@ -118,14 +119,14 @@ internal fun LazyListScope.ttsSettingsSection(
 
     // Speed slider
     item {
-        StandardCard(title = "Speed") {
+        StandardCard(title = tn("Speed")) {
             Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingXs)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CaptionText(text = "Playback speed")
+                    CaptionText(text = tn("Playback speed"))
                     Surface(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(Standards.SpacingXs)
@@ -165,14 +166,14 @@ internal fun LazyListScope.ttsSettingsSection(
 
     // Steps slider
     item {
-        StandardCard(title = "Denoising Steps") {
+        StandardCard(title = tn("Denoising Steps")) {
             Column(verticalArrangement = Arrangement.spacedBy(Standards.SpacingXs)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CaptionText(text = "Higher = better quality, slower")
+                    CaptionText(text = tn("Higher = better quality, slower"))
                     Surface(
                         color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(Standards.SpacingXs)

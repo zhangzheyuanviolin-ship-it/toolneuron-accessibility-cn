@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.ui.screen.settings
 
+import com.dark.tool_neuron.i18n.tn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -81,7 +82,7 @@ fun SettingsScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Settings",
+                        tn("Settings"),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -90,7 +91,7 @@ fun SettingsScreen(
                     ActionButton(
                         onClickListener = onNavigateBack,
                         icon = TnIcons.ArrowLeft,
-                        contentDescription = "Back"
+                        contentDescription = tn("Back")
                     )
                 }
             )
