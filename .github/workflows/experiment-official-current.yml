@@ -46,7 +46,7 @@ jobs:
       - name: Install Android components
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;26.3.11579264"
+          sdkmanager "platform-tools" "platforms;android-37" "build-tools;36.0.0" "ndk;26.3.11579264"
 
       - name: Assign independent package and label
         run: |
@@ -58,13 +58,18 @@ jobs:
               'applicationId = "com.dark.tool_neuron"',
               'applicationId = "com.dark.tool_neuron.exp.officialcurrent"',
           )
-          text = text.replace('versionName = "2.0.3"', 'versionName = "official-current-experiment"')
-          text = text.replace('abiFilters += listOf("arm64-v8a", "x86_64")', 'abiFilters += listOf("arm64-v8a")')
+          text = text.replace(
+              'abiFilters += listOf("arm64-v8a", "x86_64")',
+              'abiFilters += listOf("arm64-v8a")',
+          )
           gradle.write_text(text, encoding='utf-8')
 
           strings = Path('upstream/app/src/main/res/values/strings.xml')
           s = strings.read_text(encoding='utf-8')
-          s = s.replace('<string name="app_name">Tool Neuron</string>', '<string name="app_name">Tool Neuron 官方当前实验</string>')
+          s = s.replace(
+              '<string name="app_name">Tool-Neuron</string>',
+              '<string name="app_name">Tool Neuron 官方当前实验</string>',
+          )
           strings.write_text(s, encoding='utf-8')
           PYEOF
           grep -F 'com.dark.tool_neuron.exp.officialcurrent' upstream/app/build.gradle.kts
