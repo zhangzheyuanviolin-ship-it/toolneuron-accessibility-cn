@@ -1,0 +1,130 @@
+name: Build Official Current Tool Neuron Experiment
+
+on:
+  push:
+    branches:
+      - experiment/tn203-demand-paging
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toolneuron-official-current-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+
+    steps:
+      - name: Checkout experiment controller
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned official current ToolNeuron
+        uses: actions/checkout@v4
+        with:
+          repository: Siddhesh2377/ToolNeuron
+          ref: 5df5f8eaa1f199d6920ebe5cdd30cdf0db37f290
+          path: upstream
+          fetch-depth: 1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android components
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;26.3.11579264"
+
+      - name: Assign independent package and label
+        run: |
+          python3 - <<'PYEOF'
+          from pathlib import Path
+          gradle = Path('upstream/app/build.gradle.kts')
+          text = gradle.read_text(encoding='utf-8')
+          text = text.replace(
+              'applicationId = "com.dark.tool_neuron"',
+              'applicationId = "com.dark.tool_neuron.exp.officialcurrent"',
+          )
+          text = text.replace('versionName = "2.0.3"', 'versionName = "official-current-experiment"')
+          text = text.replace('abiFilters += listOf("arm64-v8a", "x86_64")', 'abiFilters += listOf("arm64-v8a")')
+          gradle.write_text(text, encoding='utf-8')
+
+          strings = Path('upstream/app/src/main/res/values/strings.xml')
+          s = strings.read_text(encoding='utf-8')
+          s = s.replace('<string name="app_name">Tool Neuron</string>', '<string name="app_name">Tool Neuron 官方当前实验</string>')
+          strings.write_text(s, encoding='utf-8')
+          PYEOF
+          grep -F 'com.dark.tool_neuron.exp.officialcurrent' upstream/app/build.gradle.kts
+          grep -F 'Tool Neuron 官方当前实验' upstream/app/src/main/res/values/strings.xml
+
+      - name: Build official current debug APK
+        id: gradle_build
+        run: |
+          set +e
+          cd upstream
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --console=plain :app:assembleDebug \
+            -Dorg.gradle.jvmargs="-Xmx7g -XX:MaxMetaspaceSize=1g" \
+            -Dorg.gradle.parallel=true \
+            -Dorg.gradle.caching=true \
+            > ../official-current-gradle.log 2>&1
+          status=$?
+          cd ..
+          tail -300 official-current-gradle.log
+          exit $status
+
+      - name: Upload Gradle failure log
+        if: failure() && steps.gradle_build.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-current-gradle-error
+          path: official-current-gradle.log
+          retention-days: 14
+
+      - name: Collect APK
+        run: |
+          mkdir -p out
+          APK_SRC=$(find upstream/app/build/outputs/apk/debug -name '*.apk' | head -1)
+          test -n "$APK_SRC"
+          APK_NAME="ToolNeuron-OfficialCurrent-Experiment-build${{ github.run_number }}.apk"
+          cp "$APK_SRC" "out/$APK_NAME"
+          echo "APK_NAME=$APK_NAME" >> "$GITHUB_ENV"
+          sha256sum "out/$APK_NAME" | tee out/SHA256SUMS.txt
+          ls -lh out
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_NAME }}
+          path: |
+            out/${{ env.APK_NAME }}
+            out/SHA256SUMS.txt
+          retention-days: 90
+
+      - name: Publish prerelease
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolneuron-official-current-build${{ github.run_number }}
+          name: Tool Neuron Official Current Experiment Build ${{ github.run_number }}
+          prerelease: true
+          body: |
+            Experiment D: pinned official current ToolNeuron source, unchanged inference architecture, with only a unique package and label for side-by-side installation.
+            Unique package: com.dark.tool_neuron.exp.officialcurrent
+            Primary test: Huihui-Qwen3-30B-A3B load and long generation.
+          files: |
+            out/${{ env.APK_NAME }}
+            out/SHA256SUMS.txt
