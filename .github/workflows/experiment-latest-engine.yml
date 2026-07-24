@@ -1,0 +1,98 @@
+name: Build Tool Neuron Latest Engine Experiment
+
+on:
+  push:
+    branches:
+      - experiment/tn203-offline-loader
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toolneuron-latest-engine-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout accessibility fork
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android components
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;26.3.11579264"
+
+      - name: Replace 2.0.3 AAR with latest official upstream AAR
+        run: |
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://raw.githubusercontent.com/Siddhesh2377/ToolNeuron/5df5f8eaa1f199d6920ebe5cdd30cdf0db37f290/libs/gguf_lib-release.aar" \
+            --output libs/gguf_lib-release.aar
+          test -s libs/gguf_lib-release.aar
+          sha256sum libs/gguf_lib-release.aar
+          ls -lh libs/gguf_lib-release.aar
+
+      - name: Verify unique package
+        run: |
+          grep -F 'applicationId = "com.dark.tool_neuron.exp.latestengine"' app/build.gradle.kts
+          grep -F 'Tool Neuron 最新引擎实验' app/src/main/res/values/strings.xml
+
+      - name: Build debug APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon :app:assembleDebug \
+            -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g" \
+            -Dorg.gradle.parallel=true \
+            -Dorg.gradle.caching=true
+
+      - name: Collect APK
+        run: |
+          mkdir -p out
+          APK_SRC=$(find app/build/outputs/apk/debug -name '*.apk' | head -1)
+          test -n "$APK_SRC"
+          APK_NAME="ToolNeuron-LatestEngine-Experiment-build${{ github.run_number }}.apk"
+          cp "$APK_SRC" "out/$APK_NAME"
+          echo "APK_NAME=$APK_NAME" >> "$GITHUB_ENV"
+          sha256sum "out/$APK_NAME" | tee out/SHA256SUMS.txt
+          ls -lh out
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_NAME }}
+          path: |
+            out/${{ env.APK_NAME }}
+            out/SHA256SUMS.txt
+          retention-days: 90
+
+      - name: Publish prerelease
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolneuron-latest-engine-build${{ github.run_number }}
+          name: Tool Neuron Latest Engine Experiment Build ${{ github.run_number }}
+          prerelease: true
+          body: |
+            Experiment B: the user's Tool Neuron 2.0.3e Chinese/accessibility UI with the latest official upstream gguf_lib AAR.
+            Unique Android package: com.dark.tool_neuron.exp.latestengine
+            Primary test: Huihui-Qwen3-30B-A3B model loading without whole-device freeze.
+          files: |
+            out/${{ env.APK_NAME }}
+            out/SHA256SUMS.txt
