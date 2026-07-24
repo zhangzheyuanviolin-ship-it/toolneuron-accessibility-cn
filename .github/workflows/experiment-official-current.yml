@@ -43,11 +43,20 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android API 37 preview components
+      - name: Install Android 17 Cinnamon Bun platform
         run: |
           yes | sdkmanager --licenses
-          sdkmanager --channel=3 "platform-tools" "platforms;android-37" "build-tools;36.0.0" "ndk;26.3.11579264"
+          sdkmanager --channel=3 "platform-tools" "build-tools;36.0.0" "ndk;26.3.11579264"
+          sdkmanager --list --channel=3 > sdk-packages.txt
+          PLATFORM=$(grep -oE 'platforms;android-CinnamonBun[^ |]*' sdk-packages.txt | sort -u | tail -1)
+          echo "Resolved Android 17 package: $PLATFORM"
+          test -n "$PLATFORM"
+          sdkmanager --channel=3 "$PLATFORM"
+          PLATFORM_DIR="${PLATFORM#platforms;}"
+          test -f "$ANDROID_SDK_ROOT/platforms/$PLATFORM_DIR/android.jar"
+          ln -sfn "$ANDROID_SDK_ROOT/platforms/$PLATFORM_DIR" "$ANDROID_SDK_ROOT/platforms/android-37"
           test -f "$ANDROID_SDK_ROOT/platforms/android-37/android.jar"
+          ls -la "$ANDROID_SDK_ROOT/platforms"
 
       - name: Assign independent package and label
         run: |
