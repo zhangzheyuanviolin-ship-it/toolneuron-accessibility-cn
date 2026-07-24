@@ -16,13 +16,13 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.dark.tool_neuron"
+        applicationId = "com.dark.tool_neuron.exp.latestengine"
         minSdk = 29
         targetSdk = 36
-        versionCode = 30
-        versionName = "2.0.3"
+        versionCode = 20391
+        versionName = "2.0.3e-latest-engine"
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            abiFilters += listOf("arm64-v8a")
         }
         buildConfigField("String", "ALIAS", getProperty("ALIAS"))
     }
@@ -53,8 +53,7 @@ android {
         jniLibs {
             useLegacyPackaging = true
             pickFirsts += setOf(
-                "lib/arm64-v8a/libc++_shared.so",
-                "lib/x86_64/libc++_shared.so"
+                "lib/arm64-v8a/libc++_shared.so"
             )
         }
         resources {
@@ -116,14 +115,11 @@ dependencies {
     implementation(files("../libs/gguf_lib-release.aar"))
     implementation(files("../libs/ai_sd-release.aar"))
     implementation(files("../libs/ai_supertonic_tts-release.aar"))
-    //implementation(":runanywhere-core-onnx-release@aar")
-    //implementation(":runanywhere-kotlin-release@aar")
     implementation(project(":memory-vault"))
     implementation(project(":neuron-packet"))
     implementation(project(":system_encryptor"))
     implementation(project(":file_ops"))
     implementation(project(":ums"))
-    //implementation(project(":character-engine"))
 
     // AndroidX Core & Lifecycle
     implementation(libs.androidx.core.ktx)
