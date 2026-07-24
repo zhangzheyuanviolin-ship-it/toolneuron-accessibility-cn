@@ -46,9 +46,9 @@ jobs:
       - name: Install Android components
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-37" "build-tools;36.0.0" "ndk;26.3.11579264"
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;26.3.11579264"
 
-      - name: Assign independent package and label
+      - name: Assign independent package and compatible SDK
         run: |
           python3 - <<'PYEOF'
           from pathlib import Path
@@ -58,6 +58,8 @@ jobs:
               'applicationId = "com.dark.tool_neuron"',
               'applicationId = "com.dark.tool_neuron.exp.officialcurrent"',
           )
+          text = text.replace('version = release(37)', 'version = release(36)')
+          text = text.replace('targetSdk = 37', 'targetSdk = 36')
           text = text.replace(
               'abiFilters += listOf("arm64-v8a", "x86_64")',
               'abiFilters += listOf("arm64-v8a")',
@@ -73,6 +75,7 @@ jobs:
           strings.write_text(s, encoding='utf-8')
           PYEOF
           grep -F 'com.dark.tool_neuron.exp.officialcurrent' upstream/app/build.gradle.kts
+          grep -F 'version = release(36)' upstream/app/build.gradle.kts
           grep -F 'Tool Neuron 官方当前实验' upstream/app/src/main/res/values/strings.xml
 
       - name: Build official current debug APK
