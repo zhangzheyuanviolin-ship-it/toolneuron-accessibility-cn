@@ -55,12 +55,26 @@ jobs:
           grep -F 'Tool Neuron 最新引擎实验' app/src/main/res/values/strings.xml
 
       - name: Build debug APK
+        id: gradle_build
         run: |
+          set +e
           chmod +x ./gradlew
-          ./gradlew --no-daemon :app:assembleDebug \
+          ./gradlew --no-daemon --console=plain :app:assembleDebug \
             -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g" \
             -Dorg.gradle.parallel=true \
-            -Dorg.gradle.caching=true
+            -Dorg.gradle.caching=true \
+            > latest-engine-gradle.log 2>&1
+          status=$?
+          tail -300 latest-engine-gradle.log
+          exit $status
+
+      - name: Upload compiler failure log
+        if: failure() && steps.gradle_build.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-engine-gradle-error
+          path: latest-engine-gradle.log
+          retention-days: 14
 
       - name: Collect APK
         run: |
