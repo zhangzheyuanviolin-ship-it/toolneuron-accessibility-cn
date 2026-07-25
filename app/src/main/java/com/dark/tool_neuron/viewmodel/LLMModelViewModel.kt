@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.dark.tool_neuron.data.AppSettingsDataStore
 import com.dark.tool_neuron.data.VaultManager
 import com.dark.tool_neuron.di.AppContainer
+import com.dark.tool_neuron.global.ThirtyBMoESafeDefaults
 import com.dark.tool_neuron.models.enums.PathType
 import com.dark.tool_neuron.models.enums.ProviderType
 import com.dark.tool_neuron.models.table_schema.Model
@@ -204,7 +205,12 @@ class LLMModelViewModel @Inject constructor(
                 // Speculative decoding disabled — causes KV cache position mismatch on some models
                 // TODO: re-enable once native engine position tracking is fixed
                 LlmModelWorker.setSpeculativeDecodingGguf(false)
-                LlmModelWorker.warmUpGguf()
+                val modelSizeMB = ((model.fileSize ?: 0L) / (1024 * 1024)).toInt()
+                if (!ThirtyBMoESafeDefaults.shouldSkipWarmUp(model.modelName, modelSizeMB)) {
+                    LlmModelWorker.warmUpGguf()
+                } else {
+                    android.util.Log.i("LLMModelVM", "Skipping GGUF warm-up for 30B MoE diagnostic load")
+                }
             } catch (e: Exception) {
                 android.util.Log.w("LLMModelVM", "Optimization wiring failed: ${e.message}")
             }

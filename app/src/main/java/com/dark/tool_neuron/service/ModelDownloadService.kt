@@ -15,6 +15,7 @@ import com.dark.tool_neuron.di.AppContainer
 import com.dark.tool_neuron.global.AppPaths
 import com.dark.tool_neuron.global.DeviceTuner
 import com.dark.tool_neuron.global.HardwareScanner
+import com.dark.tool_neuron.global.ThirtyBMoESafeDefaults
 import com.dark.tool_neuron.models.engine_schema.GgufEngineSchema
 import com.dark.tool_neuron.models.enums.PathType
 import com.dark.tool_neuron.models.enums.ProviderType
@@ -627,14 +628,19 @@ class ModelDownloadService : Service() {
             ProviderType.GGUF -> {
                 val appSettings = AppSettingsDataStore(this@ModelDownloadService)
                 val tuningEnabled = appSettings.hardwareTuningEnabled.firstOrNull() ?: true
-                val loadingParams = if (tuningEnabled) {
+                val modelSizeMB = (fileSize / (1024 * 1024)).toInt()
+                val tunedParams = if (tuningEnabled) {
                     val perfMode = appSettings.performanceMode.firstOrNull() ?: com.dark.tool_neuron.global.PerformanceMode.BALANCED
-                    val modelSizeMB = (fileSize / (1024 * 1024)).toInt()
                     val profile = HardwareScanner.scan(this@ModelDownloadService)
                     DeviceTuner.tune(profile, modelSizeMB, modelName, perfMode)
                 } else {
                     com.dark.tool_neuron.models.engine_schema.GgufLoadingParams()
                 }
+                val loadingParams = ThirtyBMoESafeDefaults.loadingParamsFor(
+                    tunedParams,
+                    modelName,
+                    modelSizeMB
+                )
                 val ggufSchema = GgufEngineSchema(loadingParams = loadingParams)
                 ModelConfig(
                     modelId = modelId,

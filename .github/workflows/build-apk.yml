@@ -36,7 +36,7 @@ jobs:
       - name: Install SDK Components
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;26.3.11579264"
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "cmake;3.31.4" "ndk;26.3.11579264"
 
       - name: Grant Gradle Execute Permission
         run: chmod +x ./gradlew
@@ -47,12 +47,15 @@ jobs:
       - name: Collect Build Outputs
         run: |
           mkdir -p out
-          cp app/build/outputs/apk/debug/*.apk out/ || true
+          APK_SRC=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
+          APK_NAME="ToolNeuron-30B-Diagnostics-${{ github.event.inputs.release_label || 'snapshot' }}-${{ github.run_number }}.apk"
+          cp "$APK_SRC" "out/$APK_NAME"
+          sha256sum "out/$APK_NAME" | tee out/SHA256SUMS.txt
           ls -la out
 
       - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: toolneuron-${{ github.event.inputs.release_label || 'snapshot' }}-${{ github.run_number }}
+          name: ToolNeuron-30B-Diagnostics-${{ github.event.inputs.release_label || 'snapshot' }}-${{ github.run_number }}
           path: out/*
           if-no-files-found: error

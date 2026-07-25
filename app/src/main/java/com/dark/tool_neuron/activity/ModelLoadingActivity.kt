@@ -78,6 +78,7 @@ import com.dark.tool_neuron.di.AppContainer
 import com.dark.tool_neuron.data.AppSettingsDataStore
 import com.dark.tool_neuron.global.DeviceTuner
 import com.dark.tool_neuron.global.HardwareScanner
+import com.dark.tool_neuron.global.ThirtyBMoESafeDefaults
 import com.dark.tool_neuron.models.engine_schema.GgufEngineSchema
 import com.dark.tool_neuron.models.enums.PathType
 import com.dark.tool_neuron.models.enums.ProviderType
@@ -258,14 +259,19 @@ fun ModelLoadingScreen(
                             // Use hardware-tuned params if enabled
                             val appSettings = AppSettingsDataStore(context)
                             val tuningEnabled = appSettings.hardwareTuningEnabled.firstOrNull() ?: true
-                            val loadingParams = if (tuningEnabled) {
+                            val modelSizeMB = ((model.fileSize ?: 0L) / (1024 * 1024)).toInt()
+                            val tunedParams = if (tuningEnabled) {
                                 val perfMode = appSettings.performanceMode.firstOrNull() ?: com.dark.tool_neuron.global.PerformanceMode.BALANCED
-                                val modelSizeMB = ((model.fileSize ?: 0L) / (1024 * 1024)).toInt()
                                 val profile = HardwareScanner.scan(context)
                                 DeviceTuner.tune(profile, modelSizeMB, model.modelName, perfMode)
                             } else {
                                 com.dark.tool_neuron.models.engine_schema.GgufLoadingParams()
                             }
+                            val loadingParams = ThirtyBMoESafeDefaults.loadingParamsFor(
+                                tunedParams,
+                                model.modelName,
+                                modelSizeMB
+                            )
                             val schema = GgufEngineSchema(loadingParams = loadingParams)
                             ModelConfig(
                                 modelId = model.id,

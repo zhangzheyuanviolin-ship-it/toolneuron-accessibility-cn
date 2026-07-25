@@ -12,6 +12,7 @@ import com.dark.tool_neuron.global.DeviceTuner
 import com.dark.tool_neuron.global.HardwareProfile
 import com.dark.tool_neuron.global.HardwareScanner
 import com.dark.tool_neuron.global.PerformanceMode
+import com.dark.tool_neuron.global.ThirtyBMoESafeDefaults
 import com.dark.tool_neuron.models.engine_schema.GgufEngineSchema
 import com.dark.tool_neuron.models.enums.ProviderType
 import com.dark.tool_neuron.models.table_schema.Model
@@ -210,7 +211,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 for (model in allModels.filter { it.providerType == ProviderType.GGUF }) {
                     val config = modelRepository.getConfigByModelId(model.id) ?: continue
                     val modelSizeMB = ((model.fileSize ?: 0L) / (1024 * 1024)).toInt()
-                    val newLoading = DeviceTuner.tune(profile, modelSizeMB, model.modelName, mode)
+                    val tunedLoading = DeviceTuner.tune(profile, modelSizeMB, model.modelName, mode)
+                    val newLoading = ThirtyBMoESafeDefaults.loadingParamsFor(
+                        tunedLoading,
+                        model.modelName,
+                        modelSizeMB
+                    )
                     val schema = GgufEngineSchema(loadingParams = newLoading)
                     modelRepository.updateConfig(config.copy(modelLoadingParams = schema.toLoadingJson()))
                 }

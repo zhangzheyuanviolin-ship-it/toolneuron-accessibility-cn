@@ -16,11 +16,11 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.dark.tool_neuron"
+        applicationId = "com.dark.tool_neuron.safe30b"
         minSdk = 29
         targetSdk = 36
         versionCode = 30
-        versionName = "2.0.3"
+        versionName = "2.0.3-30b-safe"
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
