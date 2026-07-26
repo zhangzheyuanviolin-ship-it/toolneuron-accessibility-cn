@@ -52,7 +52,14 @@ jobs:
           INTELLIGENCE_LAB_KEYSTORE_PASSWORD: ${{ secrets.INTELLIGENCE_LAB_KEYSTORE_PASSWORD }}
           INTELLIGENCE_LAB_KEY_ALIAS: ${{ secrets.INTELLIGENCE_LAB_KEY_ALIAS }}
           INTELLIGENCE_LAB_KEY_PASSWORD: ${{ secrets.INTELLIGENCE_LAB_KEY_PASSWORD }}
-        run: ./gradlew --no-daemon :app:assembleRelease
+        run: |
+          while true; do
+            echo "Release build still running at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            sleep 60
+          done &
+          HEARTBEAT_PID=$!
+          trap 'kill "$HEARTBEAT_PID" 2>/dev/null || true' EXIT
+          ./gradlew --no-daemon --console=plain :app:assembleRelease
 
       - name: Collect Build Outputs
         run: |
