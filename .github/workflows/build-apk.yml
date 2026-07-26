@@ -36,7 +36,7 @@ jobs:
       - name: Install SDK Components
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "cmake;3.31.4" "ndk;26.3.11579264"
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "cmake;3.22.1" "ndk;26.3.11579264"
 
       - name: Grant Gradle Execute Permission
         run: chmod +x ./gradlew
@@ -52,6 +52,7 @@ jobs:
           INTELLIGENCE_LAB_KEYSTORE_PASSWORD: ${{ secrets.INTELLIGENCE_LAB_KEYSTORE_PASSWORD }}
           INTELLIGENCE_LAB_KEY_ALIAS: ${{ secrets.INTELLIGENCE_LAB_KEY_ALIAS }}
           INTELLIGENCE_LAB_KEY_PASSWORD: ${{ secrets.INTELLIGENCE_LAB_KEY_PASSWORD }}
+          INTELLIGENCE_LAB_ABI_FILTERS: arm64-v8a
         run: |
           mkdir -p out
           while true; do
@@ -61,7 +62,7 @@ jobs:
           HEARTBEAT_PID=$!
           trap 'kill "$HEARTBEAT_PID" 2>/dev/null || true' EXIT
           set -o pipefail
-          ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease -x lintVitalAnalyzeRelease 2>&1 | tee out/gradle-release-build.log
+          ./gradlew --no-daemon --console=plain --stacktrace --max-workers=2 :app:assembleRelease -x lintVitalAnalyzeRelease 2>&1 | tee out/gradle-release-build.log
 
       - name: Collect Build Outputs
         run: |

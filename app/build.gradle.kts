@@ -14,6 +14,10 @@ val releaseKeystorePath = System.getenv("INTELLIGENCE_LAB_KEYSTORE_PATH")
 val releaseKeystorePassword = System.getenv("INTELLIGENCE_LAB_KEYSTORE_PASSWORD")
 val releaseKeyAlias = System.getenv("INTELLIGENCE_LAB_KEY_ALIAS")
 val releaseKeyPassword = System.getenv("INTELLIGENCE_LAB_KEY_PASSWORD")
+val intelligenceLabAbiFilters = (System.getenv("INTELLIGENCE_LAB_ABI_FILTERS") ?: "arm64-v8a,x86_64")
+    .split(",")
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
 
 android {
     namespace = "com.dark.tool_neuron"
@@ -26,7 +30,7 @@ android {
         versionCode = 31
         versionName = "2.1.0-intelligence-lab"
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            abiFilters += intelligenceLabAbiFilters
         }
         buildConfigField("String", "ALIAS", getProperty("ALIAS"))
     }
