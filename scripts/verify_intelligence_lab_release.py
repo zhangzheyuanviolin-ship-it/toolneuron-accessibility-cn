@@ -95,7 +95,7 @@ def main() -> None:
     download_service = read("app/src/main/java/com/dark/tool_neuron/service/ModelDownloadService.kt")
     assert_contains(download_service, '.header("Range"', "resumable download")
     assert_contains(download_service, "HTTP_PARTIAL", "partial response handling")
-    assert_contains(download_service, "append = resumeFrom > 0", "append resume writes")
+    assert_contains(download_service, "FileOutputStream(destFile, resumeFrom > 0 && isResuming)", "append resume writes")
     if re.search(r"if \\(tempDir\\.exists\\(\\)\\) \\{\\s*\\n\\s*tempDir\\.deleteRecursively\\(\\)", download_service):
         fail("download temp directory is still deleted before download")
 

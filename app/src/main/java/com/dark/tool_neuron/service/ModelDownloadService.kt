@@ -362,7 +362,7 @@ class ModelDownloadService : Service() {
 
     private suspend fun downloadFile(
         url: String, destFile: File, modelId: String, modelName: String, notificationId: Int
-    ) = withContext(Dispatchers.IO) {
+    ): Unit = withContext(Dispatchers.IO) {
         val resumeFrom = if (destFile.exists()) destFile.length() else 0L
         val requestBuilder = Request.Builder().url(url)
         if (resumeFrom > 0) {
@@ -392,7 +392,7 @@ class ModelDownloadService : Service() {
                 var lastSpeedBytes = downloadedBytes
                 var lastSpeedTime = System.currentTimeMillis()
 
-                FileOutputStream(destFile, append = resumeFrom > 0 && isResuming).buffered().use { output ->
+                FileOutputStream(destFile, resumeFrom > 0 && isResuming).buffered().use { output ->
                     body.byteStream().buffered().use { input ->
                         val buffer = ByteArray(64 * 1024) // 64KB for better throughput
                         var bytes: Int
