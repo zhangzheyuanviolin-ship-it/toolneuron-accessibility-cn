@@ -37,6 +37,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
@@ -173,14 +174,11 @@ class ModelDownloadService : Service() {
                 updateDownloadState(modelId, DownloadState.Downloading(modelId, 0f, 0, 0))
 
                 val tempDir = AppPaths.tempDownloads(applicationContext, modelId)
-                if (tempDir.exists()) {
-                    tempDir.deleteRecursively()
-                }
                 tempDir.mkdirs()
 
                 // TTS downloads files directly, skip single-file download
                 if (modelType != "TTS") {
-                    tempFile = File(tempDir, "${modelId}_${System.currentTimeMillis()}.tmp")
+                    tempFile = File(tempDir, "$modelId.download")
                     downloadFile(fileUrl, tempFile, modelId, modelName, notificationId)
                 }
 
@@ -325,9 +323,7 @@ class ModelDownloadService : Service() {
                 }
 
             } catch (e: kotlinx.coroutines.CancellationException) {
-                tempFile?.delete()
                 extractTempDir?.deleteRecursively()
-                AppPaths.tempDownloads(applicationContext, modelId).deleteRecursively()
 
                 updateDownloadState(modelId, DownloadState.Cancelled(modelId))
                 updateNotification(modelName, 0f, notificationId, isCancelled = true)
@@ -343,9 +339,7 @@ class ModelDownloadService : Service() {
                     }
                 }
             } catch (e: Exception) {
-                tempFile?.delete()
                 extractTempDir?.deleteRecursively()
-                AppPaths.tempDownloads(applicationContext, modelId).deleteRecursively()
 
                 updateDownloadState(modelId, DownloadState.Error(modelId, e.message ?: "Unknown error"))
                 updateNotification(modelName, 0f, notificationId, error = e.message)
@@ -369,7 +363,12 @@ class ModelDownloadService : Service() {
     private suspend fun downloadFile(
         url: String, destFile: File, modelId: String, modelName: String, notificationId: Int
     ) = withContext(Dispatchers.IO) {
-        val request = Request.Builder().url(url).build()
+        val resumeFrom = if (destFile.exists()) destFile.length() else 0L
+        val requestBuilder = Request.Builder().url(url)
+        if (resumeFrom > 0) {
+            requestBuilder.header("Range", "bytes=$resumeFrom-")
+        }
+        val request = requestBuilder.build()
         val call = client.newCall(request)
 
         try {
@@ -379,16 +378,21 @@ class ModelDownloadService : Service() {
                 }
 
                 val body = response.body
-                val totalBytes = body.contentLength()
-                var downloadedBytes = 0L
+                val isResuming = resumeFrom > 0 && response.code == HttpURLConnection.HTTP_PARTIAL
+                val totalBytes = if (isResuming) {
+                    resumeFrom + body.contentLength()
+                } else {
+                    body.contentLength()
+                }
+                var downloadedBytes = if (isResuming) resumeFrom else 0L
                 var lastUpdateTime = 0L
 
                 // Speed tracking: rolling window of last 5 samples
                 val speedSamples = mutableListOf<Long>()
-                var lastSpeedBytes = 0L
+                var lastSpeedBytes = downloadedBytes
                 var lastSpeedTime = System.currentTimeMillis()
 
-                FileOutputStream(destFile).buffered().use { output ->
+                FileOutputStream(destFile, append = resumeFrom > 0 && isResuming).buffered().use { output ->
                     body.byteStream().buffered().use { input ->
                         val buffer = ByteArray(64 * 1024) // 64KB for better throughput
                         var bytes: Int

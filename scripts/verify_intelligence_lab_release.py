@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+import hashlib
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+PROTECTED_HASHES = {
+    "app/src/main/java/com/dark/tool_neuron/engine/GGUFEngine.kt": "a64adfda12286f11bcb0b9718c5e9307181325b476d5e3e45f2c32a2504d3d66",
+    "app/src/main/java/com/dark/tool_neuron/service/LLMService.kt": "18ee01877c4379a8c27e1ab8d7d4efff6f757f5e44eb70955dd86ac2bc5e0f59",
+    "app/src/main/java/com/dark/tool_neuron/worker/LlmModelWorker.kt": "65800efc5b21272cd753d668ca69ef9d9cf152354871b29aee4168fbb8218792",
+    "app/src/main/java/com/dark/tool_neuron/global/ThirtyBMoESafeDefaults.kt": "f45625d3fe0d8dcd89c2eac6be1a143cf958e58db54e33bae496571b3ee56016",
+    "app/src/main/java/com/dark/tool_neuron/activity/ModelLoadingActivity.kt": "df52f04173882a1182185d69c5b5e00f4b4bb47d48254c7ba6576079a2d9de65",
+    "app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt": "2cb895842bad27b48fe17d51cc1dc67c8e7377deb5d41089950e871eeb3d04c3",
+    "app/src/main/java/com/dark/tool_neuron/viewmodel/SettingsViewModel.kt": "68dc5f8ed6a467655dc2118b344d904f2817b796c2119dba41b94a8ebb114386",
+}
+
+REQUIRED_REPOS = [
+    "unsloth/Qwen3.5-0.8B-GGUF",
+    "unsloth/Qwen3.5-2B-GGUF",
+    "unsloth/Qwen3.5-4B-GGUF",
+    "unsloth/Qwen3.5-9B-GGUF",
+    "unsloth/Qwen3.5-35B-A3B-GGUF",
+    "saidonnet/Qwen3.6-35B-A3B-MTP-GGUF",
+    "nypgd/mebi-gemma-4-e2b-assistant-gguf",
+    "mradermacher/gemma-4-E4B-tamil-GGUF",
+    "estread11/gemma-4-12b-mirozdanie-nvfp4-gguf",
+    "AtomicChat/gemma-4-26B-A4B-it-GGUF",
+]
+
+CATEGORIES = [
+    "GENERAL",
+    "MEDICAL",
+    "RESEARCH",
+    "CODING",
+    "UNCENSORED",
+    "BUSINESS",
+    "CYBERSECURITY",
+]
+
+
+def read(path: str) -> str:
+    return (ROOT / path).read_text(encoding="utf-8")
+
+
+def fail(message: str) -> None:
+    print(message, file=sys.stderr)
+    sys.exit(1)
+
+
+def assert_contains(text: str, needle: str, label: str) -> None:
+    if needle not in text:
+        fail(f"{label}: missing {needle}")
+
+
+def main() -> None:
+    for rel_path, expected in PROTECTED_HASHES.items():
+        actual = hashlib.sha256((ROOT / rel_path).read_bytes()).hexdigest()
+        if actual != expected:
+            fail(f"protected inference file changed: {rel_path}")
+
+    gradle = read("app/build.gradle.kts")
+    assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.safe30b"', "stable package")
+    assert_contains(gradle, 'versionCode = 31', "version code")
+    assert_contains(gradle, 'versionName = "2.1.0-intelligence-lab"', "version name")
+    assert_contains(gradle, 'create("release")', "release signing")
+    for env_name in [
+        "INTELLIGENCE_LAB_KEYSTORE_PATH",
+        "INTELLIGENCE_LAB_KEYSTORE_PASSWORD",
+        "INTELLIGENCE_LAB_KEY_ALIAS",
+        "INTELLIGENCE_LAB_KEY_PASSWORD",
+    ]:
+        assert_contains(gradle, env_name, "release signing env")
+
+    assert_contains(read("app/src/main/res/values/strings.xml"), "<string name=\"app_name\">Intelligence Lab</string>", "english app name")
+    assert_contains(read("app/src/main/res/values-zh-rCN/strings.xml"), "<string name=\"app_name\">Intelligence Lab智能实验室</string>", "chinese app name")
+
+    workflow = read(".github/workflows/build-apk.yml")
+    assert_contains(workflow, "INTELLIGENCE_LAB_KEYSTORE_BASE64", "workflow signing secret")
+    assert_contains(workflow, ":app:assembleRelease", "release build")
+    assert_contains(workflow, "outputs/apk/release", "release artifact")
+    assert_contains(workflow, "IntelligenceLab-", "artifact name")
+
+    repos = read("app/src/main/java/com/dark/tool_neuron/repo/ModelRepoDataStore.kt")
+    for repo in REQUIRED_REPOS:
+        assert_contains(repos, f'"{repo}"', "required latest repo")
+    for category in CATEGORIES:
+        full_blocks = len(re.findall(r"modelType = ModelType\.GGUF,\s*\n\s*isEnabled = true,\s*\n\s*category = ModelCategory\." + category, repos))
+        helper_calls = len(re.findall(r"ggufRepository\([\s\S]*?ModelCategory\." + category + r"\s*\)", repos))
+        count = full_blocks + helper_calls
+        if count < 10:
+            fail(f"category {category} has {count} enabled GGUF repositories, expected at least 10")
+
+    download_service = read("app/src/main/java/com/dark/tool_neuron/service/ModelDownloadService.kt")
+    assert_contains(download_service, '.header("Range"', "resumable download")
+    assert_contains(download_service, "HTTP_PARTIAL", "partial response handling")
+    assert_contains(download_service, "append = resumeFrom > 0", "append resume writes")
+    if re.search(r"if \\(tempDir\\.exists\\(\\)\\) \\{\\s*\\n\\s*tempDir\\.deleteRecursively\\(\\)", download_service):
+        fail("download temp directory is still deleted before download")
+
+    gguf_engine = read("app/src/main/java/com/dark/tool_neuron/engine/GGUFEngine.kt")
+    for vlm_api in ["loadVlmProjector", "isVlmLoaded", "getVlmDefaultMarker", "generateVlmFlow"]:
+        assert_contains(gguf_engine, vlm_api, "vlm api")
+    for tool_api in ["enableToolCallingDirect", "setToolsJson", "GenerationEvent.ToolCall"]:
+        assert_contains(gguf_engine, tool_api, "tool calling api")
+
+
+if __name__ == "__main__":
+    main()

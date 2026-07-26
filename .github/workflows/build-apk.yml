@@ -41,14 +41,24 @@ jobs:
       - name: Grant Gradle Execute Permission
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew --no-daemon :app:assembleDebug
+      - name: Prepare Release Signing
+        run: |
+          echo "${{ secrets.INTELLIGENCE_LAB_KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/intelligence-lab-release.jks"
+          test -s "$RUNNER_TEMP/intelligence-lab-release.jks"
+
+      - name: Build Release APK
+        env:
+          INTELLIGENCE_LAB_KEYSTORE_PATH: ${{ runner.temp }}/intelligence-lab-release.jks
+          INTELLIGENCE_LAB_KEYSTORE_PASSWORD: ${{ secrets.INTELLIGENCE_LAB_KEYSTORE_PASSWORD }}
+          INTELLIGENCE_LAB_KEY_ALIAS: ${{ secrets.INTELLIGENCE_LAB_KEY_ALIAS }}
+          INTELLIGENCE_LAB_KEY_PASSWORD: ${{ secrets.INTELLIGENCE_LAB_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon :app:assembleRelease
 
       - name: Collect Build Outputs
         run: |
           mkdir -p out
-          APK_SRC=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
-          APK_NAME="ToolNeuron-30B-Diagnostics-${{ github.event.inputs.release_label || 'snapshot' }}-${{ github.run_number }}.apk"
+          APK_SRC=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          APK_NAME="IntelligenceLab-${{ github.event.inputs.release_label || 'snapshot' }}-${{ github.run_number }}.apk"
           cp "$APK_SRC" "out/$APK_NAME"
           sha256sum "out/$APK_NAME" | tee out/SHA256SUMS.txt
           ls -la out
@@ -56,6 +66,6 @@ jobs:
       - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ToolNeuron-30B-Diagnostics-${{ github.event.inputs.release_label || 'snapshot' }}-${{ github.run_number }}
+          name: IntelligenceLab-${{ github.event.inputs.release_label || 'snapshot' }}-${{ github.run_number }}
           path: out/*
           if-no-files-found: error

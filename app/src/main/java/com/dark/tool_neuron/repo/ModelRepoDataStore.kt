@@ -22,107 +22,127 @@ class ModelRepositoryDataStore(private val context: Context) {
         private val MODEL_REPOS_KEY = stringPreferencesKey("model_repositories")
         private val DELETED_DEFAULTS_KEY = stringPreferencesKey("deleted_default_repo_ids")
 
+        private fun ggufRepository(
+            id: String,
+            name: String,
+            repoPath: String,
+            category: ModelCategory
+        ) = HFModelRepository(
+            id = id,
+            name = name,
+            repoPath = repoPath,
+            modelType = ModelType.GGUF,
+            isEnabled = true,
+            category = category
+        )
+
+        private fun sdRepository(
+            id: String,
+            name: String,
+            repoPath: String,
+            category: ModelCategory
+        ) = HFModelRepository(
+            id = id,
+            name = name,
+            repoPath = repoPath,
+            modelType = ModelType.SD,
+            isEnabled = true,
+            category = category
+        )
+
         val DEFAULT_REPOSITORIES = listOf(
             // === GENERAL ===
-            HFModelRepository(
-                id = "unsloth-qwen3_5-0_8b",
-                name = "Qwen3.5 (0.8B)",
-                repoPath = "unsloth/Qwen3.5-0.8B-GGUF",
-                modelType = ModelType.GGUF,
-                isEnabled = true,
-                category = ModelCategory.GENERAL
-            ),
-            HFModelRepository(
-                id = "unsloth-qwen3_5-4b",
-                name = "Qwen3.5 (4B)",
-                repoPath = "unsloth/Qwen3.5-4B-GGUF",
-                modelType = ModelType.GGUF,
-                isEnabled = true,
-                category = ModelCategory.GENERAL
-            ),
-            HFModelRepository(
-                id = "unsloth-qwen3_5-9b",
-                name = "Qwen3.5 (9B)",
-                repoPath = "unsloth/Qwen3.5-9B-GGUF",
-                modelType = ModelType.GGUF,
-                isEnabled = true,
-                category = ModelCategory.GENERAL
-            ),
-            HFModelRepository(
-                id = "liquidai-lfm2-350m",
-                name = "LFM2 350M",
-                repoPath = "LiquidAI/LFM2-350M-GGUF",
-                modelType = ModelType.GGUF,
-                isEnabled = true,
-                category = ModelCategory.GENERAL
-            ),
+            ggufRepository("unsloth-qwen3_5-0_8b", "Qwen3.5 0.8B", "unsloth/Qwen3.5-0.8B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3_5-2b", "Qwen3.5 2B", "unsloth/Qwen3.5-2B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3_5-4b", "Qwen3.5 4B", "unsloth/Qwen3.5-4B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3_5-9b", "Qwen3.5 9B", "unsloth/Qwen3.5-9B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3_5-35b-a3b", "Qwen3.5 35B A3B MoE", "unsloth/Qwen3.5-35B-A3B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3_5-35b-a3b-mtp", "Qwen3.5 35B A3B MTP", "unsloth/Qwen3.5-35B-A3B-MTP-GGUF", ModelCategory.GENERAL),
+            ggufRepository("qwen3_6-35b-a3b-mtp", "Qwen3.6 35B A3B MTP", "saidonnet/Qwen3.6-35B-A3B-MTP-GGUF", ModelCategory.GENERAL),
+            ggufRepository("gemma4-e2b-assistant", "Gemma 4 E2B Assistant", "nypgd/mebi-gemma-4-e2b-assistant-gguf", ModelCategory.GENERAL),
+            ggufRepository("gemma4-e4b-tamil", "Gemma 4 E4B", "mradermacher/gemma-4-E4B-tamil-GGUF", ModelCategory.GENERAL),
+            ggufRepository("gemma4-12b-mirozdanie", "Gemma 4 12B", "estread11/gemma-4-12b-mirozdanie-nvfp4-gguf", ModelCategory.GENERAL),
+            ggufRepository("gemma4-26b-a4b", "Gemma 4 26B A4B MoE", "AtomicChat/gemma-4-26B-A4B-it-GGUF", ModelCategory.GENERAL),
+            ggufRepository("lfm2-24b-a2b-bartowski", "LFM2 24B A2B MoE", "bartowski/LiquidAI_LFM2-24B-A2B-GGUF", ModelCategory.GENERAL),
+            // === MEDICAL ===
+            ggufRepository("medgemma-4b-it", "MedGemma 4B IT", "unsloth/medgemma-4b-it-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("medgemma-27b-text-it", "MedGemma 27B Text IT", "unsloth/medgemma-27b-text-it-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("medgemma-27b-it", "MedGemma 27B IT", "unsloth/medgemma-27b-it-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("bartowski-medgemma-27b-it", "MedGemma 27B IT Bartowski", "bartowski/google_medgemma-27b-it-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("qwen3_5-medical-gspo", "Qwen3.5 Medical GSPO", "mradermacher/Qwen3.5-Medical-GSPO-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("qwen3_5-medical-gspo-i1", "Qwen3.5 Medical GSPO i1", "mradermacher/Qwen3.5-Medical-GSPO-i1-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("gccl-medical-qwen3_5-4b", "GCCL Medical Qwen3.5 4B", "mradermacher/GCCL-Medical-LLM-Qwen3.5-4B-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("qwen3_5-9b-medical-v2", "Qwen3.5 9B Medical v2", "MateoM4/qwen3.5-9b-finetuned-medical-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("qwen3_5-0_8b-medical-id", "Qwen3.5 0.8B Medical ID", "AriesDjaenuri/qwen35-0.8b-medical-id-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("qwen3_5-2b-medical-id", "Qwen3.5 2B Medical ID", "AriesDjaenuri/qwen35-2b-medical-id-GGUF", ModelCategory.MEDICAL),
+            ggufRepository("qwen3_5-4b-medical-id", "Qwen3.5 4B Medical ID", "AriesDjaenuri/qwen35-4b-medical-id-GGUF", ModelCategory.MEDICAL),
+            // === RESEARCH ===
+            ggufRepository("deepseek-r1-0528-qwen3-8b-lmstudio", "DeepSeek R1 0528 Qwen3 8B", "lmstudio-community/DeepSeek-R1-0528-Qwen3-8B-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("deepseek-r1-0528-qwen3-8b-unsloth", "DeepSeek R1 0528 Qwen3 8B Unsloth", "unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("deepseek-r1-0528-qwen3-8b-maziyar", "DeepSeek R1 0528 Qwen3 8B Maziyar", "MaziyarPanahi/DeepSeek-R1-0528-Qwen3-8B-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("qwen3_5-9b-claude-reasoning-v2", "Qwen3.5 9B Reasoning v2", "Jackrong/Qwen3.5-9B-Claude-4.6-Opus-Reasoning-Distilled-v2-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("qwen3_5-9b-deepseek-flash", "Qwen3.5 9B DeepSeek Flash", "Jackrong/Qwen3.5-9B-DeepSeek-V4-Flash-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("yui-math-python-qwen3_5-4b", "Yui Math Python Qwen3.5 4B", "naksyu/yui-math-python-qwen3.5-4b-v0.5d-fft-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("qwen3_5-2b-math", "Qwen3.5 2B Math", "hpham307/qwen3.5-2b-math-gguf", ModelCategory.RESEARCH),
+            ggufRepository("qwen3_5-4b-math-quiz", "Qwen3.5 4B Math Quiz", "lzhang02/Qwen3.5-4B-Math-Quiz-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("qwen3_5-9b-data-science-tr", "Qwen3.5 9B Data Science TR", "murataksit34/Qwen3.5-9B-Data-Science-Insight-TR-16.2K-Q4_K_M-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("qwen3_5-9b-data-science", "Qwen3.5 9B Data Science", "murataksit34/Qwen3.5-9B-Data-Science-Insight-16.5K-Q4_K_M-GGUF", ModelCategory.RESEARCH),
+            ggufRepository("qwen3_5-9b-researcher", "Qwen3.5 9B Researcher", "utareen/Qwen3.5-9B-Researcher-v1-GGUF", ModelCategory.RESEARCH),
+            // === CODING ===
+            ggufRepository("qwen3_5-9b-coder", "Qwen3.5 9B Coder", "mradermacher/Qwen3.5-9B-Coder-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_5-9b-coder-i1", "Qwen3.5 9B Coder i1", "mradermacher/Qwen3.5-9B-Coder-i1-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_5-4b-agentic-coder-v4", "Qwen3.5 4B Agentic Coder v4", "mradermacher/qwen3.5-4b-agentic-coder-v4-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_5-4b-agentic-coder-v4-i1", "Qwen3.5 4B Agentic Coder v4 i1", "mradermacher/qwen3.5-4b-agentic-coder-v4-i1-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_5-9b-sushi-coder", "Qwen3.5 9B Sushi Coder RL", "bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_6-27b-a3b-coder-mtp", "Qwen3.6 27B A3B Coder MTP", "ManniX-ITA/Qwen3.6-27B-A3B-Coder-MTP-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_6-27b-a3b-coder", "Qwen3.6 27B A3B Coder", "mradermacher/Qwen3.6-27B-A3B-Coder-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_6-27b-agentic-coder", "Qwen3.6 27B Agentic Coder", "jackasda211233/Qwen3.6-27B-AEON-RYS-Agentic-Coder-PatchCode-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_5-4b-python-coder", "Qwen3.5 4B Python Coder", "Abiray/Qwen3.5-4B-Python-Coder-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_5-9b-python-coder", "Qwen3.5 9B Python Coder", "lainlives/Qwen3.5-9B-Python-Coder-GGUF", ModelCategory.CODING),
+            ggufRepository("qwen3_5-9b-claude-code", "Qwen3.5 9B Claude Code", "empero-ai/Qwen3.5-9B-Claude-Code-GGUF", ModelCategory.CODING),
+            // === BUSINESS ===
+            ggufRepository("businessgpt-qwen3_5-2b-v14", "BusinessGPT Qwen3.5 2B v14", "vXofi/businessgpt-v14-dpo-qwen3.5-2b-gguf", ModelCategory.BUSINESS),
+            ggufRepository("businessgpt-qwen3_5-2b-v11", "BusinessGPT Qwen3.5 2B v11", "vXofi/businessgpt-v11-qwen3.5-2b-gguf", ModelCategory.BUSINESS),
+            ggufRepository("businessgpt-qwen3_5-9b-v16", "BusinessGPT Qwen3.5 9B v16", "vXofi/businessgpt-v16-qwen3.5-9b-gguf", ModelCategory.BUSINESS),
+            ggufRepository("tracealchemy-gemma4-e4b-finance", "TraceAlchemy Gemma 4 E4B Finance", "trjxter/TraceAlchemy-Gemma-4-E4B-Finance-IT-gguf", ModelCategory.BUSINESS),
+            ggufRepository("financegemma-e4b", "FinanceGemma E4B", "mradermacher/FinanceGemma-E4B-GGUF", ModelCategory.BUSINESS),
+            ggufRepository("finance-gemma4-e2b", "Finance Gemma 4 E2B", "mradermacher/finance-gemma4-e2b-GGUF", ModelCategory.BUSINESS),
+            ggufRepository("legal-qwen3_5-9b", "Legal Qwen3.5 9B", "scottyjmp5/Legal-Qwen3.5-9B-Abliterated-GGUF", ModelCategory.BUSINESS),
+            ggufRepository("legal-ai-qwen3_5-q8", "Legal AI Qwen3.5 Q8", "claspi2509/legal-AI-advanced-qwen3.5-q8-gguf", ModelCategory.BUSINESS),
+            ggufRepository("qwen3-4b-sales-strategist", "Qwen3 4B Sales Strategist", "mradermacher/Qwen3-4B-Thinking-2507-Sales-Strategist-v1-GGUF", ModelCategory.BUSINESS),
+            ggufRepository("qwen3-4b-sales-strategist-i1", "Qwen3 4B Sales Strategist i1", "mradermacher/Qwen3-4B-Thinking-2507-Sales-Strategist-v1-i1-GGUF", ModelCategory.BUSINESS),
+            ggufRepository("accounting-qwen3_5-9b", "Accounting Qwen3.5 9B", "flarexio/accounting-qwen35-9b-gguf-smoke", ModelCategory.BUSINESS),
             // === UNCENSORED ===
-            HFModelRepository(
-                id = "gemma3-emophilic-1b",
-                name = "Gemma3 Emophilic (1B)",
-                repoPath = "Novaciano/Gemma3-Emophilic-1B-GGUF",
-                modelType = ModelType.GGUF,
-                isEnabled = true,
-                category = ModelCategory.UNCENSORED
-            ),
-            HFModelRepository(
-                id = "gemma3-emotional-1b",
-                name = "Gemma3 Emotional (1B)",
-                repoPath = "mradermacher/Gemma3-Emotional-1B-i1-GGUF",
-                modelType = ModelType.GGUF,
-                isEnabled = true,
-                category = ModelCategory.UNCENSORED
-            ),
-            HFModelRepository(
-                id = "sex-roleplay-1b",
-                name = "SEX ROLEPLAY 3.2 (1B)",
-                repoPath = "mradermacher/SEX_ROLEPLAY-3.2-1B-i1-GGUF",
-                modelType = ModelType.GGUF,
-                isEnabled = true,
-                category = ModelCategory.UNCENSORED
-            ),
+            ggufRepository("qwen3_5-9b-defiant-fable-uncensored", "Qwen3.5 9B Defiant Fable Uncensored", "DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("qwen3_5-9b-ultra-uncensored", "Qwen3.5 9B Ultra Uncensored", "mradermacher/Qwen3.5-9B-ultra-uncensored-heretic-v2-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("huihui-qwen3_5-9b-abliterated", "Huihui Qwen3.5 9B Abliterated", "mradermacher/Huihui-Qwen3.5-9B-abliterated-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("qwen3_5-35b-a3b-abliterated", "Qwen3.5 35B A3B Abliterated", "HeYujie/Qwen3.5-35B-A3B-abliterated-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("huihui-qwen3_5-35b-a3b-abliterated", "Huihui Qwen3.5 35B A3B Abliterated", "mradermacher/Huihui-Qwen3.5-35B-A3B-abliterated-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("qwen3_6-35b-a3b-uncensored", "Qwen3.6 35B A3B Uncensored", "llmfan46/Qwen3.6-35B-A3B-uncensored-heretic-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("qwen3_6-35b-a3b-uncensored-apex", "Qwen3.6 35B A3B Uncensored APEX", "SC117/Qwen3.6-35B-A3B-uncensored-heretic-Native-MTP-Preserved-APEX-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("gemma4-12b-heretic-abliterated", "Gemma 4 12B Heretic Abliterated", "culturerevolt/gemma-4-12b-heretic-abliterated-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("huihui-gemma4-12b-abliterated", "Huihui Gemma 4 12B Abliterated", "huihui-ai/Huihui-gemma-4-12B-it-qat-q4_0-unquantized-abliterated-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("huihui-gemma4-26b-a4b-abliterated", "Huihui Gemma 4 26B A4B Abliterated", "huihui-ai/Huihui-gemma-4-26B-A4B-it-qat-q4_0-unquantized-abliterated-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("gemma4-26b-a4b-abliterix", "Gemma 4 26B A4B Abliterix", "0xA50C1A1/gemma-4-26B-A4B-it-abliterix-gguf", ModelCategory.UNCENSORED),
+            // === CYBERSECURITY ===
+            ggufRepository("qwen3_5-0_8b-cyber", "Qwen3.5 0.8B Cyber", "reaperdoesntknow/Qwen3.5-0.8-Cyber-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("qwen3_5-9b-cyber-v3", "Qwen3.5 9B Cyber v3", "mradermacher/Qwen3.5-9B-Uncensored-cyber-v3-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("qwen3_5-9b-cyber-v2", "Qwen3.5 9B Cyber v2", "mradermacher/Qwen3.5-9B-Uncensored-cyber-v2-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("ravenx-qwen3_6-35b-a3b", "RavenX Qwen3.6 35B A3B CyberAgent", "deadbydawn101/RavenX-CyberAgent-Qwen3.6-35B-A3B-Opus-4.7-OpenMythos-Pentester-BugHunter-RATH-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("endy-qwen3_6-35b-a3b-cybersec", "Endy Qwen3.6 35B A3B CyberSec", "endystrike/Endy-Qwen3.6-CyberSec-35B-A3B-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("titus-cybersecurity-q4", "Titus Cybersecurity LLM", "AlicanKiraz0/Titus-CybersecurityLLM-v1.0-Q4_K_M-No-MTP-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("qwen3-4b-cybersecurity", "Qwen3 4B Cybersecurity", "sillykiwi/Qwen3-4B-Cybersecurity-Heretic-16bit-Q4_K_M-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("lily-cybersecurity-7b", "Lily Cybersecurity 7B", "QuantFactory/Lily-Cybersecurity-7B-v0.2-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("securityllm", "SecurityLLM", "QuantFactory/SecurityLLM-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("pentesting-gpt", "Pentesting GPT", "mradermacher/Pentesting-GPT-v1.0-GGUF", ModelCategory.CYBERSECURITY),
+            ggufRepository("seneca-cybersecurity", "Seneca Cybersecurity LLM", "AlicanKiraz0/Seneca-Cybersecurity-LLM-Q4_K_M-GGUF", ModelCategory.CYBERSECURITY),
             // === IMAGE GENERATION (SD) ===
-            HFModelRepository(
-                id = "sd-qnn",
-                name = "Stable Diffusion (NPU)",
-                repoPath = "xororz/sd-qnn",
-                modelType = ModelType.SD,
-                isEnabled = true,
-                category = ModelCategory.GENERAL
-            ),
-            HFModelRepository(
-                id = "sd-mnn",
-                name = "Stable Diffusion (CPU)",
-                repoPath = "xororz/sd-mnn",
-                modelType = ModelType.SD,
-                isEnabled = true,
-                category = ModelCategory.GENERAL
-            ),
+            sdRepository("sd-qnn", "Stable Diffusion (NPU)", "xororz/sd-qnn", ModelCategory.GENERAL),
+            sdRepository("sd-mnn", "Stable Diffusion (CPU)", "xororz/sd-mnn", ModelCategory.GENERAL),
             // === NSFW IMAGE GENERATION (SD) ===
-            HFModelRepository(
-                id = "sd-mistoonanime-qnn",
-                name = "MistoonAnime v3.0 (NPU)",
-                repoPath = "Mr-J-369/mistoonAnime_v30-SD1.5-qnn2.28",
-                modelType = ModelType.SD,
-                isEnabled = true,
-                category = ModelCategory.UNCENSORED
-            ),
-            HFModelRepository(
-                id = "sd-cyberrealistic-qnn",
-                name = "CyberRealistic Classic (NPU)",
-                repoPath = "Mr-J-369/cyberrealistic-classic-SD1.5-qnn2.28",
-                modelType = ModelType.SD,
-                isEnabled = true,
-                category = ModelCategory.UNCENSORED
-            ),
-            HFModelRepository(
-                id = "sd-realhotspice-qnn",
-                name = "RealHotSpice (NPU)",
-                repoPath = "Mr-J-369/RealHotSpice-SD1.5-qnn2.28",
-                modelType = ModelType.SD,
-                isEnabled = true,
-                category = ModelCategory.UNCENSORED
-            )
+            sdRepository("sd-mistoonanime-qnn", "MistoonAnime v3.0 (NPU)", "Mr-J-369/mistoonAnime_v30-SD1.5-qnn2.28", ModelCategory.UNCENSORED),
+            sdRepository("sd-cyberrealistic-qnn", "CyberRealistic Classic (NPU)", "Mr-J-369/cyberrealistic-classic-SD1.5-qnn2.28", ModelCategory.UNCENSORED),
+            sdRepository("sd-realhotspice-qnn", "RealHotSpice (NPU)", "Mr-J-369/RealHotSpice-SD1.5-qnn2.28", ModelCategory.UNCENSORED)
         )
     }
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ToolNeuron 30B Diagnostics</string>
+    <string name="app_name">Intelligence Lab</string>
     <string name="service_name">Notification reader</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="a11y_action_icon">Action icon</string>

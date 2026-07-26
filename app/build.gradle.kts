@@ -10,6 +10,10 @@ plugins {
 }
 
 val localPropertiesFile = rootProject.file("local.properties")
+val releaseKeystorePath = System.getenv("INTELLIGENCE_LAB_KEYSTORE_PATH")
+val releaseKeystorePassword = System.getenv("INTELLIGENCE_LAB_KEYSTORE_PASSWORD")
+val releaseKeyAlias = System.getenv("INTELLIGENCE_LAB_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("INTELLIGENCE_LAB_KEY_PASSWORD")
 
 android {
     namespace = "com.dark.tool_neuron"
@@ -19,18 +23,28 @@ android {
         applicationId = "com.dark.tool_neuron.safe30b"
         minSdk = 29
         targetSdk = 36
-        versionCode = 30
-        versionName = "2.0.3-30b-safe"
+        versionCode = 31
+        versionName = "2.1.0-intelligence-lab"
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
         buildConfigField("String", "ALIAS", getProperty("ALIAS"))
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(releaseKeystorePath ?: "missing-intelligence-lab-release.jks")
+            storePassword = releaseKeystorePassword ?: ""
+            keyAlias = releaseKeyAlias ?: ""
+            keyPassword = releaseKeyPassword ?: ""
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
