@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.safe30b"
         minSdk = 29
         targetSdk = 36
-        versionCode = 31
-        versionName = "2.1.0-intelligence-lab"
+        versionCode = 32
+        versionName = "2.2.0-tool-workspace"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }
@@ -124,6 +124,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.documentfile)
 
     // Serialization & API
     implementation(libs.kotlinx.serialization.json)

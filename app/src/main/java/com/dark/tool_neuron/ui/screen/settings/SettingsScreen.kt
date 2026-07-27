@@ -113,6 +113,8 @@ fun SettingsScreen(
                 viewModel = viewModel
             )
 
+            toolSettingsSection()
+
             // ── LLM ──
             llmSettingsSection(
                 streamingEnabled = streamingEnabled,

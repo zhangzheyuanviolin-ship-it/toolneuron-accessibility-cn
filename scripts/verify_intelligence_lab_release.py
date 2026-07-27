@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.safe30b"', "stable package")
-    assert_contains(gradle, 'versionCode = 31', "version code")
-    assert_contains(gradle, 'versionName = "2.1.0-intelligence-lab"', "version name")
+    assert_contains(gradle, 'versionCode = 32', "version code")
+    assert_contains(gradle, 'versionName = "2.2.0-tool-workspace"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -104,6 +104,58 @@ def main() -> None:
         assert_contains(gguf_engine, vlm_api, "vlm api")
     for tool_api in ["enableToolCallingDirect", "setToolsJson", "GenerationEvent.ToolCall"]:
         assert_contains(gguf_engine, tool_api, "tool calling api")
+
+    tool_settings = read("app/src/main/java/com/dark/tool_neuron/data/ToolSettingsDataStore.kt")
+    for key in [
+        "TAVILY_API_KEY",
+        "EXA_API_KEY",
+        "SEARCH_PROVIDER",
+        "SEARCH_RESULT_COUNT",
+        "SEARCH_TOPIC_MODE",
+        "SEARCH_DETAIL_MODE",
+        "WORKSPACE_TREE_URI",
+    ]:
+        assert_contains(tool_settings, key, "tool settings datastore")
+
+    web_plugin = read("app/src/main/java/com/dark/tool_neuron/plugins/WebSearchPlugin.kt")
+    for needle in [
+        "TavilySearchService",
+        "ExaSearchService",
+        'toolCall.getInt("num_results"',
+        'toolCall.getInt("max_results"',
+        '.stringParam("query"',
+    ]:
+        assert_contains(web_plugin, needle, "web search provider integration")
+    if "numberParam(\"max_results\"" in web_plugin:
+        fail("web_search should not ask local models to provide result count")
+
+    tavily_service = read("app/src/main/java/com/dark/tool_neuron/plugins/services/TavilySearchService.kt")
+    assert_contains(tavily_service, "https://api.tavily.com/search", "tavily endpoint")
+    assert_contains(tavily_service, 'Authorization", "Bearer', "tavily auth")
+
+    exa_service = read("app/src/main/java/com/dark/tool_neuron/plugins/services/ExaSearchService.kt")
+    assert_contains(exa_service, "https://api.exa.ai/search", "exa endpoint")
+    assert_contains(exa_service, '"x-api-key"', "exa auth")
+
+    file_plugin = read("app/src/main/java/com/dark/tool_neuron/plugins/FileManagerPlugin.kt")
+    for needle in [
+        "DocumentFile.fromTreeUri",
+        "WORKSPACE_PATH_HINT",
+        "workspaceRoot",
+        "read_text_file",
+        "create_file",
+    ]:
+        assert_contains(file_plugin, needle, "authorized workspace file manager")
+
+    tool_section = read("app/src/main/java/com/dark/tool_neuron/ui/screen/settings/ToolSettingsSection.kt")
+    for needle in [
+        "OpenDocumentTree",
+        "Tavily API Key",
+        "Exa API Key",
+        "Search Engine",
+        "Workspace Folder",
+    ]:
+        assert_contains(tool_section, needle, "tool settings UI")
 
 
 if __name__ == "__main__":

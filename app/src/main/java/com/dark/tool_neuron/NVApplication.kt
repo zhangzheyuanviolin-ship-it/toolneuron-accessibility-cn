@@ -42,7 +42,7 @@ class NVApplication : Application() {
         AppContainer.init(applicationContext, this)
 
         // Register plugins
-        PluginManager.registerPlugin(WebSearchPlugin())
+        PluginManager.registerPlugin(WebSearchPlugin(applicationContext))
         PluginManager.registerPlugin(CalculatorPlugin())
         PluginManager.registerPlugin(DateTimePlugin())
         PluginManager.registerPlugin(DevUtilsPlugin())

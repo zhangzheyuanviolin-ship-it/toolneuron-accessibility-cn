@@ -1,6 +1,7 @@
 package com.dark.tool_neuron.plugins
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.documentfile.provider.DocumentFile
+import com.dark.tool_neuron.data.ToolSettingsDataStore
+import com.dark.tool_neuron.data.WorkspaceSettings
 import com.dark.tool_neuron.models.plugins.PluginInfo
 import com.dark.tool_neuron.plugins.api.SuperPlugin
 import com.dark.gguf_lib.toolcalling.ToolCall
@@ -38,7 +42,10 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
         const val TOOL_CREATE_FILE = "create_file"
 
         private const val MAX_FILE_LIST_ENTRIES = 100
+        private const val WORKSPACE_PATH_HINT = "Use workspace-relative paths only. Empty path means workspace root."
     }
+
+    private val toolSettings = ToolSettingsDataStore(context)
 
     /** App-private sandbox directory for all file operations. */
     private val sandboxDir: File by lazy {
@@ -68,53 +75,53 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
     override fun getPluginInfo(): PluginInfo {
         return PluginInfo(
             name = "File Manager",
-            description = "Create, browse, read, and search files in the app sandbox",
+            description = "Create, browse, read, and search files in the user-authorized workspace folder, with sandbox fallback",
             author = "ToolNeuron",
-            version = "1.1.0",
+            version = "1.2.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(
                     TOOL_CREATE_FILE,
-                    "Create or overwrite a file with the given content in the app sandbox"
+                    "Create, append, or overwrite a text file in the authorized workspace folder"
                 )
-                    .stringParam("path", "Relative path inside the sandbox, e.g. 'notes/todo.txt'", required = true)
+                    .stringParam("path", "Relative path, e.g. 'notes/todo.txt'. $WORKSPACE_PATH_HINT", required = true)
                     .stringParam("content", "Text content to write into the file", required = true)
                     .booleanParam("append", "Append to the file instead of overwriting (default: false)", required = false),
 
                 ToolDefinitionBuilder(
                     TOOL_LIST_FILES,
-                    "List files in a directory inside the app sandbox"
+                    "List files in a directory inside the authorized workspace folder"
                 )
-                    .stringParam("path", "Relative directory path (default: sandbox root)", required = false)
+                    .stringParam("path", "Relative directory path. $WORKSPACE_PATH_HINT", required = false)
                     .stringParam("filter", "Glob filter pattern, e.g. '*.pdf', '*.txt'", required = false)
                     .booleanParam("recursive", "Whether to list files recursively (default: false)", required = false),
 
                 ToolDefinitionBuilder(
                     TOOL_READ_TEXT_FILE,
-                    "Read the contents of a text file in the app sandbox"
+                    "Read the contents of a text file in the authorized workspace folder"
                 )
-                    .stringParam("path", "Path to the text file", required = true)
+                    .stringParam("path", "Relative path to the text file", required = true)
                     .numberParam("max_chars", "Maximum number of characters to read (default: 5000)", required = false),
 
                 ToolDefinitionBuilder(
                     TOOL_READ_PDF,
-                    "Extract text content from a PDF file in the app sandbox"
+                    "Extract limited PDF metadata/text from a file in the authorized workspace folder or sandbox"
                 )
-                    .stringParam("path", "Path to the PDF file", required = true)
+                    .stringParam("path", "Relative path to the PDF file", required = true)
                     .numberParam("max_pages", "Maximum number of pages to extract (default: 10)", required = false),
 
                 ToolDefinitionBuilder(
                     TOOL_READ_DOCUMENT,
-                    "Read a document file (txt, csv, log, xml, json, etc.) in the app sandbox"
+                    "Read a document file (txt, csv, log, xml, json, etc.) in the authorized workspace folder"
                 )
-                    .stringParam("path", "Path to the document file", required = true)
+                    .stringParam("path", "Relative path to the document file", required = true)
                     .numberParam("max_chars", "Maximum number of characters to read (default: 5000)", required = false),
 
                 ToolDefinitionBuilder(
                     TOOL_SEARCH_FILES,
-                    "Search for files by name pattern in the app sandbox"
+                    "Search for files by name pattern in the authorized workspace folder"
                 )
                     .stringParam("query", "Search query or filename pattern to match", required = true)
-                    .stringParam("path", "Relative directory to search in (default: sandbox root)", required = false)
+                    .stringParam("path", "Relative directory to search in. $WORKSPACE_PATH_HINT", required = false)
                     .stringParam("file_type", "Filter by file type: 'pdf', 'text', 'image'", required = false)
             )
         )
@@ -163,6 +170,10 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
         val path = toolCall.getString("path")
         val content = toolCall.getString("content")
         val append = toolCall.getBoolean("append", false)
+        val workspace = toolSettings.workspaceSnapshot()
+        if (workspace.treeUri.isNotBlank()) {
+            return@withContext createWorkspaceFile(path, content, append, workspace)
+        }
 
         val file = resolveSandboxPath(path)
 
@@ -195,6 +206,10 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
         val rawPath = toolCall.getString("path", "")
         val filter = toolCall.getString("filter", "")
         val recursive = toolCall.getBoolean("recursive", false)
+        val workspace = toolSettings.workspaceSnapshot()
+        if (workspace.treeUri.isNotBlank()) {
+            return@withContext listWorkspaceFiles(rawPath, filter, recursive, workspace)
+        }
 
         val directory = resolveSandboxPath(rawPath)
         val path = directory.absolutePath
@@ -251,6 +266,10 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
     private suspend fun executeReadTextFile(toolCall: ToolCall): Result<Any> = withContext(Dispatchers.IO) {
         val rawPath = toolCall.getString("path")
         val maxChars = toolCall.getInt("max_chars", 5000).coerceIn(1, 50000)
+        val workspace = toolSettings.workspaceSnapshot()
+        if (workspace.treeUri.isNotBlank()) {
+            return@withContext readWorkspaceTextFile(rawPath, maxChars, workspace, TOOL_READ_TEXT_FILE)
+        }
 
         val file = resolveSandboxPath(rawPath)
         val path = file.absolutePath
@@ -290,6 +309,10 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
     private suspend fun executeReadPdf(toolCall: ToolCall): Result<Any> = withContext(Dispatchers.IO) {
         val rawPath = toolCall.getString("path")
         val maxPages = toolCall.getInt("max_pages", 10).coerceIn(1, 100)
+        val workspace = toolSettings.workspaceSnapshot()
+        if (workspace.treeUri.isNotBlank()) {
+            return@withContext readWorkspacePdf(rawPath, maxPages, workspace)
+        }
 
         val file = resolveSandboxPath(rawPath)
         val path = file.absolutePath
@@ -390,6 +413,10 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
     private suspend fun executeReadDocument(toolCall: ToolCall): Result<Any> = withContext(Dispatchers.IO) {
         val rawPath = toolCall.getString("path")
         val maxChars = toolCall.getInt("max_chars", 5000).coerceIn(1, 50000)
+        val workspace = toolSettings.workspaceSnapshot()
+        if (workspace.treeUri.isNotBlank()) {
+            return@withContext readWorkspaceTextFile(rawPath, maxChars, workspace, TOOL_READ_DOCUMENT)
+        }
 
         val file = resolveSandboxPath(rawPath)
         val path = file.absolutePath
@@ -478,6 +505,10 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
         val query = toolCall.getString("query")
         val rawPath = toolCall.getString("path", "")
         val fileType = toolCall.getString("file_type", "").lowercase()
+        val workspace = toolSettings.workspaceSnapshot()
+        if (workspace.treeUri.isNotBlank()) {
+            return@withContext searchWorkspaceFiles(query, rawPath, fileType, workspace)
+        }
 
         val directory = resolveSandboxPath(rawPath)
         val path = directory.absolutePath
@@ -526,6 +557,255 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
                 path = path,
                 content = content,
                 fileCount = matchedFiles.size,
+                success = true
+            )
+        )
+    }
+
+    private fun workspaceRoot(settings: WorkspaceSettings): DocumentFile {
+        val root = DocumentFile.fromTreeUri(context, Uri.parse(settings.treeUri))
+            ?: throw FileNotFoundException("Workspace folder is not available")
+        require(root.exists() && root.isDirectory) {
+            "Workspace folder is unavailable. Please re-authorize it in settings."
+        }
+        return root
+    }
+
+    private fun workspaceSegments(path: String): List<String> {
+        val normalized = path.replace('\\', '/').trim().trim('/')
+        if (normalized.isBlank()) return emptyList()
+        val segments = normalized.split('/').filter { it.isNotBlank() }
+        require(segments.none { it == "." || it == ".." }) {
+            "Access denied: workspace paths cannot contain '.' or '..'"
+        }
+        return segments
+    }
+
+    private fun workspaceDisplayPath(path: String): String {
+        val joined = workspaceSegments(path).joinToString("/")
+        return if (joined.isBlank()) "workspace:/" else "workspace:/$joined"
+    }
+
+    private fun resolveWorkspaceDocument(root: DocumentFile, path: String): DocumentFile {
+        var current = root
+        for (segment in workspaceSegments(path)) {
+            current = current.findFile(segment)
+                ?: throw FileNotFoundException("File not found: ${workspaceDisplayPath(path)}")
+        }
+        return current
+    }
+
+    private fun ensureWorkspaceFile(root: DocumentFile, path: String): DocumentFile {
+        val segments = workspaceSegments(path)
+        require(segments.isNotEmpty()) { "Path must include a file name" }
+        var directory = root
+        for (segment in segments.dropLast(1)) {
+            val existing = directory.findFile(segment)
+            directory = when {
+                existing == null -> directory.createDirectory(segment)
+                    ?: throw IOException("Failed to create directory: $segment")
+                existing.isDirectory -> existing
+                else -> throw IllegalArgumentException("Path segment is not a directory: $segment")
+            }
+        }
+        val name = segments.last()
+        val existing = directory.findFile(name)
+        if (existing != null) {
+            require(existing.isFile) { "Path is not a file: ${workspaceDisplayPath(path)}" }
+            return existing
+        }
+        return directory.createFile("text/plain", name)
+            ?: throw IOException("Failed to create file: ${workspaceDisplayPath(path)}")
+    }
+
+    private fun createWorkspaceFile(
+        path: String,
+        content: String,
+        append: Boolean,
+        workspace: WorkspaceSettings
+    ): Result<Any> {
+        val root = workspaceRoot(workspace)
+        val file = ensureWorkspaceFile(root, path)
+        val mode = if (append) "wa" else "wt"
+        context.contentResolver.openOutputStream(file.uri, mode)?.use { output ->
+            output.write(content.toByteArray(Charsets.UTF_8))
+        } ?: throw IOException("Failed to open file for writing: ${workspaceDisplayPath(path)}")
+
+        val action = if (append) "appended to" else "created"
+        return Result.success(
+            FileManagerResponse(
+                tool = TOOL_CREATE_FILE,
+                path = workspaceDisplayPath(path),
+                content = "File $action successfully (${content.length} characters written)",
+                fileCount = 1,
+                success = true
+            )
+        )
+    }
+
+    private fun listWorkspaceFiles(
+        rawPath: String,
+        filter: String,
+        recursive: Boolean,
+        workspace: WorkspaceSettings
+    ): Result<Any> {
+        val root = workspaceRoot(workspace)
+        val directory = resolveWorkspaceDocument(root, rawPath)
+        require(directory.isDirectory) { "Path is not a directory: ${workspaceDisplayPath(rawPath)}" }
+        val filterRegex = filter.takeIf { it.isNotBlank() }?.let(::globToRegex)
+        val entries = mutableListOf<String>()
+
+        fun visit(dir: DocumentFile, prefix: String) {
+            if (entries.size >= MAX_FILE_LIST_ENTRIES) return
+            for (child in dir.listFiles()) {
+                if (entries.size >= MAX_FILE_LIST_ENTRIES) break
+                val childPath = if (prefix.isBlank()) child.name.orEmpty() else "$prefix/${child.name.orEmpty()}"
+                val isAccepted = filterRegex == null || child.isDirectory || filterRegex.matches(child.name.orEmpty())
+                if (isAccepted) {
+                    entries += childPath + if (child.isDirectory) "/" else ""
+                }
+                if (recursive && child.isDirectory) visit(child, childPath)
+            }
+        }
+
+        visit(directory, workspaceSegments(rawPath).joinToString("/"))
+        val displayPath = workspaceDisplayPath(rawPath)
+        val content = if (entries.isEmpty()) {
+            "No files found in $displayPath" + if (filter.isNotBlank()) " matching '$filter'" else ""
+        } else {
+            entries.joinToString("\n")
+        }
+
+        return Result.success(
+            FileManagerResponse(
+                tool = TOOL_LIST_FILES,
+                path = displayPath,
+                content = content,
+                fileCount = entries.size,
+                success = true
+            )
+        )
+    }
+
+    private fun readWorkspaceTextFile(
+        rawPath: String,
+        maxChars: Int,
+        workspace: WorkspaceSettings,
+        toolName: String
+    ): Result<Any> {
+        val root = workspaceRoot(workspace)
+        val file = resolveWorkspaceDocument(root, rawPath)
+        require(file.isFile) { "Path is not a file: ${workspaceDisplayPath(rawPath)}" }
+        val text = context.contentResolver.openInputStream(file.uri)?.bufferedReader(Charsets.UTF_8)?.use { reader ->
+            val fullText = reader.readText()
+            if (fullText.length > maxChars) {
+                fullText.take(maxChars) + "\n... [truncated at $maxChars characters, total: ${fullText.length}]"
+            } else {
+                fullText
+            }
+        } ?: throw IOException("Failed to open file for reading: ${workspaceDisplayPath(rawPath)}")
+
+        return Result.success(
+            FileManagerResponse(
+                tool = toolName,
+                path = workspaceDisplayPath(rawPath),
+                content = text,
+                fileCount = 1,
+                success = true
+            )
+        )
+    }
+
+    private fun readWorkspacePdf(
+        rawPath: String,
+        maxPages: Int,
+        workspace: WorkspaceSettings
+    ): Result<Any> {
+        val root = workspaceRoot(workspace)
+        val file = resolveWorkspaceDocument(root, rawPath)
+        require(file.isFile) { "Path is not a file: ${workspaceDisplayPath(rawPath)}" }
+
+        val content = context.contentResolver.openFileDescriptor(file.uri, "r")?.use { fd ->
+            val renderer = android.graphics.pdf.PdfRenderer(fd)
+            val pagesToRead = minOf(renderer.pageCount, maxPages)
+            buildString {
+                appendLine("PDF: ${file.name}")
+                appendLine("Total pages: ${renderer.pageCount} (reading first $pagesToRead)")
+                appendLine("---")
+                for (i in 0 until pagesToRead) {
+                    val page = renderer.openPage(i)
+                    appendLine("[Page ${i + 1}] (${page.width}x${page.height})")
+                    appendLine("(Page rendered - direct text extraction requires a PDF text library)")
+                    page.close()
+                }
+                appendLine("---")
+                appendLine("Note: PdfRenderer can render pages but cannot extract embedded text directly.")
+            }.also {
+                renderer.close()
+            }
+        } ?: throw IOException("Failed to open PDF: ${workspaceDisplayPath(rawPath)}")
+
+        return Result.success(
+            FileManagerResponse(
+                tool = TOOL_READ_PDF,
+                path = workspaceDisplayPath(rawPath),
+                content = content,
+                fileCount = 1,
+                success = true
+            )
+        )
+    }
+
+    private fun searchWorkspaceFiles(
+        query: String,
+        rawPath: String,
+        fileType: String,
+        workspace: WorkspaceSettings
+    ): Result<Any> {
+        val root = workspaceRoot(workspace)
+        val directory = resolveWorkspaceDocument(root, rawPath)
+        require(directory.isDirectory) { "Path is not a directory: ${workspaceDisplayPath(rawPath)}" }
+        val queryRegex = globToRegex(query)
+        val typeExtensions = when (fileType) {
+            "pdf" -> setOf("pdf")
+            "text" -> setOf("txt", "text", "md", "csv", "log", "json", "xml", "html", "yml", "yaml")
+            "image" -> setOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "svg")
+            else -> null
+        }
+        val matched = mutableListOf<String>()
+
+        fun visit(dir: DocumentFile, prefix: String) {
+            if (matched.size >= MAX_FILE_LIST_ENTRIES) return
+            for (child in dir.listFiles()) {
+                if (matched.size >= MAX_FILE_LIST_ENTRIES) break
+                val name = child.name.orEmpty()
+                val childPath = if (prefix.isBlank()) name else "$prefix/$name"
+                if (child.isDirectory) {
+                    visit(child, childPath)
+                } else {
+                    val extension = name.substringAfterLast('.', "").lowercase()
+                    val nameMatches = queryRegex.matches(name) || name.contains(query, ignoreCase = true)
+                    val typeMatches = typeExtensions == null || extension in typeExtensions
+                    if (nameMatches && typeMatches) matched += "workspace:/$childPath"
+                }
+            }
+        }
+
+        visit(directory, workspaceSegments(rawPath).joinToString("/"))
+        val displayPath = workspaceDisplayPath(rawPath)
+        val content = if (matched.isEmpty()) {
+            "No files found matching '$query' in $displayPath" +
+                    if (fileType.isNotBlank()) " (type: $fileType)" else ""
+        } else {
+            matched.joinToString("\n")
+        }
+
+        return Result.success(
+            FileManagerResponse(
+                tool = TOOL_SEARCH_FILES,
+                path = displayPath,
+                content = content,
+                fileCount = matched.size,
                 success = true
             )
         )

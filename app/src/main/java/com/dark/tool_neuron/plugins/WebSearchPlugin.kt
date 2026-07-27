@@ -1,5 +1,6 @@
 package com.dark.tool_neuron.plugins
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dark.tool_neuron.models.plugins.PluginInfo
+import com.dark.tool_neuron.data.SearchProvider
+import com.dark.tool_neuron.data.ToolSettingsDataStore
 import com.dark.tool_neuron.plugins.api.SuperPlugin
+import com.dark.tool_neuron.plugins.services.ExaSearchService
+import com.dark.tool_neuron.plugins.services.TavilySearchService
 import com.dark.tool_neuron.plugins.services.WebScrapingSearchService
 import com.dark.tool_neuron.plugins.services.WebScrapingService
 import com.dark.gguf_lib.toolcalling.ToolCall
@@ -33,6 +38,8 @@ import org.json.JSONObject
 
 data class WebSearchPipelineResult(
     val query: String,
+    val provider: String = "google",
+    val answer: String = "",
     val results: List<ScrapedSearchResult>,
     val totalResults: Int,
     val searchTimeMs: Long
@@ -47,10 +54,13 @@ data class ScrapedSearchResult(
 
 // ── Plugin ──
 
-class WebSearchPlugin : SuperPlugin {
+class WebSearchPlugin(private val context: Context) : SuperPlugin {
 
     private val searchService = WebScrapingSearchService()
     private val scrapingService = WebScrapingService()
+    private val tavilySearchService = TavilySearchService()
+    private val exaSearchService = ExaSearchService()
+    private val toolSettings = ToolSettingsDataStore(context)
 
     companion object {
         private const val TAG = "WebSearchPlugin"
@@ -62,16 +72,15 @@ class WebSearchPlugin : SuperPlugin {
     override fun getPluginInfo(): PluginInfo {
         return PluginInfo(
             name = "Web Search",
-            description = "Search the web with automatic content scraping from top results",
+            description = "Search the web. The user configures engine and result detail in tool settings.",
             author = "ToolNeuron",
-            version = "2.0.0",
+            version = "2.1.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(
                     TOOL_WEB_SEARCH,
-                    "Search the web and automatically scrape content from top results. Returns search results with scraped page content."
+                    "Search the web. Pass only the query; engine, result count, topic, and detail are configured by the user."
                 )
-                    .stringParam("query", "The search query", required = true)
-                    .numberParam("max_results", "Number of results to scrape (1-5, default 3)", required = false)
+                    .stringParam("query", "The search query. Keep it short and specific.", required = true)
             )
         )
     }
@@ -81,6 +90,8 @@ class WebSearchPlugin : SuperPlugin {
     override fun serializeResult(data: Any): String = when (data) {
         is WebSearchPipelineResult -> JSONObject().apply {
             put("query", data.query)
+            put("provider", data.provider)
+            put("answer", data.answer)
             put("totalResults", data.totalResults)
             put("searchTimeMs", data.searchTimeMs)
             val arr = JSONArray()
@@ -112,10 +123,22 @@ class WebSearchPlugin : SuperPlugin {
 
     private suspend fun executePipelinedSearch(toolCall: ToolCall): Result<Any> {
         val query = toolCall.getString("query")
-        val maxResults = toolCall.getInt("max_results", 3).coerceIn(1, 5)
+        val configuredSettings = toolSettings.searchSettingsSnapshot()
+        val modelRequestedResults = toolCall.getInt("num_results", toolCall.getInt("max_results", configuredSettings.resultCount))
+        val maxResults = minOf(
+            configuredSettings.resultCount,
+            modelRequestedResults.coerceIn(1, 8)
+        ).coerceIn(1, 8)
+        val settings = configuredSettings.copy(resultCount = maxResults)
         val startTime = System.currentTimeMillis()
 
-        Log.d(TAG, "Pipeline search: '$query' (max $maxResults results)")
+        Log.d(TAG, "Pipeline search: '$query' via ${settings.provider.value} (max $maxResults results)")
+
+        when (settings.provider) {
+            SearchProvider.TAVILY -> return tavilySearchService.search(query, settings)
+            SearchProvider.EXA -> return exaSearchService.search(query, settings)
+            SearchProvider.GOOGLE -> Unit
+        }
 
         // Step 1: Search
         val searchResult = searchService.search(query, maxResults, safeSearch = true)
@@ -166,6 +189,7 @@ class WebSearchPlugin : SuperPlugin {
 
         return Result.success(WebSearchPipelineResult(
             query = query,
+            provider = "google",
             results = scrapedResults,
             totalResults = scrapedResults.size,
             searchTimeMs = elapsed
@@ -196,6 +220,8 @@ class WebSearchPlugin : SuperPlugin {
     @Composable
     private fun PipelineResultUI(data: JSONObject) {
         val query = data.optString("query", "")
+        val provider = data.optString("provider", "google")
+        val answer = data.optString("answer", "")
         val resultsArray = data.optJSONArray("results")
         val totalResults = data.optInt("totalResults", 0)
         val searchTimeMs = data.optLong("searchTimeMs", 0)
@@ -215,10 +241,26 @@ class WebSearchPlugin : SuperPlugin {
             )
 
             Text(
-                text = "$totalResults results · ${searchTimeMs}ms",
+                text = "${provider.uppercase()} · $totalResults results · ${searchTimeMs}ms",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            if (answer.isNotBlank()) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                ) {
+                    Text(
+                        text = answer,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(8.dp),
+                        maxLines = 6,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
             // ── Results ──
             if (resultsArray != null && resultsArray.length() > 0) {
