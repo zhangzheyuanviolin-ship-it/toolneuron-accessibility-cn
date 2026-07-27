@@ -9,7 +9,7 @@
         android:minSdkVersion="34" />
 
     <permission
-        android:name="com.dark.tool_neuron.safe30b.permission.BIND_LLM_SERVICE"
+        android:name="${applicationId}.permission.BIND_LLM_SERVICE"
         android:protectionLevel="signature" />
 
     <application
@@ -92,7 +92,7 @@
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="dataSync"
-            android:permission="com.dark.tool_neuron.safe30b.permission.BIND_LLM_SERVICE"
+            android:permission="${applicationId}.permission.BIND_LLM_SERVICE"
             android:stopWithTask="false"
             tools:targetApi="29" />
 

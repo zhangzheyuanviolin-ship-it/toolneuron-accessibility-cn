@@ -61,9 +61,9 @@ def main() -> None:
             fail(f"protected inference file changed: {rel_path}")
 
     gradle = read("app/build.gradle.kts")
-    assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.safe30b"', "stable package")
-    assert_contains(gradle, 'versionCode = 32', "version code")
-    assert_contains(gradle, 'versionName = "2.2.0-tool-workspace"', "version name")
+    assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
+    assert_contains(gradle, 'versionCode = 33', "version code")
+    assert_contains(gradle, 'versionName = "2.3.0-parallel-30b-safe"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -73,8 +73,10 @@ def main() -> None:
     ]:
         assert_contains(gradle, env_name, "release signing env")
 
-    assert_contains(read("app/src/main/res/values/strings.xml"), "<string name=\"app_name\">Intelligence Lab</string>", "english app name")
-    assert_contains(read("app/src/main/res/values-zh-rCN/strings.xml"), "<string name=\"app_name\">Intelligence Lab智能实验室</string>", "chinese app name")
+    assert_contains(read("app/src/main/AndroidManifest.xml"), 'android:name="${applicationId}.permission.BIND_LLM_SERVICE"', "application id scoped service permission")
+    assert_contains(read("app/src/main/AndroidManifest.xml"), 'android:permission="${applicationId}.permission.BIND_LLM_SERVICE"', "application id scoped service binding")
+    assert_contains(read("app/src/main/res/values/strings.xml"), "<string name=\"app_name\">Intelligence Lab Test</string>", "english app name")
+    assert_contains(read("app/src/main/res/values-zh-rCN/strings.xml"), "<string name=\"app_name\">Intelligence Lab智能实验室 测试版</string>", "chinese app name")
 
     workflow = read(".github/workflows/build-apk.yml")
     assert_contains(workflow, "INTELLIGENCE_LAB_KEYSTORE_BASE64", "workflow signing secret")
@@ -104,6 +106,13 @@ def main() -> None:
         assert_contains(gguf_engine, vlm_api, "vlm api")
     for tool_api in ["enableToolCallingDirect", "setToolsJson", "GenerationEvent.ToolCall"]:
         assert_contains(gguf_engine, tool_api, "tool calling api")
+
+    plugin_manager = read("app/src/main/java/com/dark/tool_neuron/plugins/PluginManager.kt")
+    for needle in [
+        "_toolsSyncedWithLoadedModel",
+        "No enabled tools; skipping native tool clear during model load",
+    ]:
+        assert_contains(plugin_manager, needle, "30b-safe lazy tool sync")
 
     tool_settings = read("app/src/main/java/com/dark/tool_neuron/data/ToolSettingsDataStore.kt")
     for key in [

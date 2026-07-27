@@ -24,11 +24,11 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.dark.tool_neuron.safe30b"
+        applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 32
-        versionName = "2.2.0-tool-workspace"
+        versionCode = 33
+        versionName = "2.3.0-parallel-30b-safe"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }

@@ -46,6 +46,7 @@ object PluginManager {
 
     // Cached enabled tool definitions and JSON, invalidated on enable/disable
     @Volatile private var _cachedEnabledToolDefs: List<ToolDefinitionBuilder>? = null
+    @Volatile private var _toolsSyncedWithLoadedModel: Boolean = false
 
     // Set of enabled plugin names
     private val _enabledPluginNames = MutableStateFlow<Set<String>>(emptySet())
@@ -94,6 +95,7 @@ object PluginManager {
      */
     fun setToolCallingModelLoaded(nativeSupports: Boolean) {
         _isToolCallingModelLoaded.value = nativeSupports || _toolCallingBypassEnabled.value
+        _toolsSyncedWithLoadedModel = false
     }
 
     /**
@@ -285,8 +287,13 @@ object PluginManager {
         val toolDefinitions = getEnabledToolDefinitions()
 
         if (toolDefinitions.isEmpty()) {
-            LlmModelWorker.clearToolsGguf()
-            Log.d(TAG, "Cleared all tools from LLM")
+            if (_toolsSyncedWithLoadedModel) {
+                LlmModelWorker.clearToolsGguf()
+                _toolsSyncedWithLoadedModel = false
+                Log.d(TAG, "Cleared all tools from LLM")
+            } else {
+                Log.d(TAG, "No enabled tools; skipping native tool clear during model load")
+            }
         } else {
             val mode = _grammarMode.value
             val config = ToolCallingConfig(
@@ -298,6 +305,7 @@ object PluginManager {
             val success = LlmModelWorker.enableToolCallingDirect(toolDefinitions, config)
 
             if (success) {
+                _toolsSyncedWithLoadedModel = true
                 // With STRICT grammar, any model can do tool calling — mark as loaded
                 if (mode == GrammarMode.STRICT && !_isToolCallingModelLoaded.value) {
                     _isToolCallingModelLoaded.value = true
@@ -444,4 +452,3 @@ data class MultiTurnToolResult(
     val executionTimeMs: Long,
     val rawData: Any? = null
 )
-
