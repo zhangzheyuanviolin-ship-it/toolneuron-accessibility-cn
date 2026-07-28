@@ -33,6 +33,13 @@ internal fun MetricsDisplay(metrics: DecodingMetrics, memoryMetrics: MemoryMetri
     val formattedTime = remember(metrics.totalTimeMs) {
         if (metrics.totalTimeMs > 0f) "%.1f".format(metrics.totalTimeMs / 1000f) else null
     }
+    val formattedPrefillSpeed = remember(metrics.tokensEvaluated, metrics.timeToFirstTokenMs) {
+        if (metrics.tokensEvaluated > 0 && metrics.timeToFirstTokenMs > 0f) {
+            "%.1f".format(metrics.tokensEvaluated / (metrics.timeToFirstTokenMs / 1000f))
+        } else {
+            null
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -133,6 +140,14 @@ internal fun MetricsDisplay(metrics: DecodingMetrics, memoryMetrics: MemoryMetri
                         label = "Speed",
                         value = "$formattedSpeed t/s"
                     )
+
+                    formattedPrefillSpeed?.let { prefillSpeed ->
+                        MetricRow(
+                            icon = TnIcons.Prompt,
+                            label = "Prefill Speed",
+                            value = "$prefillSpeed t/s"
+                        )
+                    }
 
                     if (metrics.timeToFirstTokenMs > 0f) {
                         MetricRow(

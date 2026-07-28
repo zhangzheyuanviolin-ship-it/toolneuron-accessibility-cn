@@ -740,6 +740,7 @@ class ChatViewModel @Inject constructor(
         val truncatedPlan = plan.take(200)
 
         for (round in 1..maxRounds) {
+            var shouldStopAfterSuccessfulSearch = false
             // Generate next tool call
             PluginManager.restoreGrammar()
             // Build proper multi-turn messages: system + user + tool call/result pairs
@@ -835,6 +836,7 @@ class ChatViewModel @Inject constructor(
 
                 val toolCall = ToolCall(name = normalizedName, arguments = argsObj)
                 val result = PluginManager.executeToolForMultiTurn(toolCall)
+                val modelVisibleResult = compactToolResultForModel(normalizedName, result.resultJson)
 
                 val isSuccess = !result.isError
                 if (isSuccess) {
@@ -861,7 +863,7 @@ class ChatViewModel @Inject constructor(
                     toolName = normalizedName,
                     pluginName = result.pluginName,
                     args = rawArgs.take(2000),
-                    result = result.resultJson.take(2000),
+                    result = modelVisibleResult,
                     executionTimeMs = result.executionTimeMs,
                     success = isSuccess
                 ))
@@ -904,13 +906,64 @@ class ChatViewModel @Inject constructor(
                     }
                     _messages.add(pluginMessage)
                 }
+
+                if (isSuccess && normalizedName.equals(WEB_SEARCH_TOOL_NAME, ignoreCase = true)) {
+                    shouldStopAfterSuccessfulSearch = true
+                    Log.d(TAG, "Search tool succeeded; skipping extra tool-decision rounds before summary")
+                    break
+                }
             }
 
-            if (generatedDuplicate || consecutiveFailures >= 2) break
+            if (generatedDuplicate || consecutiveFailures >= 2 || shouldStopAfterSuccessfulSearch) break
         }
 
         return steps
     }
+
+    private fun compactToolResultForModel(toolName: String, resultJson: String): String {
+        return if (toolName.equals(WEB_SEARCH_TOOL_NAME, ignoreCase = true)) {
+            compactWebSearchResultForModel(resultJson)
+        } else {
+            resultJson.take(MAX_TOOL_RESULT_CHARS_FOR_MODEL)
+        }
+    }
+
+    private fun compactWebSearchResultForModel(resultJson: String): String {
+        return try {
+            val json = JSONObject(resultJson)
+            val results = json.optJSONArray("results") ?: JSONArray()
+            val shownResults = minOf(results.length(), MAX_SEARCH_RESULTS_FOR_MODEL)
+            buildString {
+                appendLine("web_search succeeded")
+                appendLine("query: ${json.optString("query", "")}")
+                appendLine("provider: ${json.optString("provider", "")}")
+                val answer = compactWhitespace(json.optString("answer", ""))
+                if (answer.isNotBlank()) appendLine("answer: ${answer.take(400)}")
+                appendLine("results:")
+                for (i in 0 until shownResults) {
+                    val item = results.optJSONObject(i) ?: continue
+                    val title = compactWhitespace(item.optString("title", "")).take(140)
+                    val url = item.optString("url", "").take(240)
+                    val snippet = compactWhitespace(
+                        item.optString("snippet", "").ifBlank { item.optString("content", "") }
+                    ).take(260)
+                    appendLine("${i + 1}. $title")
+                    if (url.isNotBlank()) appendLine("   url: $url")
+                    if (snippet.isNotBlank()) appendLine("   snippet: $snippet")
+                }
+                val total = json.optInt("totalResults", shownResults)
+                if (total > shownResults) {
+                    appendLine("context_note: ${total - shownResults} additional results were omitted for local model context safety.")
+                }
+            }.take(MAX_SEARCH_RESULT_CHARS_FOR_MODEL)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to compact web search result for model: ${e.message}")
+            resultJson.take(MAX_SEARCH_RESULT_CHARS_FOR_MODEL)
+        }
+    }
+
+    private fun compactWhitespace(value: String): String =
+        value.replace(Regex("\\s+"), " ").trim()
 
     /** Phase 3: Generate a natural language summary from all tool results. */
     private suspend fun generateSummary(
@@ -2173,6 +2226,10 @@ class ChatViewModel @Inject constructor(
         private const val TAG = "ChatViewModel"
         private const val PLAN_MAX_TOKENS = 150
         private const val SUMMARY_MAX_TOKENS = 512
+        private const val WEB_SEARCH_TOOL_NAME = "web_search"
+        private const val MAX_TOOL_RESULT_CHARS_FOR_MODEL = 1600
+        private const val MAX_SEARCH_RESULT_CHARS_FOR_MODEL = 1400
+        private const val MAX_SEARCH_RESULTS_FOR_MODEL = 3
         private const val STREAMING_THROTTLE_MS = 100L
         private const val REPETITION_CHECK_INTERVAL = 200
         private const val REPETITION_MIN_PATTERN_LEN = 30

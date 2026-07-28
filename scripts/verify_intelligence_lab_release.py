@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 33', "version code")
-    assert_contains(gradle, 'versionName = "2.3.0-parallel-30b-safe"', "version name")
+    assert_contains(gradle, 'versionCode = 34', "version code")
+    assert_contains(gradle, 'versionName = "2.4.0-search-prefill"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -113,6 +113,23 @@ def main() -> None:
         "No enabled tools; skipping native tool clear during model load",
     ]:
         assert_contains(plugin_manager, needle, "30b-safe lazy tool sync")
+
+    chat_vm = read("app/src/main/java/com/dark/tool_neuron/viewmodel/ChatViewModel.kt")
+    for needle in [
+        "compactToolResultForModel",
+        "compactWebSearchResultForModel",
+        "MAX_SEARCH_RESULT_CHARS_FOR_MODEL = 1400",
+        "Search tool succeeded; skipping extra tool-decision rounds before summary",
+    ]:
+        assert_contains(chat_vm, needle, "compact web search tool result")
+
+    metrics_ui = read("app/src/main/java/com/dark/tool_neuron/ui/screen/home/MessageMetrics.kt")
+    for needle in [
+        "formattedPrefillSpeed",
+        "Prefill Speed",
+        "metrics.tokensEvaluated / (metrics.timeToFirstTokenMs / 1000f)",
+    ]:
+        assert_contains(metrics_ui, needle, "prefill speed metric")
 
     tool_settings = read("app/src/main/java/com/dark/tool_neuron/data/ToolSettingsDataStore.kt")
     for key in [
