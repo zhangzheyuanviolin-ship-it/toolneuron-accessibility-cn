@@ -79,6 +79,15 @@ text = text.replace("    p.use_mmap        = true;", "    p.load_mode       = LL
 rag.write_text(text)
 PY
 
+python3 - <<'PY' "${AI_REPO}/gguf_lib/src/main/cpp/CMakeLists.txt"
+from pathlib import Path
+import sys
+path = Path(sys.argv[1])
+text = path.read_text()
+text = text.replace("    common\n", "    llama-common\n")
+path.write_text(text)
+PY
+
 mkdir -p "${AI_REPO}/gguf_lib/src/main/assets"
 cat > "${AI_REPO}/gguf_lib/src/main/assets/intelligence_lab_engine_provenance.txt" <<EOF
 ggml_org_llama_cpp=${UPSTREAM_SHA}
