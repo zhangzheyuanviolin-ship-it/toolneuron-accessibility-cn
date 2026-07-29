@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -675,14 +676,15 @@ internal fun ErrorContent(state: AppState.Error) {
                 modifier = Modifier.size(12.dp),
                 tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
             )
-            Text(
-                text = state.message,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.weight(1f),
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
+            SelectionContainer(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = state.message,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }

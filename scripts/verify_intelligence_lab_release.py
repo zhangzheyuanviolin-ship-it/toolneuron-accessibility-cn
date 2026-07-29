@@ -12,7 +12,7 @@ PROTECTED_HASHES = {
     "app/src/main/java/com/dark/tool_neuron/worker/LlmModelWorker.kt": "65800efc5b21272cd753d668ca69ef9d9cf152354871b29aee4168fbb8218792",
     "app/src/main/java/com/dark/tool_neuron/global/ThirtyBMoESafeDefaults.kt": "f45625d3fe0d8dcd89c2eac6be1a143cf958e58db54e33bae496571b3ee56016",
     "app/src/main/java/com/dark/tool_neuron/activity/ModelLoadingActivity.kt": "df52f04173882a1182185d69c5b5e00f4b4bb47d48254c7ba6576079a2d9de65",
-    "app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt": "2cb895842bad27b48fe17d51cc1dc67c8e7377deb5d41089950e871eeb3d04c3",
+    "app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt": "68578a40cfa80c51b0e30a0c276b4d4acfb07aa3ab69112ee83e82eb64e46a74",
     "app/src/main/java/com/dark/tool_neuron/viewmodel/SettingsViewModel.kt": "68dc5f8ed6a467655dc2118b344d904f2817b796c2119dba41b94a8ebb114386",
 }
 
@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 35', "version code")
-    assert_contains(gradle, 'versionName = "2.5.0-vlm-store"', "version name")
+    assert_contains(gradle, 'versionCode = 36', "version code")
+    assert_contains(gradle, 'versionName = "2.6.0-load-diagnostics"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -205,6 +205,23 @@ def main() -> None:
         "loadVlmProjector",
     ]:
         assert_contains(bottom_bar, needle, "image attachment entry")
+
+    load_diagnostics = read("app/src/main/java/com/dark/tool_neuron/utils/GgufLoadDiagnostics.kt")
+    for needle in [
+        "DEFINITE_SIZE_MISMATCH",
+        "DEFINITE_TRUNCATED_GGUF",
+        "architecture=qwen35moe",
+        "minRequiredByTensorTable",
+        "knownExpectedSize",
+        "Current loading params",
+    ]:
+        assert_contains(load_diagnostics, needle, "gguf load diagnostics")
+
+    llm_vm = read("app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt")
+    assert_contains(llm_vm, "GgufLoadDiagnostics.buildFailureReport", "gguf failure diagnostics wiring")
+
+    status_states = read("app/src/main/java/com/dark/tool_neuron/ui/screen/home/StatusStates.kt")
+    assert_contains(status_states, "SelectionContainer", "copyable error diagnostics")
 
 
 if __name__ == "__main__":

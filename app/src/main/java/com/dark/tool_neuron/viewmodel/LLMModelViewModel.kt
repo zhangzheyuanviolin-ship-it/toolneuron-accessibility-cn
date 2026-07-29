@@ -14,6 +14,7 @@ import com.dark.tool_neuron.models.enums.ProviderType
 import com.dark.tool_neuron.models.table_schema.Model
 import com.dark.tool_neuron.models.table_schema.ModelConfig
 import com.dark.tool_neuron.state.AppStateManager
+import com.dark.tool_neuron.utils.GgufLoadDiagnostics
 import com.dark.tool_neuron.worker.DiffusionConfig
 import com.dark.tool_neuron.worker.DiffusionInferenceParams
 import com.dark.tool_neuron.worker.LlmModelWorker
@@ -176,18 +177,34 @@ class LLMModelViewModel @Inject constructor(
     }
 
     private suspend fun loadGgufModel(model: Model, config: ModelConfig) {
-        val success = if (model.pathType == PathType.CONTENT_URI) {
-            // Use FD-based loading for content:// URIs (SAF)
-            val uri = model.modelPath.toUri()
-            LlmModelWorker.loadGgufModelFromUri(
-                context = getApplication(),
-                uri = uri,
-                modelName = model.modelName,
-                modelConfig = config
+        val startedAt = System.currentTimeMillis()
+        val loadVia = if (model.pathType == PathType.CONTENT_URI) "content-uri/fd" else "direct-file-path"
+        val success = try {
+            if (model.pathType == PathType.CONTENT_URI) {
+                // Use FD-based loading for content:// URIs (SAF)
+                val uri = model.modelPath.toUri()
+                LlmModelWorker.loadGgufModelFromUri(
+                    context = getApplication(),
+                    uri = uri,
+                    modelName = model.modelName,
+                    modelConfig = config
+                )
+            } else {
+                // Use path-based loading for regular file paths
+                LlmModelWorker.loadGgufModel(model, config)
+            }
+        } catch (e: Exception) {
+            AppStateManager.setError(
+                GgufLoadDiagnostics.buildFailureReport(
+                    context = getApplication(),
+                    model = model,
+                    config = config,
+                    loadVia = loadVia,
+                    throwable = e,
+                    elapsedMs = System.currentTimeMillis() - startedAt
+                )
             )
-        } else {
-            // Use path-based loading for regular file paths
-            LlmModelWorker.loadGgufModel(model, config)
+            return
         }
 
         if (success) {
@@ -220,7 +237,15 @@ class LLMModelViewModel @Inject constructor(
             com.dark.tool_neuron.plugins.PluginManager.setToolCallingModelLoaded(nativeSupports)
             com.dark.tool_neuron.plugins.PluginManager.syncToolsWithLLM()
         } else {
-            AppStateManager.setError("Failed to load GGUF model")
+            AppStateManager.setError(
+                GgufLoadDiagnostics.buildFailureReport(
+                    context = getApplication(),
+                    model = model,
+                    config = config,
+                    loadVia = loadVia,
+                    elapsedMs = System.currentTimeMillis() - startedAt
+                )
+            )
         }
     }
 
