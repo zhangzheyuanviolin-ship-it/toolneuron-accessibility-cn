@@ -348,7 +348,7 @@ if "fun setToolsJson(toolsJson: String): Boolean" not in text:
 
 '''
     marker = "    companion object {"
-    idx = text.find(marker)
+    idx = text.rfind(marker)
     if idx < 0:
         raise SystemExit("Unable to find GGMLEngine companion marker")
     text = text[:idx] + compat + text[idx:]
