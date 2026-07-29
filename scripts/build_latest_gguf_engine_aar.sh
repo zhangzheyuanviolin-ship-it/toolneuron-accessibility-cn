@@ -43,6 +43,7 @@ import sys
 path = Path(sys.argv[1])
 text = path.read_text()
 text = re.sub(r'version = "3\.[0-9.]+"', 'version = "3.31.6"', text)
+text = text.replace("        release {\n            isMinifyEnabled = true", "        release {\n            isMinifyEnabled = false")
 path.write_text(text)
 PY
 
@@ -387,6 +388,31 @@ chmod +x "${AI_REPO}/gradlew"
 AAR_SRC="$(find "${AI_REPO}/gguf_lib/build/outputs/aar" -name '*release.aar' | head -1)"
 test -n "${AAR_SRC}"
 test -s "${AAR_SRC}"
+python3 - <<'PY' "${AAR_SRC}"
+from pathlib import Path
+import io
+import sys
+import zipfile
+
+aar = Path(sys.argv[1])
+with zipfile.ZipFile(aar) as outer:
+    classes = outer.read("classes.jar")
+with zipfile.ZipFile(io.BytesIO(classes)) as jar:
+    names = set(jar.namelist())
+required = [
+    "com/dark/gguf_lib/GGMLEngine.class",
+    "com/dark/gguf_lib/ErrorTracker.class",
+    "com/dark/gguf_lib/toolcalling/ToolCall.class",
+    "com/dark/gguf_lib/toolcalling/ToolCallingConfig.class",
+    "com/dark/gguf_lib/toolcalling/ToolDefinitionBuilder.class",
+    "com/dark/gguf_lib/models/GenerationEvent$ToolCall.class",
+]
+missing = [name for name in required if name not in names]
+if missing:
+    print("AAR missing required compatibility classes:", ", ".join(missing), file=sys.stderr)
+    raise SystemExit(1)
+print("Verified latest GGUF AAR compatibility classes")
+PY
 cp "${AAR_SRC}" "${ROOT_DIR}/libs/gguf_lib-release.aar"
 
 mkdir -p "${ROOT_DIR}/out"
