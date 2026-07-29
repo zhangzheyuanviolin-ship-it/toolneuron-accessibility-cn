@@ -46,6 +46,39 @@ text = re.sub(r'version = "3\.[0-9.]+"', 'version = "3.31.6"', text)
 path.write_text(text)
 PY
 
+python3 - <<'PY' "${AI_REPO}/gguf_lib/src/main/cpp/gguf_lib.cpp" "${ANDROID_LLAMA}/engine/rag-engine.cpp"
+from pathlib import Path
+import sys
+
+gguf = Path(sys.argv[1])
+text = gguf.read_text()
+text = text.replace(
+"""    auto mparams = llama_model_default_params();
+    mparams.use_mmap  = (bool)useMmap;
+    mparams.use_mlock = (bool)useMlock;
+    g_state.use_mmap  = mparams.use_mmap;
+    g_state.use_mlock = mparams.use_mlock;""",
+"""    auto mparams = llama_model_default_params();
+    if (useMmap && useMlock) {
+        mparams.load_mode = LLAMA_LOAD_MODE_MMAP_MLOCK;
+    } else if (useMlock) {
+        mparams.load_mode = LLAMA_LOAD_MODE_MLOCK;
+    } else if (useMmap) {
+        mparams.load_mode = LLAMA_LOAD_MODE_MMAP;
+    } else {
+        mparams.load_mode = LLAMA_LOAD_MODE_NONE;
+    }
+    g_state.use_mmap  = (bool)useMmap;
+    g_state.use_mlock = (bool)useMlock;""")
+text = text.replace("    mparams.use_mmap = true;", "    mparams.load_mode = LLAMA_LOAD_MODE_MMAP;")
+gguf.write_text(text)
+
+rag = Path(sys.argv[2])
+text = rag.read_text()
+text = text.replace("    p.use_mmap        = true;", "    p.load_mode       = LLAMA_LOAD_MODE_MMAP;")
+rag.write_text(text)
+PY
+
 mkdir -p "${AI_REPO}/gguf_lib/src/main/assets"
 cat > "${AI_REPO}/gguf_lib/src/main/assets/intelligence_lab_engine_provenance.txt" <<EOF
 ggml_org_llama_cpp=${UPSTREAM_SHA}
