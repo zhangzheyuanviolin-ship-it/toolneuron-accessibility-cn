@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 34
-        versionName = "2.4.0-search-prefill"
+        versionCode = 35
+        versionName = "2.5.0-vlm-store"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }

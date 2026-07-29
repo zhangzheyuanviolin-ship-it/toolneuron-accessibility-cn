@@ -2,6 +2,9 @@ package com.dark.tool_neuron.ui.screen.home
 import com.dark.tool_neuron.i18n.tn
 
 import android.content.Intent
+import android.graphics.Bitmap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
@@ -43,8 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dark.tool_neuron.activity.RagActivity
+import com.dark.tool_neuron.global.AppPaths
 import com.dark.tool_neuron.global.Standards
 import com.dark.tool_neuron.models.ModelType
+import com.dark.tool_neuron.state.AppStateManager
 import com.dark.tool_neuron.ui.components.ActionButton
 import com.dark.tool_neuron.ui.components.ActionProgressButton
 import com.dark.tool_neuron.ui.components.ActionToggleButton
@@ -60,6 +67,9 @@ import com.dark.tool_neuron.viewmodel.LLMModelViewModel
 import com.dark.tool_neuron.viewmodel.MemoryViewModel
 import com.dark.tool_neuron.viewmodel.PluginViewModel
 import com.dark.tool_neuron.viewmodel.RagViewModel
+import com.dark.tool_neuron.worker.LlmModelWorker
+import java.io.ByteArrayOutputStream
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 // ── BottomBar ───────────────────────────────────────────────────────────────────
@@ -82,6 +92,7 @@ internal fun BottomBar(
     val config by chatViewModel.chatConfigState.collectAsStateWithLifecycle()
     val isTextModelLoaded by chatViewModel.isTextModelLoaded.collectAsStateWithLifecycle()
     val isImageModelLoaded by chatViewModel.isImageModelLoaded.collectAsStateWithLifecycle()
+    val isVlmProjectorLoaded by LlmModelWorker.isVlmLoaded.collectAsStateWithLifecycle()
 
     // RAG State
     val loadedRags by ragViewModel.loadedRags.collectAsStateWithLifecycle()
@@ -113,6 +124,29 @@ internal fun BottomBar(
 
     // More Options overlay state
     var showMoreOptions by remember { mutableStateOf(false) }
+    var showAttachmentMenu by remember { mutableStateOf(false) }
+    var selectedImageData by remember { mutableStateOf<List<ByteArray>>(emptyList()) }
+    var vlmProjectors by remember { mutableStateOf(emptyList<java.io.File>()) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                selectedImageData = listOf(input.readBytes())
+            }
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            val output = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 88, output)
+            selectedImageData = listOf(output.toByteArray())
+        }
+    }
 
     // Track if any model is loaded
     val isModelLoaded = currentModelID.isNotEmpty()
@@ -267,6 +301,15 @@ internal fun BottomBar(
                     onWebSearchChipClick = { pluginViewModel.toggleWebSearch(false) }
                 )
 
+                AnimatedVisibility(visible = selectedImageData.isNotEmpty()) {
+                    Text(
+                        text = tn("${selectedImageData.size} image attached"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = Standards.SpacingMd)
+                    )
+                }
+
                 // More Options overlay (above action row, like model list)
                 MoreOptionsOverlay(
                     show = showMoreOptions,
@@ -310,7 +353,78 @@ internal fun BottomBar(
                         modifier = Modifier.padding(start = Standards.SpacingMd)
                     )
 
-                    // 2. More Options
+                    // 2. Image attachment and VLM projector controls
+                    if (isTextModelLoaded) {
+                        Box {
+                            ActionButton(
+                                onClickListener = {
+                                    vlmProjectors = AppPaths.vlmProjectors(context)
+                                        .listFiles { file ->
+                                            file.isFile && file.extension.equals("gguf", ignoreCase = true)
+                                        }
+                                        ?.sortedBy { it.name.lowercase() }
+                                        ?: emptyList()
+                                    showAttachmentMenu = true
+                                },
+                                icon = TnIcons.Photo,
+                                contentDescription = tn("Image attachment")
+                            )
+                            DropdownMenu(
+                                expanded = showAttachmentMenu,
+                                onDismissRequest = { showAttachmentMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(tn("Pick image")) },
+                                    onClick = {
+                                        showAttachmentMenu = false
+                                        galleryLauncher.launch("image/*")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(tn("Take photo")) },
+                                    onClick = {
+                                        showAttachmentMenu = false
+                                        cameraLauncher.launch(null)
+                                    }
+                                )
+                                if (vlmProjectors.isEmpty()) {
+                                    DropdownMenuItem(
+                                        text = { Text(tn("No VLM projector downloaded")) },
+                                        enabled = false,
+                                        onClick = {}
+                                    )
+                                } else {
+                                    vlmProjectors.take(6).forEach { projector ->
+                                        DropdownMenuItem(
+                                            text = { Text(tn("Load ${projector.nameWithoutExtension.take(32)}")) },
+                                            onClick = {
+                                                showAttachmentMenu = false
+                                                scope.launch(Dispatchers.IO) {
+                                                    val success = LlmModelWorker.loadVlmProjector(projector.absolutePath)
+                                                    if (!success) {
+                                                        AppStateManager.setError("Failed to load VLM projector")
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                                if (isVlmProjectorLoaded) {
+                                    DropdownMenuItem(
+                                        text = { Text(tn("Release VLM projector")) },
+                                        onClick = {
+                                            showAttachmentMenu = false
+                                            scope.launch(Dispatchers.IO) {
+                                                LlmModelWorker.releaseVlmProjector()
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // 3. More Options
                     ActionToggleButton(
                         onCheckedChange = { showMoreOptions = !showMoreOptions },
                         checked = showMoreOptions,
@@ -318,7 +432,7 @@ internal fun BottomBar(
                         contentDescription = tn("More options")
                     )
 
-                    // 3. Model selector
+                    // 4. Model selector
                     ActionToggleButton(
                         onCheckedChange = {
                             if (config.showModelList) {
@@ -332,7 +446,7 @@ internal fun BottomBar(
                         contentDescription = tn("Select model")
                     )
 
-                    // 4. Web Search Toggle
+                    // 5. Web Search Toggle
                     if (toolCallingEnabled) {
                         ActionToggleButton(
                             onCheckedChange = { pluginViewModel.toggleWebSearch(!isWebSearchEnabled) },
@@ -343,7 +457,7 @@ internal fun BottomBar(
                         )
                     }
 
-                    // 5. Thinking Toggle
+                    // 6. Thinking Toggle
                     if (isTextModelLoaded) {
                         ActionToggleButton(
                             onCheckedChange = { chatViewModel.toggleThinkingMode() },
@@ -356,7 +470,7 @@ internal fun BottomBar(
 
                     Spacer(Modifier.weight(1f))
 
-                    // 6. Send/Stop
+                    // 7. Send/Stop
                     when (chatState.isGenerating) {
                         true -> {
                             ActionProgressButton(
@@ -382,7 +496,14 @@ internal fun BottomBar(
                                             ModelType.TEXT_GENERATION -> {
                                                 val hasRags = loadedRags.isNotEmpty() && isRagEnabledForChat
 
-                                                if (hasRags) {
+                                                if (selectedImageData.isNotEmpty()) {
+                                                    val userQuery = value
+                                                    val imageData = selectedImageData
+                                                    value = ""
+                                                    selectedImageData = emptyList()
+                                                    chatViewModel.clearRagContext()
+                                                    chatViewModel.sendChatWithImages(userQuery, imageData)
+                                                } else if (hasRags) {
                                                     val userQuery = value
                                                     value = ""
                                                     scope.launch {

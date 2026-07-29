@@ -252,6 +252,21 @@ class ModelDownloadService : Service() {
                         )
                     }
 
+                    "VLM_PROJECTOR" -> {
+                        AppPaths.vlmProjectors(applicationContext).mkdirs()
+
+                        val targetFile = AppPaths.vlmProjectorFile(applicationContext, modelId)
+
+                        if (targetFile.exists()) {
+                            targetFile.delete()
+                        }
+
+                        tempFile?.copyTo(targetFile, overwrite = true)
+                        updateDownloadState(modelId, DownloadState.Processing(modelId))
+                        updateNotification(modelName, 0f, notificationId, isProcessing = true)
+                        // Projectors are loaded explicitly and are not standalone chat models.
+                    }
+
                     "TTS" -> {
                         AppPaths.models(applicationContext).mkdirs()
 

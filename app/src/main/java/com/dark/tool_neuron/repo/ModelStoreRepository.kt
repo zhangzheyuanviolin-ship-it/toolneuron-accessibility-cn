@@ -23,7 +23,7 @@ data class ModelStoreCache(
 ) {
     companion object {
         // Bump this when filtering logic changes to auto-invalidate stale caches
-        const val CURRENT_VERSION = 2
+        const val CURRENT_VERSION = 3
     }
 }
 
@@ -184,6 +184,37 @@ class ModelStoreRepository(private val context: Context) {
         }
     }
 
+    private fun isVisionProjectorFile(path: String): Boolean {
+        return path.contains("mmproj", ignoreCase = true) ||
+                path.contains("vision-adapter", ignoreCase = true) ||
+                path.contains("projector", ignoreCase = true)
+    }
+
+    private fun isImageTextRepo(repo: HFModelRepository, hasProjector: Boolean): Boolean {
+        return hasProjector ||
+                repo.repoPath.contains("medgemma", ignoreCase = true) ||
+                repo.repoPath.contains("gemma-4-26B-A4B-it-GGUF", ignoreCase = true)
+    }
+
+    private fun isReasoningRepo(repo: HFModelRepository, fileName: String): Boolean {
+        return repo.name.contains("reason", ignoreCase = true) ||
+                repo.repoPath.contains("reason", ignoreCase = true) ||
+                repo.name.contains("R1", ignoreCase = true) ||
+                fileName.contains("thinking", ignoreCase = true)
+    }
+
+    private fun isExperimentalGguf(repo: HFModelRepository): Boolean {
+        return repo.repoPath.contains("gemma-4", ignoreCase = true) ||
+                repo.name.contains("Gemma 4", ignoreCase = true)
+    }
+
+    private fun quantTypeFrom(fileName: String): String {
+        return fileName.removeSuffix(".gguf")
+            .substringAfterLast("-")
+            .substringAfterLast(".")
+            .uppercase()
+    }
+
     private suspend fun getSDModels(repositories: List<HFModelRepository>): List<HuggingFaceModel> {
         val models = mutableListOf<HuggingFaceModel>()
         val npuSuffixChain = getNpuSuffixChain() // null = non-Qualcomm
@@ -317,28 +348,45 @@ class ModelStoreRepository(private val context: Context) {
                 if (response.isSuccessful) {
                     val files = response.body() ?: emptyList()
 
+                    val projectorFiles = files.filter { file ->
+                        file.path.endsWith(".gguf", ignoreCase = true) &&
+                                isVisionProjectorFile(file.path)
+                    }
+                    val hasProjector = projectorFiles.isNotEmpty()
+
                     // Detect if this repo supports tool calling (Qwen/ChatML models)
                     val supportsToolCalling = repo.repoPath.contains("qwen", ignoreCase = true) ||
                             repo.repoPath.contains("Qwen", ignoreCase = false) ||
                             repo.name.contains("qwen", ignoreCase = true)
 
                     files.filter { file ->
-                        file.path.endsWith(".gguf") &&
-                                // Filter out mmproj/vision projection files - these are not standalone models
-                                !file.path.contains("mmproj", ignoreCase = true) &&
-                                !file.path.contains("vision-adapter", ignoreCase = true) &&
-                                !file.path.contains("projector", ignoreCase = true)
+                        file.path.endsWith(".gguf") && !isVisionProjectorFile(file.path)
                     }.forEach { file ->
                             val fileName = file.path.substringAfterLast("/")
                             val sizeStr = formatDecimalBytes(file.size ?: 0)
 
-                            // Extract quantization type from filename
-                            val quantType =
-                                fileName.substringAfterLast("-").removeSuffix(".gguf").uppercase()
+                            val quantType = quantTypeFrom(fileName)
 
                             val baseTags = mutableListOf("GGUF", quantType, repo.name)
+                            baseTags.add(if (isImageTextRepo(repo, hasProjector)) "Image-to-Text" else "Text-to-Text")
                             if (supportsToolCalling) {
                                 baseTags.add("Tool Calling")
+                            }
+                            if (isReasoningRepo(repo, fileName)) {
+                                baseTags.add("Reasoning")
+                            }
+                            if (repo.name.contains("MoE", ignoreCase = true) ||
+                                repo.repoPath.contains("A3B", ignoreCase = true) ||
+                                repo.repoPath.contains("A4B", ignoreCase = true) ||
+                                repo.repoPath.contains("MoE", ignoreCase = true)
+                            ) {
+                                baseTags.add("MoE")
+                            }
+                            if (hasProjector) {
+                                baseTags.add("Projector Available")
+                            }
+                            if (isExperimentalGguf(repo)) {
+                                baseTags.add("Experimental Load")
                             }
 
                             models.add(
@@ -358,6 +406,31 @@ class ModelStoreRepository(private val context: Context) {
                                 )
                             )
                         }
+
+                    projectorFiles.forEach { file ->
+                        val fileName = file.path.substringAfterLast("/")
+                        val sizeStr = formatDecimalBytes(file.size ?: 0)
+                        val quantType = quantTypeFrom(fileName)
+                        val tags = mutableListOf("VLM Projector", "Image-to-Text", quantType, "Optional")
+                        if (isExperimentalGguf(repo)) tags.add("Experimental Load")
+
+                        models.add(
+                            HuggingFaceModel(
+                                id = "${repo.id}-${fileName.removeSuffix(".gguf")}",
+                                name = "${repo.name} - VLM Projector $quantType",
+                                description = "Optional vision projector for image-to-text inference. Download only when you need image input; it is not a standalone chat model.",
+                                fileUri = "${repo.repoPath}/resolve/main/${file.path}",
+                                approximateSize = sizeStr,
+                                modelType = ModelType.VLM_PROJECTOR,
+                                isZip = false,
+                                runOnCpu = false,
+                                textEmbeddingSize = 0,
+                                tags = tags,
+                                requiresNPU = false,
+                                repositoryUrl = repo.repoPath
+                            )
+                        )
+                    }
                 } else {
                     Log.e(
                         "ModelStoreRepository",

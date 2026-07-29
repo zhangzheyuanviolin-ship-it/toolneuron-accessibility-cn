@@ -63,6 +63,7 @@ class ModelRepositoryDataStore(private val context: Context) {
             ggufRepository("gemma4-e4b-tamil", "Gemma 4 E4B", "mradermacher/gemma-4-E4B-tamil-GGUF", ModelCategory.GENERAL),
             ggufRepository("gemma4-12b-mirozdanie", "Gemma 4 12B", "estread11/gemma-4-12b-mirozdanie-nvfp4-gguf", ModelCategory.GENERAL),
             ggufRepository("gemma4-26b-a4b", "Gemma 4 26B A4B MoE", "AtomicChat/gemma-4-26B-A4B-it-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-gemma4-26b-a4b-vlm", "Gemma 4 26B A4B MoE VLM", "unsloth/gemma-4-26B-A4B-it-GGUF", ModelCategory.GENERAL),
             ggufRepository("lfm2-24b-a2b-bartowski", "LFM2 24B A2B MoE", "bartowski/LiquidAI_LFM2-24B-A2B-GGUF", ModelCategory.GENERAL),
             // === MEDICAL ===
             ggufRepository("medgemma-4b-it", "MedGemma 4B IT", "unsloth/medgemma-4b-it-GGUF", ModelCategory.MEDICAL),

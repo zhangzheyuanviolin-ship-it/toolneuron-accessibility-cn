@@ -50,6 +50,7 @@ fun ModelStoreScreen(
     val installedModels by viewModel.installedModels.collectAsStateWithLifecycle()
     val deviceInfo by viewModel.deviceInfo.collectAsStateWithLifecycle()
     val deleteInProgress by viewModel.deleteInProgress.collectAsStateWithLifecycle()
+    val installedStoreModelIds = installedModels.map { it.id }.toSet() + viewModel.installedProjectorIds()
 
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
@@ -140,9 +141,10 @@ fun ModelStoreScreen(
                         isLoading = isLoading,
                         error = error,
                         downloadStates = downloadStates,
-                        installedModelIds = installedModels.map { it.id }.toSet(),
+                        installedModelIds = installedStoreModelIds,
                         viewModel = viewModel,
                         onDownload = { viewModel.downloadModel(it) },
+                        onDeleteProjector = { viewModel.deleteProjector(it) },
                         onCancelDownload = { modelId -> viewModel.cancelDownload(modelId) },
                         onRetry = { viewModel.loadModels() })
 

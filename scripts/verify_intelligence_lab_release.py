@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 34', "version code")
-    assert_contains(gradle, 'versionName = "2.4.0-search-prefill"', "version name")
+    assert_contains(gradle, 'versionCode = 35', "version code")
+    assert_contains(gradle, 'versionName = "2.5.0-vlm-store"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -182,6 +182,29 @@ def main() -> None:
         "Workspace Folder",
     ]:
         assert_contains(tool_section, needle, "tool settings UI")
+
+    store_repo = read("app/src/main/java/com/dark/tool_neuron/repo/ModelStoreRepository.kt")
+    for needle in [
+        "VLM_PROJECTOR",
+        "Image-to-Text",
+        "Text-to-Text",
+        "Reasoning",
+        "Projector Available",
+        "Experimental Load",
+    ]:
+        assert_contains(store_repo, needle, "vlm model store metadata")
+
+    app_paths = read("app/src/main/java/com/dark/tool_neuron/global/AppPaths.kt")
+    assert_contains(app_paths, "vlmProjectorFile", "projector storage path")
+
+    bottom_bar = read("app/src/main/java/com/dark/tool_neuron/ui/screen/home/HomeBottomBar.kt")
+    for needle in [
+        "GetContent",
+        "TakePicturePreview",
+        "sendChatWithImages",
+        "loadVlmProjector",
+    ]:
+        assert_contains(bottom_bar, needle, "image attachment entry")
 
 
 if __name__ == "__main__":

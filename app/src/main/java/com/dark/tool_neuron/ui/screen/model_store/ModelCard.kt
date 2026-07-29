@@ -43,6 +43,7 @@ import com.dark.tool_neuron.global.Standards
 internal fun ModelTypeBadge(modelType: ModelType) {
     val (label, color) = when (modelType) {
         ModelType.GGUF -> "LLM" to MaterialTheme.colorScheme.primary
+        ModelType.VLM_PROJECTOR -> "VLM" to MaterialTheme.colorScheme.secondary
         ModelType.SD -> "Image" to MaterialTheme.colorScheme.tertiary
         ModelType.TTS -> "TTS" to MaterialTheme.colorScheme.secondary
     }
@@ -65,7 +66,8 @@ fun ModelCard(
     isInstalled: Boolean,
     downloadState: ModelDownloadService.DownloadState?,
     onDownload: () -> Unit,
-    onCancelDownload: () -> Unit
+    onCancelDownload: () -> Unit,
+    onDeleteProjector: () -> Unit = {}
 ) {
     val isDownloading = remember(downloadState) {
         downloadState is ModelDownloadService.DownloadState.Downloading
@@ -108,12 +110,20 @@ fun ModelCard(
 
                 when {
                     isInstalled -> {
-                        Icon(
-                            imageVector = TnIcons.CircleCheck,
-                            contentDescription = tn("Installed"),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        if (model.modelType == ModelType.VLM_PROJECTOR) {
+                            ActionButton(
+                                onClickListener = onDeleteProjector,
+                                icon = TnIcons.Trash,
+                                contentDescription = "Delete projector"
+                            )
+                        } else {
+                            Icon(
+                                imageVector = TnIcons.CircleCheck,
+                                contentDescription = tn("Installed"),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
 
                     isDownloading || isExtracting || isProcessing -> {
@@ -172,8 +182,11 @@ fun ModelCard(
                     )
                 }
 
-                // Key tags (max 2)
-                model.tags.take(2).forEach { tag ->
+                // Key tags
+                model.tags
+                    .filterNot { it == "GGUF" }
+                    .take(4)
+                    .forEach { tag ->
                     Text(
                         text = tn(tag),
                         style = MaterialTheme.typography.labelSmall,

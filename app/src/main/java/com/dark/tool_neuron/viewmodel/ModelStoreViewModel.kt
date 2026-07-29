@@ -230,7 +230,7 @@ class ModelStoreViewModel @Inject constructor(
                     .toSet()
                 filtered = filtered.filter { model ->
                     // Category filter only applies to GGUF models
-                    model.modelType != ModelType.GGUF ||
+                    (model.modelType != ModelType.GGUF && model.modelType != ModelType.VLM_PROJECTOR) ||
                             enabledRepos.any { model.id.startsWith(it) }
                 }
             }
@@ -405,6 +405,7 @@ class ModelStoreViewModel @Inject constructor(
         models.groupBy { model ->
             when (model.modelType) {
                 ModelType.GGUF -> model.repositoryUrl.ifEmpty { "Unknown" }
+                ModelType.VLM_PROJECTOR -> model.repositoryUrl.ifEmpty { "Unknown" }
                 ModelType.SD -> model.repositoryUrl.ifEmpty { "SD Models" }
                 ModelType.TTS -> "tts-models"
             }
@@ -425,6 +426,7 @@ class ModelStoreViewModel @Inject constructor(
         return _filteredModels.value.filter { model ->
             when (model.modelType) {
                 ModelType.GGUF -> (model.repositoryUrl.ifEmpty { "Unknown" }) == repoKey
+                ModelType.VLM_PROJECTOR -> (model.repositoryUrl.ifEmpty { "Unknown" }) == repoKey
                 ModelType.SD -> (model.repositoryUrl.ifEmpty { "SD Models" }) == repoKey
                 ModelType.TTS -> repoKey == "tts-models"
             }
@@ -460,6 +462,22 @@ class ModelStoreViewModel @Inject constructor(
         }
 
         androidx.core.content.ContextCompat.startForegroundService(context, intent)
+    }
+
+    fun installedProjectorIds(): Set<String> {
+        val dir = AppPaths.vlmProjectors(getApplication())
+        return dir.listFiles { file -> file.isFile && file.extension.equals("gguf", ignoreCase = true) }
+            ?.map { it.name.removeSuffix(".gguf") }
+            ?.toSet()
+            ?: emptySet()
+    }
+
+    fun deleteProjector(model: HuggingFaceModel) {
+        if (model.modelType != ModelType.VLM_PROJECTOR) return
+        val file = AppPaths.vlmProjectorFile(getApplication(), model.id)
+        if (file.exists() && !file.delete()) {
+            _error.value = "Failed to delete projector"
+        }
     }
 
     private fun parseApproxSizeMB(sizeStr: String): Int {

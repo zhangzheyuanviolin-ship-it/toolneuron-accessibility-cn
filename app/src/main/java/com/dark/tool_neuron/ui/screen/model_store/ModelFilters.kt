@@ -118,6 +118,11 @@ fun ModelFiltersSection(
                 label = { Text(tn("LLM (GGUF)")) }
             )
             FilterChip(
+                selected = selectedModelType == ModelType.VLM_PROJECTOR,
+                onClick = { viewModel.filterByModelType(ModelType.VLM_PROJECTOR) },
+                label = { Text(tn("VLM Projector")) }
+            )
+            FilterChip(
                 selected = selectedModelType == ModelType.SD,
                 onClick = { viewModel.filterByModelType(ModelType.SD) },
                 label = { Text(tn("Image (SD)")) }

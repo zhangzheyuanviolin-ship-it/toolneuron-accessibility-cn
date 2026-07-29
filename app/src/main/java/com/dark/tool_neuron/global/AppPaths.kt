@@ -37,6 +37,14 @@ object AppPaths {
     fun modelFile(context: Context, modelId: String): File =
         File(models(context), "$modelId.gguf")
 
+    /** Vision projector files used by multimodal GGUF models */
+    fun vlmProjectors(context: Context): File =
+        File(models(context), "vlm_projectors")
+
+    /** Specific VLM projector file */
+    fun vlmProjectorFile(context: Context, modelId: String): File =
+        File(vlmProjectors(context), "$modelId.gguf")
+
     /** TTS model directory */
     fun ttsModel(context: Context): File =
         File(models(context), "supertonic-2")

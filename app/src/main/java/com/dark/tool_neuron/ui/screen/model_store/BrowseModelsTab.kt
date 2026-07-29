@@ -59,6 +59,7 @@ internal fun ModelsTab(
     installedModelIds: Set<String>,
     viewModel: ModelStoreViewModel,
     onDownload: (HuggingFaceModel) -> Unit,
+    onDeleteProjector: (HuggingFaceModel) -> Unit,
     onCancelDownload: (String) -> Unit,
     onRetry: () -> Unit
 ) {
@@ -155,6 +156,7 @@ internal fun ModelsTab(
                             downloadStates = downloadStates,
                             installedModelIds = installedModelIds,
                             onDownload = onDownload,
+                            onDeleteProjector = onDeleteProjector,
                             onCancelDownload = onCancelDownload
                         )
                     }
@@ -291,6 +293,7 @@ internal fun RepoDetailView(
     downloadStates: Map<String, ModelDownloadService.DownloadState>,
     installedModelIds: Set<String>,
     onDownload: (HuggingFaceModel) -> Unit,
+    onDeleteProjector: (HuggingFaceModel) -> Unit,
     onCancelDownload: (String) -> Unit
 ) {
     val repoModels = remember(viewModel.filteredModels.collectAsStateWithLifecycle().value, repoKey) {
@@ -355,7 +358,8 @@ internal fun RepoDetailView(
                         isInstalled = installedModelIds.contains(model.id),
                         downloadState = downloadStates[model.id],
                         onDownload = { onDownload(model) },
-                        onCancelDownload = { onCancelDownload(model.id) }
+                        onCancelDownload = { onCancelDownload(model.id) },
+                        onDeleteProjector = { onDeleteProjector(model) }
                     )
                 }
             }
