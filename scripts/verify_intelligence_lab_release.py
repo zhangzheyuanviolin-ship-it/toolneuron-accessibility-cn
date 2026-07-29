@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 36', "version code")
-    assert_contains(gradle, 'versionName = "2.6.0-load-diagnostics"', "version name")
+    assert_contains(gradle, 'versionCode = 37', "version code")
+    assert_contains(gradle, 'versionName = "2.7.0-latest-gguf-engine"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -80,6 +80,10 @@ def main() -> None:
 
     workflow = read(".github/workflows/build-apk.yml")
     assert_contains(workflow, "INTELLIGENCE_LAB_KEYSTORE_BASE64", "workflow signing secret")
+    assert_contains(workflow, "Build Latest GGUF Engine AAR", "latest gguf engine aar build")
+    assert_contains(workflow, "scripts/build_latest_gguf_engine_aar.sh", "latest gguf engine script")
+    assert_contains(workflow, "ndk;27.3.13750724", "latest gguf engine ndk")
+    assert_contains(workflow, "cmake;3.31.6", "latest gguf engine cmake")
     assert_contains(workflow, ":app:assembleRelease", "release build")
     assert_contains(workflow, "outputs/apk/release", "release artifact")
     assert_contains(workflow, "IntelligenceLab-", "artifact name")
@@ -214,8 +218,20 @@ def main() -> None:
         "minRequiredByTensorTable",
         "knownExpectedSize",
         "Current loading params",
+        "Native error tracker",
+        "ErrorTracker.getLastErrorJson",
     ]:
         assert_contains(load_diagnostics, needle, "gguf load diagnostics")
+
+    latest_engine_script = read("scripts/build_latest_gguf_engine_aar.sh")
+    for needle in [
+        "https://github.com/ggml-org/llama.cpp.git",
+        "https://github.com/Siddhesh2377/llama.cpp-android.git",
+        "https://github.com/Siddhesh2377/Ai-Systems-New.git",
+        "ggml_org_llama_cpp",
+        "gguf_lib-release.aar",
+    ]:
+        assert_contains(latest_engine_script, needle, "latest gguf engine source build")
 
     llm_vm = read("app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt")
     assert_contains(llm_vm, "GgufLoadDiagnostics.buildFailureReport", "gguf failure diagnostics wiring")

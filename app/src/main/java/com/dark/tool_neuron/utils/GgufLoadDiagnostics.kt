@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.dark.gguf_lib.ErrorTracker
 import com.dark.tool_neuron.models.engine_schema.GgufEngineSchema
 import com.dark.tool_neuron.models.enums.PathType
 import com.dark.tool_neuron.models.table_schema.Model
@@ -48,6 +49,8 @@ object GgufLoadDiagnostics {
 
         appendMemoryInfo(context, lines)
         lines += ""
+        appendNativeErrorTracker(lines)
+        lines += ""
 
         if (model.pathType == PathType.CONTENT_URI) {
             appendContentUriInfo(context, model, lines)
@@ -71,6 +74,20 @@ object GgufLoadDiagnostics {
         }
         lines += "Device memory:"
         lines += "avail=${formatBytes(info.availMem)}, threshold=${formatBytes(info.threshold)}, lowMemory=${info.lowMemory}"
+    }
+
+    private fun appendNativeErrorTracker(lines: MutableList<String>) {
+        lines += "Native error tracker:"
+        try {
+            val json = ErrorTracker.getLastErrorJson()
+            lines += if (json.isBlank() || json == "{}") {
+                "lastError={}"
+            } else {
+                "lastError=$json"
+            }
+        } catch (e: Throwable) {
+            lines += "lastErrorUnavailable=${e::class.java.simpleName}: ${e.message ?: "(no message)"}"
+        }
     }
 
     private fun appendContentUriInfo(context: Context, model: Model, lines: MutableList<String>) {

@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 36
-        versionName = "2.6.0-load-diagnostics"
+        versionCode = 37
+        versionName = "2.7.0-latest-gguf-engine"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }
