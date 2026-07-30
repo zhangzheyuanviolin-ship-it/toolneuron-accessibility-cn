@@ -11,8 +11,8 @@ PROTECTED_HASHES = {
     "app/src/main/java/com/dark/tool_neuron/service/LLMService.kt": "18ee01877c4379a8c27e1ab8d7d4efff6f757f5e44eb70955dd86ac2bc5e0f59",
     "app/src/main/java/com/dark/tool_neuron/worker/LlmModelWorker.kt": "65800efc5b21272cd753d668ca69ef9d9cf152354871b29aee4168fbb8218792",
     "app/src/main/java/com/dark/tool_neuron/global/ThirtyBMoESafeDefaults.kt": "f45625d3fe0d8dcd89c2eac6be1a143cf958e58db54e33bae496571b3ee56016",
-    "app/src/main/java/com/dark/tool_neuron/activity/ModelLoadingActivity.kt": "df52f04173882a1182185d69c5b5e00f4b4bb47d48254c7ba6576079a2d9de65",
-    "app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt": "68578a40cfa80c51b0e30a0c276b4d4acfb07aa3ab69112ee83e82eb64e46a74",
+    "app/src/main/java/com/dark/tool_neuron/activity/ModelLoadingActivity.kt": "fa19df3b9483d5c311997e603084da65a52bf84dfb1191b12406e3d373400186",
+    "app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt": "8328898348a4179476254aa964f046ab682c21193add34173d7a775e4f92b481",
     "app/src/main/java/com/dark/tool_neuron/viewmodel/SettingsViewModel.kt": "68dc5f8ed6a467655dc2118b344d904f2817b796c2119dba41b94a8ebb114386",
 }
 
@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 38', "version code")
-    assert_contains(gradle, 'versionName = "2.7.1-latest-gguf-engine-nopdfium"', "version name")
+    assert_contains(gradle, 'versionCode = 39', "version code")
+    assert_contains(gradle, 'versionName = "2.7.2-uri-load-fallback"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -220,8 +220,18 @@ def main() -> None:
         "Current loading params",
         "Native error tracker",
         "ErrorTracker.getLastErrorJson",
+        "resolvedPath=",
     ]:
         assert_contains(load_diagnostics, needle, "gguf load diagnostics")
+
+    uri_resolver = read("app/src/main/java/com/dark/tool_neuron/utils/ContentUriLocalPathResolver.kt")
+    for needle in [
+        "DocumentsContract.getDocumentId",
+        "primary:",
+        "/storage/emulated/0/",
+        "takeIfReadableModelFile",
+    ]:
+        assert_contains(uri_resolver, needle, "content URI local path resolver")
 
     latest_engine_script = read("scripts/build_latest_gguf_engine_aar.sh")
     for needle in [

@@ -111,7 +111,13 @@ object GgufLoadDiagnostics {
         } catch (e: Exception) {
             lines += "contentUriCheckError=${e::class.java.simpleName}: ${e.message ?: "(no message)"}"
         }
-        lines += "GGUF header parse: skipped for content URI"
+        val resolvedFile = ContentUriLocalPathResolver.resolveReadableFile(context, Uri.parse(model.modelPath))
+        if (resolvedFile != null) {
+            lines += "resolvedPath=${resolvedFile.absolutePath}"
+            appendFileInfo(model.copy(modelPath = resolvedFile.absolutePath, pathType = PathType.FILE), lines)
+        } else {
+            lines += "GGUF header parse: skipped for content URI"
+        }
     }
 
     private fun appendFileInfo(model: Model, lines: MutableList<String>) {
