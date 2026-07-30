@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 39
-        versionName = "2.7.2-uri-load-fallback"
+        versionCode = 40
+        versionName = "2.7.3-fd-fileptr-load"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }

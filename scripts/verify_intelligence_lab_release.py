@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 39', "version code")
-    assert_contains(gradle, 'versionName = "2.7.2-uri-load-fallback"', "version name")
+    assert_contains(gradle, 'versionCode = 40', "version code")
+    assert_contains(gradle, 'versionName = "2.7.3-fd-fileptr-load"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -242,6 +242,8 @@ def main() -> None:
         "gguf_lib-release.aar",
         "rag_ingest_pdf_stub.cpp",
         "libpdfium.so",
+        "llama_model_load_from_file_ptr",
+        "/proc/self/fd/",
     ]:
         assert_contains(latest_engine_script, needle, "latest gguf engine source build")
 

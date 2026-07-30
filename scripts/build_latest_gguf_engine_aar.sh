@@ -72,6 +72,22 @@ text = text.replace(
     g_state.use_mmap  = (bool)useMmap;
     g_state.use_mlock = (bool)useMlock;""")
 text = text.replace("    mparams.use_mmap = true;", "    mparams.load_mode = LLAMA_LOAD_MODE_MMAP;")
+text = text.replace(
+"""    g_state.model = llama_model_load_from_file(path_s.c_str(), mparams);
+    if (!g_state.model) {""",
+"""    if (path_s.rfind("/proc/self/fd/", 0) == 0) {
+        FILE * model_file = fopen(path_s.c_str(), "rb");
+        if (model_file) {
+            LOGI("Loading model through FILE* for fd-backed path: %s", path_s.c_str());
+            g_state.model = llama_model_load_from_file_ptr(model_file, mparams);
+            fclose(model_file);
+        } else {
+            LOGE("fopen failed for fd-backed path %s: %s", path_s.c_str(), strerror(errno));
+        }
+    } else {
+        g_state.model = llama_model_load_from_file(path_s.c_str(), mparams);
+    }
+    if (!g_state.model) {""")
 gguf.write_text(text)
 
 rag = Path(sys.argv[2])
