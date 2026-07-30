@@ -437,13 +437,30 @@ if missing:
     raise SystemExit(1)
 print("Verified latest GGUF AAR compatibility classes")
 PY
-if unzip -l "${AAR_SRC}" | grep -q 'libpdfium.so'; then
-    echo "The inference AAR must not package libpdfium.so" >&2
-    exit 1
-fi
+python3 - <<'PY' "${AAR_SRC}"
+from pathlib import Path
+import sys
+import zipfile
+
+aar = Path(sys.argv[1])
+tmp = aar.with_suffix(".nopdfium.aar")
+removed = []
+with zipfile.ZipFile(aar, "r") as src, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as dst:
+    for info in src.infolist():
+        if info.filename.endswith("libpdfium.so"):
+            removed.append(info.filename)
+            continue
+        dst.writestr(info, src.read(info.filename))
+tmp.replace(aar)
+print("Removed packaged libpdfium entries:", ", ".join(removed) if removed else "none")
+PY
 unzip -p "${AAR_SRC}" "jni/arm64-v8a/libgguf_lib.so" > "${WORK_DIR}/libgguf_lib.so"
 if readelf -d "${WORK_DIR}/libgguf_lib.so" | grep -q 'libpdfium.so'; then
     echo "libgguf_lib.so must not link libpdfium.so in the inference build" >&2
+    exit 1
+fi
+if unzip -l "${AAR_SRC}" | grep -q 'libpdfium.so'; then
+    echo "The inference AAR must not package libpdfium.so" >&2
     exit 1
 fi
 echo "Verified latest GGUF AAR native library does not link libpdfium.so"
