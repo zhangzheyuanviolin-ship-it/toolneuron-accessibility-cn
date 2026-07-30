@@ -227,17 +227,7 @@ fun ModelLoadingScreen(
                     InstallState.NotInstalled
                 }
 
-                // Load the model using FD
-                when (val result = modelParser.loadModelFromUri(context, uri, modelName, null)) {
-                    is ModelLoadResult.Success -> {
-                        onEngineLoaded(result.engine)
-                        loadingState = LoadingState.Loaded(result.info)
-                    }
-
-                    is ModelLoadResult.Error -> {
-                        loadingState = LoadingState.Error(result.message)
-                    }
-                }
+                loadingState = LoadingState.Loaded(modelParser.inspectGgufUri(context, uri, modelName, fileSize))
             } catch (e: Exception) {
                 loadingState = LoadingState.Error(e.message ?: "Unknown error")
             }
@@ -352,13 +342,17 @@ fun ModelLoadingScreen(
                     InstallState.NotInstalled
                 }
 
-                when (val result = modelParser.loadModel(model, null)) {
-                    is ModelLoadResult.Success -> {
-                        onEngineLoaded(result.engine)
-                        loadingState = LoadingState.Loaded(result.info)
-                    }
-                    is ModelLoadResult.Error -> {
-                        loadingState = LoadingState.Error(result.message)
+                if (providerType == ProviderType.GGUF) {
+                    loadingState = LoadingState.Loaded(modelParser.inspectGgufFile(file))
+                } else {
+                    when (val result = modelParser.loadModel(model, null)) {
+                        is ModelLoadResult.Success -> {
+                            onEngineLoaded(result.engine)
+                            loadingState = LoadingState.Loaded(result.info)
+                        }
+                        is ModelLoadResult.Error -> {
+                            loadingState = LoadingState.Error(result.message)
+                        }
                     }
                 }
             } catch (e: Exception) {

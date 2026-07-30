@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 42
-        versionName = "2.5.2-vlm-store-stable"
+        versionCode = 43
+        versionName = "2.5.3-30b-miui-foreground"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }

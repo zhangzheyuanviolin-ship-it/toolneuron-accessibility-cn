@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -116,6 +117,11 @@ object LlmModelWorker {
 
         val appContext = context.applicationContext
         val intent = Intent(appContext, LLMService::class.java)
+        try {
+            ContextCompat.startForegroundService(appContext, intent)
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to explicitly start LLM foreground service before binding", e)
+        }
 
         val bound = appContext.bindService(
             intent,

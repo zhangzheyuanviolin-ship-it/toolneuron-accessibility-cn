@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.IBinder
 import android.os.DeadObjectException
 import android.os.ParcelFileDescriptor
-import android.os.Process
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -45,6 +44,14 @@ class LLMService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     val ggufEngine = GGUFEngine()
     private val diffusionEngine = DiffusionEngine()
+    @Volatile private var diffusionInitialized = false
+
+    private suspend fun ensureDiffusionInitialized() {
+        if (diffusionInitialized) return
+        diffusionEngine.init(applicationContext, safetyCheckerEnabled = true)
+        diffusionInitialized = true
+        Log.i(TAG, "DiffusionEngine initialized lazily in LLMService")
+    }
 
     private fun collectGenerationFlow(
         flow: kotlinx.coroutines.flow.Flow<GenerationEvent>,
@@ -298,6 +305,7 @@ class LLMService : Service() {
         override fun loadUpscaler(modelPath: String, callback: IModelLoadCallback) {
             scope.launch(Dispatchers.IO) {
                 try {
+                    ensureDiffusionInitialized()
                     val success = diffusionEngine.loadUpscaler(modelPath)
                     if (success) callback.onSuccess()
                     else callback.onError("Failed to load upscaler")
@@ -328,6 +336,7 @@ class LLMService : Service() {
         ) {
             scope.launch(Dispatchers.IO) {
                 try {
+                    ensureDiffusionInitialized()
                     Log.i(TAG, "Loading diffusion model: $name")
                     AppStateManager.setLoadingModel(name)
 
@@ -382,6 +391,7 @@ class LLMService : Service() {
         ) {
             scope.launch(Dispatchers.IO) {
                 try {
+                    ensureDiffusionInitialized()
                     Log.i(TAG, "Starting diffusion generation: $prompt")
 
                     diffusionEngine.generateImage(
@@ -446,6 +456,7 @@ class LLMService : Service() {
         override fun restartDiffusionBackend(callback: IModelLoadCallback) {
             scope.launch(Dispatchers.IO) {
                 try {
+                    ensureDiffusionInitialized()
                     val success = diffusionEngine.restartBackend()
                     if (success) callback.onSuccess()
                     else callback.onError("Failed to restart backend")
@@ -474,7 +485,6 @@ class LLMService : Service() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
 
         // Tell llama.cpp where to find CPU backend variant .so files
         // (libggml-cpu-android_armv8.*.so) for runtime arch-level dispatch.
@@ -484,15 +494,6 @@ class LLMService : Service() {
             initMethod.invoke(null, applicationContext)
         } catch (_: Throwable) {
             // Old AAR without initBackendDir — dladdr() fallback handles it
-        }
-
-        scope.launch(Dispatchers.IO) {
-            try {
-                diffusionEngine.init(applicationContext, safetyCheckerEnabled = true)
-                Log.i(TAG, "DiffusionEngine initialized in LLMService")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to initialize diffusion engine", e)
-            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

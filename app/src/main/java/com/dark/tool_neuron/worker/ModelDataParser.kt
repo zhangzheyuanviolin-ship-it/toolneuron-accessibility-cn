@@ -21,6 +21,38 @@ import java.security.MessageDigest
  */
 class ModelDataParser {
 
+    fun inspectGgufFile(file: File): ModelInfo {
+        return GGUFModelInfo(
+            providerType = ProviderType.GGUF,
+            architecture = "GGUF",
+            name = file.name,
+            description = "Model file selected. Full native load is deferred until chat loading.",
+            parameters = buildMap {
+                put("File Size", "${file.length() / (1024 * 1024)} MB")
+                put("Path Type", "Direct file")
+            }
+        )
+    }
+
+    fun inspectGgufUri(context: Context, uri: Uri, modelName: String, fileSize: Long): ModelInfo {
+        val readable = try {
+            context.contentResolver.openFileDescriptor(uri, "r")?.use { true } ?: false
+        } catch (_: Exception) {
+            false
+        }
+        return GGUFModelInfo(
+            providerType = ProviderType.GGUF,
+            architecture = "GGUF",
+            name = modelName,
+            description = "Model URI selected. Full native load is deferred until chat loading.",
+            parameters = buildMap {
+                put("File Size", "${fileSize / (1024 * 1024)} MB")
+                put("Path Type", "Content URI")
+                put("Readable", readable.toString())
+            }
+        )
+    }
+
     suspend fun loadModel(
         model: Model, config: ModelConfig?
     ): ModelLoadResult = withContext(Dispatchers.IO) {
