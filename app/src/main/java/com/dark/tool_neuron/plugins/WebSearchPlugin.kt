@@ -73,7 +73,7 @@ class WebSearchPlugin(private val context: Context) : SuperPlugin {
         return PluginInfo(
             name = "Web Search",
             description = "Search the web. The user configures engine and result detail in tool settings.",
-            author = "ToolNeuron",
+            author = "Intelligence Lab",
             version = "2.1.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(

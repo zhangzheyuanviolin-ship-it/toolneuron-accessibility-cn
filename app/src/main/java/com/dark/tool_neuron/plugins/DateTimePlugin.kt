@@ -38,7 +38,7 @@ class DateTimePlugin : SuperPlugin {
         return PluginInfo(
             name = "Date & Time",
             description = "Get current date/time, perform date arithmetic, and convert between timezones",
-            author = "ToolNeuron",
+            author = "Intelligence Lab",
             version = "1.0.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(

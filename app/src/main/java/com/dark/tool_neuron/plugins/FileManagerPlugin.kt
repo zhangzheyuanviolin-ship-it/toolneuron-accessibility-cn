@@ -77,7 +77,7 @@ class FileManagerPlugin(private val context: Context) : SuperPlugin {
         return PluginInfo(
             name = "File Manager",
             description = "Create, browse, read, and search files in the user-authorized workspace folder, with sandbox fallback",
-            author = "ToolNeuron",
+            author = "Intelligence Lab",
             version = "1.2.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(

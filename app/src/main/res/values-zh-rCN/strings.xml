@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Intelligence Lab智能实验室 测试版</string>
+    <string name="app_name">智能实验室</string>
     <string name="service_name">通知朗读服务</string>
     <string name="title_activity_main">主界面</string>
     <string name="a11y_action_icon">操作图标</string>

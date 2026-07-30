@@ -50,7 +50,7 @@ class NotePadPlugin : SuperPlugin {
         return PluginInfo(
             name = "NotePad",
             description = "Scratch pad for storing and retrieving notes across conversation turns",
-            author = "ToolNeuron",
+            author = "Intelligence Lab",
             version = "1.0.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(

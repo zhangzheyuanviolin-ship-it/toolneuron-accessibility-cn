@@ -87,7 +87,6 @@ import com.dark.tool_neuron.models.table_schema.ModelConfig
 import com.dark.tool_neuron.ui.components.ActionButton
 import com.dark.tool_neuron.ui.theme.NeuroVerseTheme
 import com.dark.tool_neuron.ui.theme.maple
-import com.dark.tool_neuron.utils.ContentUriLocalPathResolver
 import com.dark.tool_neuron.worker.DiffusionConfig
 import com.dark.tool_neuron.worker.DiffusionModelInfo
 import com.dark.tool_neuron.worker.ModelDataParser
@@ -206,16 +205,15 @@ fun ModelLoadingScreen(
                 // Get file info from URI
                 val modelName = modelParser.getFileNameFromUri(context, uri)
                 val fileSize = modelParser.getFileSizeFromUri(context, uri)
-                val resolvedFile = ContentUriLocalPathResolver.resolveReadableFile(context, uri)
 
                 // Fast partial hash for deduplication (first 4 MB + metadata)
                 val modelHash = modelParser.checksumSHA256FromUri(context, uri)
 
                 val model = Model(
                     id = modelHash,
-                    modelPath = resolvedFile?.absolutePath ?: uri.toString(),
+                    modelPath = uri.toString(),  // Store the content:// URI string
                     modelName = modelName,
-                    pathType = if (resolvedFile != null) PathType.FILE else PathType.CONTENT_URI,
+                    pathType = PathType.CONTENT_URI,
                     providerType = ProviderType.GGUF,
                     fileSize = fileSize
                 )

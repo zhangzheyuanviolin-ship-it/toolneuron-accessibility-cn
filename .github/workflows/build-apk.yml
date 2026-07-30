@@ -36,10 +36,7 @@ jobs:
       - name: Install SDK Components
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "cmake;3.22.1" "cmake;3.31.6" "ndk;26.3.11579264" "ndk;27.3.13750724"
-
-      - name: Build Latest GGUF Engine AAR
-        run: bash scripts/build_latest_gguf_engine_aar.sh
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "cmake;3.22.1" "ndk;26.3.11579264"
 
       - name: Grant Gradle Execute Permission
         run: chmod +x ./gradlew

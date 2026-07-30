@@ -7,12 +7,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 PROTECTED_HASHES = {
-    "app/src/main/java/com/dark/tool_neuron/engine/GGUFEngine.kt": "37de5317b0799c952e00e26bf405a70ce55470294a0dbfbd12665bbac1ce9b9f",
+    "app/src/main/java/com/dark/tool_neuron/engine/GGUFEngine.kt": "a64adfda12286f11bcb0b9718c5e9307181325b476d5e3e45f2c32a2504d3d66",
     "app/src/main/java/com/dark/tool_neuron/service/LLMService.kt": "18ee01877c4379a8c27e1ab8d7d4efff6f757f5e44eb70955dd86ac2bc5e0f59",
     "app/src/main/java/com/dark/tool_neuron/worker/LlmModelWorker.kt": "65800efc5b21272cd753d668ca69ef9d9cf152354871b29aee4168fbb8218792",
     "app/src/main/java/com/dark/tool_neuron/global/ThirtyBMoESafeDefaults.kt": "f45625d3fe0d8dcd89c2eac6be1a143cf958e58db54e33bae496571b3ee56016",
-    "app/src/main/java/com/dark/tool_neuron/activity/ModelLoadingActivity.kt": "fa19df3b9483d5c311997e603084da65a52bf84dfb1191b12406e3d373400186",
-    "app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt": "8328898348a4179476254aa964f046ab682c21193add34173d7a775e4f92b481",
+    "app/src/main/java/com/dark/tool_neuron/activity/ModelLoadingActivity.kt": "df52f04173882a1182185d69c5b5e00f4b4bb47d48254c7ba6576079a2d9de65",
+    "app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt": "2cb895842bad27b48fe17d51cc1dc67c8e7377deb5d41089950e871eeb3d04c3",
     "app/src/main/java/com/dark/tool_neuron/viewmodel/SettingsViewModel.kt": "68dc5f8ed6a467655dc2118b344d904f2817b796c2119dba41b94a8ebb114386",
 }
 
@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 40', "version code")
-    assert_contains(gradle, 'versionName = "2.7.3-fd-fileptr-load"', "version name")
+    assert_contains(gradle, 'versionCode = 41', "version code")
+    assert_contains(gradle, 'versionName = "2.5.1-vlm-store-stable"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -75,15 +75,15 @@ def main() -> None:
 
     assert_contains(read("app/src/main/AndroidManifest.xml"), 'android:name="${applicationId}.permission.BIND_LLM_SERVICE"', "application id scoped service permission")
     assert_contains(read("app/src/main/AndroidManifest.xml"), 'android:permission="${applicationId}.permission.BIND_LLM_SERVICE"', "application id scoped service binding")
-    assert_contains(read("app/src/main/res/values/strings.xml"), "<string name=\"app_name\">Intelligence Lab Test</string>", "english app name")
-    assert_contains(read("app/src/main/res/values-zh-rCN/strings.xml"), "<string name=\"app_name\">Intelligence Lab智能实验室 测试版</string>", "chinese app name")
+    assert_contains(read("app/src/main/res/values/strings.xml"), "<string name=\"app_name\">智能实验室</string>", "english app name")
+    assert_contains(read("app/src/main/res/values-zh-rCN/strings.xml"), "<string name=\"app_name\">智能实验室</string>", "chinese app name")
+
+    aar_hash = hashlib.sha256((ROOT / "libs/gguf_lib-release.aar").read_bytes()).hexdigest()
+    if aar_hash != "7a3415a1753f917b914d5c1527520b6ae801611650eedb7402c69f19f39f77bd":
+        fail("gguf AAR hash does not match the 2.5.0-vlm-store baseline")
 
     workflow = read(".github/workflows/build-apk.yml")
     assert_contains(workflow, "INTELLIGENCE_LAB_KEYSTORE_BASE64", "workflow signing secret")
-    assert_contains(workflow, "Build Latest GGUF Engine AAR", "latest gguf engine aar build")
-    assert_contains(workflow, "scripts/build_latest_gguf_engine_aar.sh", "latest gguf engine script")
-    assert_contains(workflow, "ndk;27.3.13750724", "latest gguf engine ndk")
-    assert_contains(workflow, "cmake;3.31.6", "latest gguf engine cmake")
     assert_contains(workflow, ":app:assembleRelease", "release build")
     assert_contains(workflow, "outputs/apk/release", "release artifact")
     assert_contains(workflow, "IntelligenceLab-", "artifact name")
@@ -209,49 +209,6 @@ def main() -> None:
         "loadVlmProjector",
     ]:
         assert_contains(bottom_bar, needle, "image attachment entry")
-
-    load_diagnostics = read("app/src/main/java/com/dark/tool_neuron/utils/GgufLoadDiagnostics.kt")
-    for needle in [
-        "DEFINITE_SIZE_MISMATCH",
-        "DEFINITE_TRUNCATED_GGUF",
-        "architecture=qwen35moe",
-        "minRequiredByTensorTable",
-        "knownExpectedSize",
-        "Current loading params",
-        "Native error tracker",
-        "ErrorTracker.getLastErrorJson",
-        "resolvedPath=",
-    ]:
-        assert_contains(load_diagnostics, needle, "gguf load diagnostics")
-
-    uri_resolver = read("app/src/main/java/com/dark/tool_neuron/utils/ContentUriLocalPathResolver.kt")
-    for needle in [
-        "DocumentsContract.getDocumentId",
-        "primary:",
-        "/storage/emulated/0/",
-        "takeIfReadableModelFile",
-    ]:
-        assert_contains(uri_resolver, needle, "content URI local path resolver")
-
-    latest_engine_script = read("scripts/build_latest_gguf_engine_aar.sh")
-    for needle in [
-        "https://github.com/ggml-org/llama.cpp.git",
-        "https://github.com/Siddhesh2377/llama.cpp-android.git",
-        "https://github.com/Siddhesh2377/Ai-Systems-New.git",
-        "ggml_org_llama_cpp",
-        "gguf_lib-release.aar",
-        "rag_ingest_pdf_stub.cpp",
-        "libpdfium.so",
-        "llama_model_load_from_file_ptr",
-        "/proc/self/fd/",
-    ]:
-        assert_contains(latest_engine_script, needle, "latest gguf engine source build")
-
-    llm_vm = read("app/src/main/java/com/dark/tool_neuron/viewmodel/LLMModelViewModel.kt")
-    assert_contains(llm_vm, "GgufLoadDiagnostics.buildFailureReport", "gguf failure diagnostics wiring")
-
-    status_states = read("app/src/main/java/com/dark/tool_neuron/ui/screen/home/StatusStates.kt")
-    assert_contains(status_states, "SelectionContainer", "copyable error diagnostics")
 
 
 if __name__ == "__main__":

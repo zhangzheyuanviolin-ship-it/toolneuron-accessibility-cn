@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Intelligence Lab Test</string>
+    <string name="app_name">智能实验室</string>
     <string name="service_name">Notification reader</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="a11y_action_icon">Action icon</string>

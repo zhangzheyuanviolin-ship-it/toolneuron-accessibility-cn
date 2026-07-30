@@ -5,11 +5,9 @@ import android.content.Context
 import android.net.Uri
 import com.dark.tool_neuron.engine.GGUFEngine
 import com.dark.tool_neuron.global.formatNumber
-import com.dark.tool_neuron.models.enums.PathType
 import com.dark.tool_neuron.models.enums.ProviderType
 import com.dark.tool_neuron.models.table_schema.Model
 import com.dark.tool_neuron.models.table_schema.ModelConfig
-import com.dark.tool_neuron.utils.ContentUriLocalPathResolver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -43,19 +41,6 @@ class ModelDataParser {
         config: ModelConfig?
     ): ModelLoadResult = withContext(Dispatchers.IO) {
         try {
-            ContentUriLocalPathResolver.resolveReadableFile(context, uri)?.let { file ->
-                return@withContext loadGGUFModel(
-                    Model(
-                        modelName = modelName,
-                        modelPath = file.absolutePath,
-                        pathType = PathType.FILE,
-                        providerType = ProviderType.GGUF,
-                        fileSize = file.length()
-                    ),
-                    config
-                )
-            }
-
             val engine = GGUFEngine()
 
             // Get FD from content resolver

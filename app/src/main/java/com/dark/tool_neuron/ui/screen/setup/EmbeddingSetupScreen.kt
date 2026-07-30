@@ -100,7 +100,7 @@ fun EmbeddingSetupScreen(onSetupComplete: () -> Unit) {
                 Spacer(modifier = Modifier.height(Standards.SpacingXl))
 
                 Text(
-                    text = "Setting up ToolNeuron",
+                    text = "Setting up Intelligence Lab",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )

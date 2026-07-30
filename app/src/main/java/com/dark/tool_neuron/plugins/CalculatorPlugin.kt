@@ -33,7 +33,7 @@ class CalculatorPlugin : SuperPlugin {
         return PluginInfo(
             name = "Calculator",
             description = "Perform mathematical calculations and unit conversions",
-            author = "ToolNeuron",
+            author = "Intelligence Lab",
             version = "1.0.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(

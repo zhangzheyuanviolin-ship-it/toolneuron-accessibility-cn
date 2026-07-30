@@ -51,7 +51,7 @@ fun TermsAndConditionsScreen(
             )
 
             Text(
-                text = tn("Please read carefully before using ToolNeuron"),
+                text = tn("Please read carefully before using Intelligence Lab"),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.padding(bottom = Standards.SpacingXl)
@@ -67,14 +67,14 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "1. Acceptance of Terms",
                     content = """
-                        By downloading, installing, or using ToolNeuron ("the App"), you agree to be bound by these Terms and Conditions (Version 2.0). If you do not agree to these terms, you must immediately uninstall the App and discontinue its use.
+                        By downloading, installing, or using Intelligence Lab ("the App"), you agree to be bound by these Terms and Conditions (Version 2.0). If you do not agree to these terms, you must immediately uninstall the App and discontinue its use.
                     """.trimIndent()
                 )
 
                 TermsSection(
                     title = "2. Nature of Service",
                     content = """
-                        ToolNeuron is a privacy-first AI assistant that runs AI models locally on your Android device. The App enables you to:
+                        Intelligence Lab is a privacy-first AI assistant that runs AI models locally on your Android device. The App enables you to:
                         • Run Large Language Models (LLMs) in GGUF format for text generation
                         • Generate images using Stable Diffusion 1.5 (censored and uncensored variants)
                         • Generate speech using on-device Text-to-Speech (10 voices, 5 languages)
@@ -101,14 +101,14 @@ fun TermsAndConditionsScreen(
                         • Content that infringes on intellectual property rights
                         • Content that violates the rights or safety of any person or entity
 
-                        The developer and ToolNeuron team bear NO LIABILITY for content you generate, regardless of how the content was created, what prompts were used, or which models were loaded.
+                        The developer and Intelligence Lab team bear NO LIABILITY for content you generate, regardless of how the content was created, what prompts were used, or which models were loaded.
                     """.trimIndent()
                 )
 
                 TermsSection(
                     title = "4. Third-Party AI Models",
                     content = """
-                        ToolNeuron allows you to download and use AI models from Hugging Face, as well as load custom models from your device storage.
+                        Intelligence Lab allows you to download and use AI models from Hugging Face, as well as load custom models from your device storage.
 
                         IMPORTANT DISCLAIMERS:
                         • The developer did NOT create, train, or tune these models
@@ -125,7 +125,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "5. Network Usage",
                     content = """
-                        ToolNeuron's network connections include:
+                        Intelligence Lab's network connections include:
 
                         MODEL DOWNLOADS:
                         • AI models are downloaded from Hugging Face
@@ -149,7 +149,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "6. Prohibited Uses",
                     content = """
-                        You agree NOT to use ToolNeuron to:
+                        You agree NOT to use Intelligence Lab to:
                         • Generate content that violates local, national, or international laws
                         • Create content for illegal activities including but not limited to fraud, harassment, or harm
                         • Produce child sexual abuse material (CSAM) or content exploiting minors
@@ -164,7 +164,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "7. Privacy and Data Security",
                     content = """
-                        ToolNeuron is designed with privacy as a core principle:
+                        Intelligence Lab is designed with privacy as a core principle:
 
                         COMPLETE OFFLINE OPERATION:
                         • All AI inference occurs locally on your device
@@ -243,7 +243,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "10. Indemnification",
                     content = """
-                        You agree to INDEMNIFY, DEFEND, and HOLD HARMLESS the developer, ToolNeuron team, and their affiliates from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from:
+                        You agree to INDEMNIFY, DEFEND, and HOLD HARMLESS the developer, Intelligence Lab team, and their affiliates from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from:
                         • Your use of the App
                         • Content you generate using the App
                         • Your violation of these Terms and Conditions
@@ -256,7 +256,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "11. Age Requirement",
                     content = """
-                        You must be at least 18 years old to use ToolNeuron. If you are under 18, you may only use the App with the supervision and consent of a parent or legal guardian.
+                        You must be at least 18 years old to use Intelligence Lab. If you are under 18, you may only use the App with the supervision and consent of a parent or legal guardian.
 
                         The App may generate adult content depending on the models loaded and prompts used. By using the App, you confirm you are of legal age in your jurisdiction to access such content.
                     """.trimIndent()
@@ -265,7 +265,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "12. Open Source and Licensing",
                     content = """
-                        ToolNeuron is open-source software licensed under the Apache License 2.0. You may view, modify, and distribute the source code subject to the Apache 2.0 license terms.
+                        Intelligence Lab is open-source software licensed under the Apache License 2.0. You may view, modify, and distribute the source code subject to the Apache 2.0 license terms.
 
                         APACHE 2.0 LICENSE:
                         • Commercial use, modification, distribution, and private use are permitted
@@ -283,7 +283,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "13. Plugin System",
                     content = """
-                        ToolNeuron includes built-in plugins that extend AI capabilities:
+                        Intelligence Lab includes built-in plugins that extend AI capabilities:
                         • Web Search: Connects to DuckDuckGo (requires internet connection)
                         • File Manager: Accesses files within app directories only
                         • Calculator: Mathematical expressions and unit conversion
@@ -360,7 +360,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "17. Google Play Store Distribution",
                     content = """
-                        ToolNeuron is available on the Google Play Store. By downloading from Google Play:
+                        Intelligence Lab is available on the Google Play Store. By downloading from Google Play:
                         • You are also subject to Google Play's Terms of Service
                         • The app complies with Google Play's Developer Program Policies
                         • In-app content generation is the user's responsibility per these Terms
@@ -387,7 +387,7 @@ fun TermsAndConditionsScreen(
                         For questions about these Terms and Conditions, please contact:
 
                         Email: siddheshsonar2377@gmail.com
-                        GitHub: https://github.com/Siddhesh2377/ToolNeuron
+                        GitHub: project repository
                         Discord: https://discord.gg/mVPwHDhrAP
                         Google Play: https://play.google.com/store/apps/details?id=com.dark.tool_neuron
 

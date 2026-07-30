@@ -51,7 +51,7 @@ class SystemInfoPlugin(private val context: Context) : SuperPlugin {
         return PluginInfo(
             name = "System Info",
             description = "Get current date/time, battery level, and network status",
-            author = "ToolNeuron",
+            author = "Intelligence Lab",
             version = "1.0.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(

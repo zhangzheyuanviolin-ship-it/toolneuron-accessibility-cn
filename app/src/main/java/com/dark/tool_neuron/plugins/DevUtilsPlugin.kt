@@ -38,7 +38,7 @@ class DevUtilsPlugin : SuperPlugin {
         return PluginInfo(
             name = "Dev Utils",
             description = "Developer utilities: text transforms, hashing, UUID, base64, JSON formatting",
-            author = "ToolNeuron",
+            author = "Intelligence Lab",
             version = "1.0.0",
             toolDefinitionBuilder = listOf(
                 ToolDefinitionBuilder(

@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import com.dark.gguf_lib.models.GenerationEvent as LibGenerationEvent
 
@@ -414,7 +413,7 @@ class GGUFEngine {
     fun isUncensored(): Boolean {
         if (!engine.isLoaded) return false
         return try {
-            characterEngine.isUncensored()
+            characterEngine.isUncensored
         } catch (_: Exception) { false }
     }
 
@@ -423,7 +422,7 @@ class GGUFEngine {
     fun calcVectors(prompt: String, onProgress: ((Float) -> Unit)? = null): FloatArray? {
         if (!engine.isLoaded) return null
         return try {
-            characterEngine.calcVectors(prompt, onProgress ?: {})
+            characterEngine.calcVectors(prompt, onProgress)
         } catch (_: Exception) { null }
     }
 
@@ -447,14 +446,14 @@ class GGUFEngine {
     fun loadVlmProjector(path: String, threads: Int = 0): Boolean {
         if (!engine.isLoaded) return false
         return try {
-            runBlocking { engine.loadVlmProjector(path, threads) }
+            engine.loadVlmProjector(path, threads)
         } catch (_: Exception) { false }
     }
 
     fun loadVlmProjectorFromFd(fd: Int, threads: Int = 0): Boolean {
         if (!engine.isLoaded) return false
         return try {
-            runBlocking { engine.loadVlmProjectorFromFd(fd, threads) }
+            engine.loadVlmProjectorFromFd(fd, threads)
         } catch (_: Exception) { false }
     }
 
@@ -520,5 +519,4 @@ private fun LibGenerationEvent.toLocal(): GenerationEvent = when (this) {
     is LibGenerationEvent.Error -> GenerationEvent.Error(message)
     is LibGenerationEvent.Metrics -> GenerationEvent.Metrics(metrics.toLocal())
     is LibGenerationEvent.Progress -> GenerationEvent.Progress(progress)
-    else -> GenerationEvent.Progress(0f)
 }
