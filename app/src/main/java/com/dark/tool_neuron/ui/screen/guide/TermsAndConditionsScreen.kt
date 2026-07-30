@@ -226,7 +226,7 @@ fun TermsAndConditionsScreen(
                 TermsSection(
                     title = "9. Limitation of Liability",
                     content = """
-                        TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE DEVELOPER AND TOOLNEURON TEAM SHALL NOT BE LIABLE FOR:
+                        TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE DEVELOPER AND APPLICATION TEAM SHALL NOT BE LIABLE FOR:
                         • Any damages arising from your use or inability to use the App
                         • Content you generate or actions you take based on AI outputs
                         • Data loss, corruption, or security breaches on your device

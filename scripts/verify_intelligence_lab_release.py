@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 41', "version code")
-    assert_contains(gradle, 'versionName = "2.5.1-vlm-store-stable"', "version name")
+    assert_contains(gradle, 'versionCode = 42', "version code")
+    assert_contains(gradle, 'versionName = "2.5.2-vlm-store-stable"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
