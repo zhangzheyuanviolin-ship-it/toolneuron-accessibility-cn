@@ -86,8 +86,32 @@ import sys
 path = Path(sys.argv[1])
 text = path.read_text()
 text = text.replace("    common\n", "    llama-common\n")
+text = text.replace(
+"""set(PDFIUM_DIR     ${RAG_INGEST_DIR}/third_party/pdfium)
+
+add_library(pdfium SHARED IMPORTED)
+set_target_properties(pdfium PROPERTIES
+    IMPORTED_LOCATION ${PDFIUM_DIR}/${ANDROID_ABI}/libpdfium.so)
+
+""",
+"")
+text = text.replace(
+"    ${RAG_INGEST_DIR}/rag_ingest_pdf.cpp\n",
+"    ${RAG_INGEST_DIR}/rag_ingest_pdf_stub.cpp\n",
+)
+text = text.replace("    pdfium\n", "")
 path.write_text(text)
 PY
+
+cat > "${AI_REPO}/gguf_lib/src/main/cpp/rag_ingest/rag_ingest_pdf_stub.cpp" <<'EOF'
+#include "rag_ingest.h"
+
+#include <string>
+
+int rag_ingest_extract_pdf(const uint8_t*, size_t, std::string&) {
+    return RAG_INGEST_ERR_UNSUPPORTED;
+}
+EOF
 
 mkdir -p "${AI_REPO}/gguf_lib/src/main/java/com/dark/gguf_lib/toolcalling"
 cat > "${AI_REPO}/gguf_lib/src/main/java/com/dark/gguf_lib/toolcalling/ToolCallingCompat.kt" <<'EOF'
@@ -413,6 +437,16 @@ if missing:
     raise SystemExit(1)
 print("Verified latest GGUF AAR compatibility classes")
 PY
+if unzip -l "${AAR_SRC}" | grep -q 'libpdfium.so'; then
+    echo "The inference AAR must not package libpdfium.so" >&2
+    exit 1
+fi
+unzip -p "${AAR_SRC}" "jni/arm64-v8a/libgguf_lib.so" > "${WORK_DIR}/libgguf_lib.so"
+if readelf -d "${WORK_DIR}/libgguf_lib.so" | grep -q 'libpdfium.so'; then
+    echo "libgguf_lib.so must not link libpdfium.so in the inference build" >&2
+    exit 1
+fi
+echo "Verified latest GGUF AAR native library does not link libpdfium.so"
 cp "${AAR_SRC}" "${ROOT_DIR}/libs/gguf_lib-release.aar"
 
 mkdir -p "${ROOT_DIR}/out"

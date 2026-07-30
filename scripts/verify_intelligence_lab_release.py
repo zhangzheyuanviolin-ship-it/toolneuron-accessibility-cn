@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 PROTECTED_HASHES = {
-    "app/src/main/java/com/dark/tool_neuron/engine/GGUFEngine.kt": "a64adfda12286f11bcb0b9718c5e9307181325b476d5e3e45f2c32a2504d3d66",
+    "app/src/main/java/com/dark/tool_neuron/engine/GGUFEngine.kt": "37de5317b0799c952e00e26bf405a70ce55470294a0dbfbd12665bbac1ce9b9f",
     "app/src/main/java/com/dark/tool_neuron/service/LLMService.kt": "18ee01877c4379a8c27e1ab8d7d4efff6f757f5e44eb70955dd86ac2bc5e0f59",
     "app/src/main/java/com/dark/tool_neuron/worker/LlmModelWorker.kt": "65800efc5b21272cd753d668ca69ef9d9cf152354871b29aee4168fbb8218792",
     "app/src/main/java/com/dark/tool_neuron/global/ThirtyBMoESafeDefaults.kt": "f45625d3fe0d8dcd89c2eac6be1a143cf958e58db54e33bae496571b3ee56016",
@@ -62,8 +62,8 @@ def main() -> None:
 
     gradle = read("app/build.gradle.kts")
     assert_contains(gradle, 'applicationId = "com.dark.tool_neuron.intelligencelabtest"', "parallel test package")
-    assert_contains(gradle, 'versionCode = 37', "version code")
-    assert_contains(gradle, 'versionName = "2.7.0-latest-gguf-engine"', "version name")
+    assert_contains(gradle, 'versionCode = 38', "version code")
+    assert_contains(gradle, 'versionName = "2.7.1-latest-gguf-engine-nopdfium"', "version name")
     assert_contains(gradle, 'create("release")', "release signing")
     for env_name in [
         "INTELLIGENCE_LAB_KEYSTORE_PATH",
@@ -230,6 +230,8 @@ def main() -> None:
         "https://github.com/Siddhesh2377/Ai-Systems-New.git",
         "ggml_org_llama_cpp",
         "gguf_lib-release.aar",
+        "rag_ingest_pdf_stub.cpp",
+        "libpdfium.so",
     ]:
         assert_contains(latest_engine_script, needle, "latest gguf engine source build")
 
