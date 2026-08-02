@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 43
-        versionName = "2.5.3-30b-miui-foreground"
+        versionCode = 44
+        versionName = "2.5.4-tool-compat-nemotron"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }

@@ -750,7 +750,7 @@ class ChatViewModel @Inject constructor(
             messages.add(JSONObject().put("role", "system").put("content", buildString {
                 appendLine("Tools: $toolSignatures")
                 if (steps.isEmpty()) appendLine("Plan: $truncatedPlan")
-                appendLine("Call the next tool needed, or generate a text response if done.")
+                appendLine("Return exactly one tool call for the next action. Do not explain, do not answer from memory, and do not write prose. If web_search is needed, pass only {\"query\":\"short search query\"}.")
             }))
 
             // Original user request
@@ -766,10 +766,16 @@ class ChatViewModel @Inject constructor(
                 ))
             }
             Log.d(TAG, "Agent loop round $round: generating tool call")
-            val toolCalls = generateAndCollectToolCalls(messages, maxTokens = 300)
+            var toolCalls = generateAndCollectToolCalls(messages, maxTokens = 300)
             if (toolCalls.isEmpty()) {
-                Log.d(TAG, "Agent loop round $round: no tool call generated, stopping")
-                break
+                val fallback = synthesizeFallbackToolCall(prompt, plan, round)
+                if (fallback != null) {
+                    Log.w(TAG, "Agent loop round $round: synthesized fallback tool call ${fallback.first}")
+                    toolCalls = listOf(fallback)
+                } else {
+                    Log.d(TAG, "Agent loop round $round: no tool call generated, stopping")
+                    break
+                }
             }
 
             // Process each tool call from this generation (usually 1)
@@ -920,6 +926,42 @@ class ChatViewModel @Inject constructor(
         return steps
     }
 
+    private fun synthesizeFallbackToolCall(prompt: String, plan: String, round: Int): Pair<String, String>? {
+        if (round != 1) return null
+        val enabled = PluginManager.getEnabledToolNames().map { normalizeToolName(it).lowercase() }
+        if (WEB_SEARCH_TOOL_NAME !in enabled) return null
+        if (!looksLikeSearchRequest(prompt, plan)) return null
+        val query = deriveSearchQuery(prompt)
+        val argsJson = JSONObject().apply {
+            put("tool_calls", JSONArray().apply {
+                put(JSONObject().apply {
+                    put("name", WEB_SEARCH_TOOL_NAME)
+                    put("arguments", JSONObject().put("query", query))
+                })
+            })
+        }.toString()
+        return WEB_SEARCH_TOOL_NAME to argsJson
+    }
+
+    private fun looksLikeSearchRequest(prompt: String, plan: String): Boolean {
+        val text = "$prompt\n$plan".lowercase()
+        val keywords = listOf(
+            "web_search", "search", "latest", "news", "real-time", "realtime",
+            "联网", "网络搜索", "搜索", "检索", "最新", "新闻", "实时", "近期", "最近", "今天", "现在", "截至"
+        )
+        return keywords.any { it.lowercase() in text }
+    }
+
+    private fun deriveSearchQuery(prompt: String): String {
+        return prompt
+            .lines()
+            .map { it.trim() }
+            .lastOrNull { it.isNotBlank() }
+            ?.replace(Regex("\\s+"), " ")
+            ?.take(180)
+            ?: prompt.replace(Regex("\\s+"), " ").take(180)
+    }
+
     private fun compactToolResultForModel(toolName: String, resultJson: String): String {
         return if (toolName.equals(WEB_SEARCH_TOOL_NAME, ignoreCase = true)) {
             compactWebSearchResultForModel(resultJson)
@@ -982,7 +1024,7 @@ class ChatViewModel @Inject constructor(
             JSONObject().put("role", "system").put("content", systemPrompt),
             JSONObject().put("role", "user").put("content", userContent)
         )
-        val summary = generatePlainText(messages, maxTokens = SUMMARY_MAX_TOKENS)
+        val summary = postProcessAssistantText(generatePlainText(messages, maxTokens = SUMMARY_MAX_TOKENS))
         PluginManager.restoreGrammar()  // Re-enable grammar for next message
         return summary
     }
@@ -1086,7 +1128,7 @@ class ChatViewModel @Inject constructor(
         if (isNewChat) {
             val conversationMessages = buildConversationMessages(fullPrompt)
             val genResult = generateWithToolCalls(conversationMessages, maxTokens)
-            val finalResponse = filterToolCallSyntax(genResult.text)
+            val finalResponse = postProcessAssistantText(filterToolCallSyntax(genResult.text))
 
             _streamingAssistantMessage.value = finalResponse
             createChatWithMessages(prompt, finalResponse, currentMetrics)
@@ -1095,7 +1137,7 @@ class ChatViewModel @Inject constructor(
 
             val conversationMessages = buildConversationMessages(fullPrompt, isRegeneration)
             val genResult = generateWithToolCalls(conversationMessages, maxTokens)
-            val finalResponse = filterToolCallSyntax(genResult.text)
+            val finalResponse = postProcessAssistantText(filterToolCallSyntax(genResult.text))
 
             _streamingAssistantMessage.value = finalResponse
 
@@ -1599,6 +1641,26 @@ class ChatViewModel @Inject constructor(
                 }.toString()
                 return Pair(name, argsJson)
             }
+
+            // Format 4: Function style, e.g. web_search(query="...", num_results=5)
+            val functionRegex = Regex(
+                """([A-Za-z_][A-Za-z0-9_\- ]*)\s*\(\s*query\s*=\s*["“]([^"”]+)["”][^)]*\)""",
+                RegexOption.DOT_MATCHES_ALL
+            )
+            val functionMatch = functionRegex.find(content)
+            if (functionMatch != null) {
+                val name = normalizeToolName(functionMatch.groupValues[1])
+                val query = functionMatch.groupValues[2].trim()
+                val argsJson = JSONObject().apply {
+                    put("tool_calls", JSONArray().apply {
+                        put(JSONObject().apply {
+                            put("name", name)
+                            put("arguments", JSONObject().put("query", query))
+                        })
+                    })
+                }.toString()
+                return Pair(name, argsJson)
+            }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to parse tool call from content: ${e.message}")
         }
@@ -1622,6 +1684,9 @@ class ChatViewModel @Inject constructor(
         filtered = filtered.replace(Regex("\\n{3,}"), "\n\n")
         return filtered
     }
+
+    private fun postProcessAssistantText(content: String): String =
+        ChatOutputPostProcessor.cleanupFinalText(content)
 
     // ==================== Image Generation ====================
 
@@ -1817,7 +1882,7 @@ class ChatViewModel @Inject constructor(
         metrics: DecodingMetrics?,
         toolChainSteps: List<ToolChainStepData>? = null
     ) {
-        val filteredResponse = filterToolCallSyntax(assistantResponse)
+        val filteredResponse = postProcessAssistantText(filterToolCallSyntax(assistantResponse))
         val ragResultItems = _currentRagResults.value.takeIf { it.isNotEmpty() }?.map { result ->
             RagResultItem(ragName = result.ragName, content = result.content, score = result.score, nodeId = result.nodeId)
         }
