@@ -72,6 +72,7 @@ enum class ExaSearchTypeMode(val value: String, val label: String) {
 data class ToolSearchSettings(
     val provider: SearchProvider = SearchProvider.GOOGLE,
     val resultCount: Int = 3,
+    val modelResultCount: Int = 3,
     val topic: ToolSearchTopic = ToolSearchTopic.GENERAL,
     val detail: ToolSearchDetail = ToolSearchDetail.SUMMARY,
     val tavilyDepth: TavilyDepthMode = TavilyDepthMode.BASIC,
@@ -91,6 +92,7 @@ class ToolSettingsDataStore(private val context: Context) {
         private val EXA_API_KEY = stringPreferencesKey("exa_api_key")
         private val SEARCH_PROVIDER = stringPreferencesKey("search_provider")
         private val SEARCH_RESULT_COUNT = intPreferencesKey("search_result_count")
+        private val SEARCH_MODEL_RESULT_COUNT = intPreferencesKey("search_model_result_count")
         private val SEARCH_TOPIC_MODE = stringPreferencesKey("search_topic_mode")
         private val SEARCH_DETAIL_MODE = stringPreferencesKey("search_detail_mode")
         private val TAVILY_DEPTH_MODE = stringPreferencesKey("tavily_depth_mode")
@@ -106,6 +108,10 @@ class ToolSettingsDataStore(private val context: Context) {
 
     val searchResultCount: Flow<Int> = context.toolSettingsDataStore.data.map { prefs ->
         clampResultCount(prefs[SEARCH_RESULT_COUNT] ?: 3)
+    }
+
+    val searchModelResultCount: Flow<Int> = context.toolSettingsDataStore.data.map { prefs ->
+        clampResultCount(prefs[SEARCH_MODEL_RESULT_COUNT] ?: 3)
     }
 
     val searchTopic: Flow<ToolSearchTopic> = context.toolSettingsDataStore.data.map { prefs ->
@@ -144,6 +150,7 @@ class ToolSettingsDataStore(private val context: Context) {
         return ToolSearchSettings(
             provider = SearchProvider.from(prefs[SEARCH_PROVIDER]),
             resultCount = clampResultCount(prefs[SEARCH_RESULT_COUNT] ?: 3),
+            modelResultCount = clampResultCount(prefs[SEARCH_MODEL_RESULT_COUNT] ?: 3),
             topic = ToolSearchTopic.from(prefs[SEARCH_TOPIC_MODE]),
             detail = ToolSearchDetail.from(prefs[SEARCH_DETAIL_MODE]),
             tavilyDepth = TavilyDepthMode.from(prefs[TAVILY_DEPTH_MODE]),
@@ -161,6 +168,10 @@ class ToolSettingsDataStore(private val context: Context) {
 
     suspend fun updateSearchResultCount(count: Int) {
         context.toolSettingsDataStore.edit { it[SEARCH_RESULT_COUNT] = clampResultCount(count) }
+    }
+
+    suspend fun updateSearchModelResultCount(count: Int) {
+        context.toolSettingsDataStore.edit { it[SEARCH_MODEL_RESULT_COUNT] = clampResultCount(count) }
     }
 
     suspend fun updateSearchTopic(topic: ToolSearchTopic) {

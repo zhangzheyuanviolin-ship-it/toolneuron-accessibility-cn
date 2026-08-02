@@ -23,11 +23,13 @@ import com.dark.tool_neuron.service.ModelDownloadService
 import com.dark.tool_neuron.ui.screen.model_store.StoreTab
 import com.dark.tool_neuron.utils.ModelMetadataExtractor
 import com.dark.tool_neuron.utils.SizeCategory
+import com.dark.tool_neuron.vlm.VlmProjectorMatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
@@ -73,6 +75,9 @@ class ModelStoreViewModel @Inject constructor(
 
     private val _installedModels = MutableStateFlow<List<Model>>(emptyList())
     val installedModels: StateFlow<List<Model>> = _installedModels
+
+    private val _installedProjectorIds = MutableStateFlow<Set<String>>(emptySet())
+    val installedProjectorIdsState: StateFlow<Set<String>> = _installedProjectorIds
 
     private val _deviceInfo = MutableStateFlow<Map<String, String>>(emptyMap())
     val deviceInfo: StateFlow<Map<String, String>> = _deviceInfo
@@ -146,6 +151,12 @@ class ModelStoreViewModel @Inject constructor(
         loadDeviceInfo()
         loadModels()
         loadInstalledModels()
+        refreshInstalledProjectorIds()
+        viewModelScope.launch {
+            ModelDownloadService.downloadStates.collect {
+                refreshInstalledProjectorIds()
+            }
+        }
     }
 
     private fun loadDeviceInfo() {
@@ -465,11 +476,11 @@ class ModelStoreViewModel @Inject constructor(
     }
 
     fun installedProjectorIds(): Set<String> {
-        val dir = AppPaths.vlmProjectors(getApplication())
-        return dir.listFiles { file -> file.isFile && file.extension.equals("gguf", ignoreCase = true) }
-            ?.map { it.name.removeSuffix(".gguf") }
-            ?.toSet()
-            ?: emptySet()
+        return VlmProjectorMatcher.installedProjectorIds(AppPaths.vlmProjectors(getApplication()))
+    }
+
+    fun refreshInstalledProjectorIds() {
+        _installedProjectorIds.value = installedProjectorIds()
     }
 
     fun deleteProjector(model: HuggingFaceModel) {
@@ -478,6 +489,7 @@ class ModelStoreViewModel @Inject constructor(
         if (file.exists() && !file.delete()) {
             _error.value = "Failed to delete projector"
         }
+        refreshInstalledProjectorIds()
     }
 
     private fun parseApproxSizeMB(sizeStr: String): Int {

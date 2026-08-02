@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 44
-        versionName = "2.5.4-tool-compat-nemotron"
+        versionCode = 45
+        versionName = "2.5.5-tool-settings-vlm"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }

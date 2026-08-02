@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
+import java.io.File
 import java.util.Base64
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -684,11 +685,14 @@ object LlmModelWorker {
 
     private val _isVlmLoaded = MutableStateFlow(false)
     val isVlmLoaded: StateFlow<Boolean> = _isVlmLoaded.asStateFlow()
+    private val _currentVlmProjectorName = MutableStateFlow<String?>(null)
+    val currentVlmProjectorName: StateFlow<String?> = _currentVlmProjectorName.asStateFlow()
 
     fun loadVlmProjector(path: String, threads: Int = 0): Boolean {
         val engine = LLMService.instance?.ggufEngine ?: return false
         val success = engine.loadVlmProjector(path, threads)
         _isVlmLoaded.value = success
+        _currentVlmProjectorName.value = if (success) File(path).nameWithoutExtension else null
         if (success) Log.i(TAG, "VLM projector loaded: $path")
         else Log.e(TAG, "VLM projector failed to load: $path")
         return success
@@ -698,12 +702,14 @@ object LlmModelWorker {
         val engine = LLMService.instance?.ggufEngine ?: return false
         val success = engine.loadVlmProjectorFromFd(fd, threads)
         _isVlmLoaded.value = success
+        _currentVlmProjectorName.value = if (success) "content-uri projector" else null
         return success
     }
 
     fun releaseVlmProjector() {
         LLMService.instance?.ggufEngine?.releaseVlmProjector()
         _isVlmLoaded.value = false
+        _currentVlmProjectorName.value = null
         Log.i(TAG, "VLM projector released")
     }
 

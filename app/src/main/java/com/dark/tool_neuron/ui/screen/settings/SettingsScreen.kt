@@ -36,6 +36,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onModelEditor: () -> Unit = {},
     onAiMemoryClick: () -> Unit = {},
+    onToolSettingsClick: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel()
 ) {
     // App settings
@@ -113,7 +114,7 @@ fun SettingsScreen(
                 viewModel = viewModel
             )
 
-            toolSettingsSection()
+            toolSettingsEntrySection(onToolSettingsClick = onToolSettingsClick)
 
             // ── LLM ──
             llmSettingsSection(

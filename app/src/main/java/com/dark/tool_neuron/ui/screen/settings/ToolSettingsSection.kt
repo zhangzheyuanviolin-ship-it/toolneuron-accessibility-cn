@@ -8,19 +8,28 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dark.tool_neuron.data.ExaSearchTypeMode
@@ -30,6 +39,7 @@ import com.dark.tool_neuron.data.ToolSearchDetail
 import com.dark.tool_neuron.data.ToolSearchTopic
 import com.dark.tool_neuron.data.ToolSettingsDataStore
 import com.dark.tool_neuron.global.Standards
+import com.dark.tool_neuron.ui.components.ActionButton
 import com.dark.tool_neuron.ui.components.ActionTextButton
 import com.dark.tool_neuron.ui.components.ActionToggleGroup
 import com.dark.tool_neuron.ui.components.CaptionText
@@ -39,9 +49,58 @@ import com.dark.tool_neuron.ui.components.StandardCard
 import com.dark.tool_neuron.ui.icons.TnIcons
 import kotlinx.coroutines.launch
 
-internal fun LazyListScope.toolSettingsSection() {
+internal fun LazyListScope.toolSettingsEntrySection(onToolSettingsClick: () -> Unit) {
     item { Spacer(Modifier.height(Standards.SpacingSm)) }
     item { SectionDivider() }
+    item { SectionHeader(title = "Tools") }
+    item {
+        StandardCard(
+            title = "Tool Settings",
+            description = "Search engines, API keys, model context results, and workspace folder",
+            icon = TnIcons.Tool,
+            onClick = onToolSettingsClick
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ToolSettingsScreen(onNavigateBack: () -> Unit) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Tool Settings",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                navigationIcon = {
+                    ActionButton(
+                        onClickListener = onNavigateBack,
+                        icon = TnIcons.ArrowLeft,
+                        contentDescription = "Back"
+                    )
+                }
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentPadding = PaddingValues(horizontal = Standards.SpacingMd),
+            verticalArrangement = Arrangement.spacedBy(Standards.SpacingSm)
+        ) {
+            toolSettingsSection()
+            item { Spacer(Modifier.height(Standards.SpacingXl)) }
+        }
+    }
+}
+
+internal fun LazyListScope.toolSettingsSection() {
+    item { Spacer(Modifier.height(Standards.SpacingSm)) }
     item { SectionHeader(title = "Tool Configuration") }
 
     item {
@@ -50,6 +109,7 @@ internal fun LazyListScope.toolSettingsSection() {
         val scope = rememberCoroutineScope()
         val provider by store.searchProvider.collectAsStateWithLifecycle(initialValue = SearchProvider.GOOGLE)
         val resultCount by store.searchResultCount.collectAsStateWithLifecycle(initialValue = 3)
+        val modelResultCount by store.searchModelResultCount.collectAsStateWithLifecycle(initialValue = 3)
         val topic by store.searchTopic.collectAsStateWithLifecycle(initialValue = ToolSearchTopic.GENERAL)
         val detail by store.searchDetail.collectAsStateWithLifecycle(initialValue = ToolSearchDetail.SUMMARY)
         val tavilyDepth by store.tavilyDepth.collectAsStateWithLifecycle(initialValue = TavilyDepthMode.BASIC)
@@ -80,6 +140,13 @@ internal fun LazyListScope.toolSettingsSection() {
                         items = listOf(1, 3, 5, 8),
                         selectedItem = resultCount,
                         onItemSelected = { scope.launch { store.updateSearchResultCount(it) } },
+                        itemLabel = { it.toString() }
+                    )
+                    CaptionText(text = "Results Sent to Model")
+                    ActionToggleGroup(
+                        items = listOf(1, 3, 5, 8),
+                        selectedItem = modelResultCount,
+                        onItemSelected = { scope.launch { store.updateSearchModelResultCount(it) } },
                         itemLabel = { it.toString() }
                     )
                     CaptionText(text = "Topic")

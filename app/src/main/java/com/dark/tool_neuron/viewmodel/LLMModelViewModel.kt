@@ -256,6 +256,7 @@ class LLMModelViewModel @Inject constructor(
         try {
             when (_currentModelType.value) {
                 ProviderType.GGUF -> {
+                    LlmModelWorker.releaseVlmProjector()
                     LlmModelWorker.unloadGgufModel()
                     LlmModelWorker.setCurrentGgufModelId(null)
                 }
@@ -280,6 +281,7 @@ class LLMModelViewModel @Inject constructor(
             try {
                 when (_currentModelType.value) {
                     ProviderType.GGUF -> {
+                        LlmModelWorker.releaseVlmProjector()
                         LlmModelWorker.unloadGgufModel()
                         LlmModelWorker.setCurrentGgufModelId(null)
                     }

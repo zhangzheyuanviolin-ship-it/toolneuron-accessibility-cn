@@ -36,6 +36,7 @@ import com.dark.tool_neuron.ui.screen.memory.VaultDashboard
 import com.dark.tool_neuron.ui.screen.model_config.ModelConfigEditorScreen
 import com.dark.tool_neuron.ui.screen.model_store.ModelStoreScreen
 import com.dark.tool_neuron.ui.screen.settings.SettingsScreen
+import com.dark.tool_neuron.ui.screen.settings.ToolSettingsScreen
 import com.dark.tool_neuron.ui.screen.setup.ImageGenSetupScreen
 import com.dark.tool_neuron.ui.screen.setup.SetupScreen
 import com.dark.tool_neuron.viewModel.VaultGateViewModel
@@ -184,6 +185,7 @@ sealed class Screen(val route: String) {
     object Store : Screen("store")
     object Editor : Screen("editor")
     object Settings : Screen("settings")
+    object ToolSettings : Screen("tool_settings")
     object VaultManager : Screen("vault_manager")
     object AiMemory : Screen("ai_memory")
     object ImageGenSetup : Screen("image_gen_setup")
@@ -333,8 +335,13 @@ fun AppNavigation(
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onModelEditor = { navController.navigate(Screen.Editor.route) },
-                onAiMemoryClick = { navController.navigate(Screen.AiMemory.route) }
+                onAiMemoryClick = { navController.navigate(Screen.AiMemory.route) },
+                onToolSettingsClick = { navController.navigate(Screen.ToolSettings.route) }
             )
+        }
+
+        composable(Screen.ToolSettings.route) {
+            ToolSettingsScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable(Screen.VaultManager.route) {

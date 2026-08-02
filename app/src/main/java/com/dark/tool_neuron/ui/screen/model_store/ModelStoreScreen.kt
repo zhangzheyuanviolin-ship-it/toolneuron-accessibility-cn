@@ -48,9 +48,10 @@ fun ModelStoreScreen(
     val error by viewModel.error.collectAsStateWithLifecycle()
     val downloadStates by viewModel.downloadStates.collectAsStateWithLifecycle()
     val installedModels by viewModel.installedModels.collectAsStateWithLifecycle()
+    val installedProjectorIds by viewModel.installedProjectorIdsState.collectAsStateWithLifecycle()
     val deviceInfo by viewModel.deviceInfo.collectAsStateWithLifecycle()
     val deleteInProgress by viewModel.deleteInProgress.collectAsStateWithLifecycle()
-    val installedStoreModelIds = installedModels.map { it.id }.toSet() + viewModel.installedProjectorIds()
+    val installedStoreModelIds = installedModels.map { it.id }.toSet() + installedProjectorIds
 
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }

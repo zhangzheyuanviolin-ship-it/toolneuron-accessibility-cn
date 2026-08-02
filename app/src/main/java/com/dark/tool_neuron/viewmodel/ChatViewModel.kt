@@ -9,6 +9,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dark.tool_neuron.data.AppSettingsDataStore
+import com.dark.tool_neuron.data.ToolSettingsDataStore
 import com.dark.tool_neuron.di.AppContainer
 import com.dark.tool_neuron.engine.GenerationEvent
 import com.dark.tool_neuron.models.engine_schema.GgufEngineSchema
@@ -61,6 +62,7 @@ class ChatViewModel @Inject constructor(
 
     private val appContext = context
     private val appSettings = AppSettingsDataStore(context)
+    private val toolSettings = ToolSettingsDataStore(context)
     private val ttsDataStore = com.dark.tool_neuron.tts.TTSDataStore(context)
     // ControlVectorManager removed — will be re-added when new lib supports it
 
@@ -962,7 +964,7 @@ class ChatViewModel @Inject constructor(
             ?: prompt.replace(Regex("\\s+"), " ").take(180)
     }
 
-    private fun compactToolResultForModel(toolName: String, resultJson: String): String {
+    private suspend fun compactToolResultForModel(toolName: String, resultJson: String): String {
         return if (toolName.equals(WEB_SEARCH_TOOL_NAME, ignoreCase = true)) {
             compactWebSearchResultForModel(resultJson)
         } else {
@@ -970,42 +972,17 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private fun compactWebSearchResultForModel(resultJson: String): String {
+    private suspend fun compactWebSearchResultForModel(resultJson: String): String {
         return try {
-            val json = JSONObject(resultJson)
-            val results = json.optJSONArray("results") ?: JSONArray()
-            val shownResults = minOf(results.length(), MAX_SEARCH_RESULTS_FOR_MODEL)
-            buildString {
-                appendLine("web_search succeeded")
-                appendLine("query: ${json.optString("query", "")}")
-                appendLine("provider: ${json.optString("provider", "")}")
-                val answer = compactWhitespace(json.optString("answer", ""))
-                if (answer.isNotBlank()) appendLine("answer: ${answer.take(400)}")
-                appendLine("results:")
-                for (i in 0 until shownResults) {
-                    val item = results.optJSONObject(i) ?: continue
-                    val title = compactWhitespace(item.optString("title", "")).take(140)
-                    val url = item.optString("url", "").take(240)
-                    val snippet = compactWhitespace(
-                        item.optString("snippet", "").ifBlank { item.optString("content", "") }
-                    ).take(260)
-                    appendLine("${i + 1}. $title")
-                    if (url.isNotBlank()) appendLine("   url: $url")
-                    if (snippet.isNotBlank()) appendLine("   snippet: $snippet")
-                }
-                val total = json.optInt("totalResults", shownResults)
-                if (total > shownResults) {
-                    appendLine("context_note: ${total - shownResults} additional results were omitted for local model context safety.")
-                }
-            }.take(MAX_SEARCH_RESULT_CHARS_FOR_MODEL)
+            WebSearchResultCompactor.compact(
+                resultJson = resultJson,
+                modelResultCount = toolSettings.searchSettingsSnapshot().modelResultCount
+            )
         } catch (e: Exception) {
             Log.w(TAG, "Failed to compact web search result for model: ${e.message}")
-            resultJson.take(MAX_SEARCH_RESULT_CHARS_FOR_MODEL)
+            resultJson.take(DEFAULT_SEARCH_RESULT_CHARS_FOR_MODEL)
         }
     }
-
-    private fun compactWhitespace(value: String): String =
-        value.replace(Regex("\\s+"), " ").trim()
 
     /** Phase 3: Generate a natural language summary from all tool results. */
     private suspend fun generateSummary(
@@ -2293,8 +2270,7 @@ class ChatViewModel @Inject constructor(
         private const val SUMMARY_MAX_TOKENS = 512
         private const val WEB_SEARCH_TOOL_NAME = "web_search"
         private const val MAX_TOOL_RESULT_CHARS_FOR_MODEL = 1600
-        private const val MAX_SEARCH_RESULT_CHARS_FOR_MODEL = 1400
-        private const val MAX_SEARCH_RESULTS_FOR_MODEL = 3
+        private const val DEFAULT_SEARCH_RESULT_CHARS_FOR_MODEL = 1400
         private const val STREAMING_THROTTLE_MS = 100L
         private const val REPETITION_CHECK_INTERVAL = 200
         private const val REPETITION_MIN_PATTERN_LEN = 30

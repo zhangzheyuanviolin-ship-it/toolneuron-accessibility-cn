@@ -54,6 +54,7 @@ import com.dark.tool_neuron.models.ModelType
 import com.dark.tool_neuron.state.AppStateManager
 import com.dark.tool_neuron.ui.components.ActionButton
 import com.dark.tool_neuron.ui.components.ActionProgressButton
+import com.dark.tool_neuron.ui.components.ActionTextButton
 import com.dark.tool_neuron.ui.components.ActionToggleButton
 import com.dark.tool_neuron.ui.components.MemoryOverlayBottomSheet
 import com.dark.tool_neuron.ui.components.ModeToggleSwitch
@@ -68,7 +69,9 @@ import com.dark.tool_neuron.viewmodel.MemoryViewModel
 import com.dark.tool_neuron.viewmodel.PluginViewModel
 import com.dark.tool_neuron.viewmodel.RagViewModel
 import com.dark.tool_neuron.worker.LlmModelWorker
+import com.dark.tool_neuron.vlm.VlmProjectorMatcher
 import java.io.ByteArrayOutputStream
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -93,6 +96,7 @@ internal fun BottomBar(
     val isTextModelLoaded by chatViewModel.isTextModelLoaded.collectAsStateWithLifecycle()
     val isImageModelLoaded by chatViewModel.isImageModelLoaded.collectAsStateWithLifecycle()
     val isVlmProjectorLoaded by LlmModelWorker.isVlmLoaded.collectAsStateWithLifecycle()
+    val currentVlmProjectorName by LlmModelWorker.currentVlmProjectorName.collectAsStateWithLifecycle()
 
     // RAG State
     val loadedRags by ragViewModel.loadedRags.collectAsStateWithLifecycle()
@@ -222,22 +226,62 @@ internal fun BottomBar(
                         ), contentPadding = PaddingValues(bottom = Standards.SpacingSm)
                 ) {
                     items(installedModels) { modelConfig ->
-                        ModelListItem(
+                        val projectors = AppPaths.vlmProjectors(context)
+                            .listFiles { file ->
+                                file.isFile && file.extension.equals("gguf", ignoreCase = true)
+                            }
+                            ?.toList()
+                            ?: emptyList()
+                        val matchedProjector = if (modelConfig.providerType.name == "GGUF") {
+                            VlmProjectorMatcher.bestMatch(
+                                modelId = modelConfig.id,
+                                modelName = modelConfig.modelName,
+                                projectors = projectors
+                            )
+                        } else {
+                            null
+                        }
+
+                        Column(
                             modifier = Modifier
                                 .padding(top = Standards.SpacingSm)
                                 .padding(horizontal = Standards.SpacingSm),
-                            model = modelConfig,
-                            isLoaded = currentModelID == modelConfig.id,
-                            onClickListener = { selectedModel ->
-                                if (isModelLoaded) {
-                                    llmModelViewModel.unloadModel()
-                                    chatViewModel.hideModelList()
-                                } else {
-                                    llmModelViewModel.loadModel(selectedModel)
-                                    chatViewModel.hideModelList()
+                            verticalArrangement = Arrangement.spacedBy(Standards.SpacingXs)
+                        ) {
+                            ModelListItem(
+                                modifier = Modifier.fillMaxWidth(),
+                                model = modelConfig,
+                                isLoaded = currentModelID == modelConfig.id,
+                                onClickListener = { selectedModel ->
+                                    if (isModelLoaded) {
+                                        llmModelViewModel.unloadModel()
+                                        chatViewModel.hideModelList()
+                                    } else {
+                                        llmModelViewModel.loadModel(selectedModel)
+                                        chatViewModel.hideModelList()
+                                    }
                                 }
+                            )
+                            if (matchedProjector != null) {
+                                VlmProjectorRow(
+                                    projector = matchedProjector,
+                                    textModelLoaded = currentModelID == modelConfig.id,
+                                    projectorLoaded = isVlmProjectorLoaded &&
+                                            currentVlmProjectorName == matchedProjector.nameWithoutExtension,
+                                    onLoad = {
+                                        scope.launch(Dispatchers.IO) {
+                                            val success = LlmModelWorker.loadVlmProjector(matchedProjector.absolutePath)
+                                            if (!success) AppStateManager.setError("Failed to load VLM projector")
+                                        }
+                                    },
+                                    onRelease = {
+                                        scope.launch(Dispatchers.IO) {
+                                            LlmModelWorker.releaseVlmProjector()
+                                        }
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
@@ -358,12 +402,25 @@ internal fun BottomBar(
                         Box {
                             ActionButton(
                                 onClickListener = {
-                                    vlmProjectors = AppPaths.vlmProjectors(context)
+                                    val allProjectors = AppPaths.vlmProjectors(context)
                                         .listFiles { file ->
                                             file.isFile && file.extension.equals("gguf", ignoreCase = true)
                                         }
                                         ?.sortedBy { it.name.lowercase() }
                                         ?: emptyList()
+                                    val currentModel = installedModels.firstOrNull { it.id == currentModelID }
+                                    val matched = currentModel?.let {
+                                        VlmProjectorMatcher.bestMatch(
+                                            modelId = it.id,
+                                            modelName = it.modelName,
+                                            projectors = allProjectors
+                                        )
+                                    }
+                                    vlmProjectors = if (matched != null) {
+                                        listOf(matched) + allProjectors.filter { it.absolutePath != matched.absolutePath }
+                                    } else {
+                                        allProjectors
+                                    }
                                     showAttachmentMenu = true
                                 },
                                 icon = TnIcons.Photo,
@@ -543,5 +600,51 @@ internal fun BottomBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun VlmProjectorRow(
+    projector: File,
+    textModelLoaded: Boolean,
+    projectorLoaded: Boolean,
+    onLoad: () -> Unit,
+    onRelease: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+                RoundedCornerShape(Standards.RadiusMd)
+            )
+            .padding(horizontal = Standards.SpacingSm, vertical = Standards.SpacingXs),
+        horizontalArrangement = Arrangement.spacedBy(Standards.SpacingSm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = TnIcons.Photo,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MaterialTheme.colorScheme.secondary
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Vision projector",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Text(
+                text = projector.nameWithoutExtension.take(42),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        ActionTextButton(
+            onClickListener = if (projectorLoaded) onRelease else onLoad,
+            icon = if (projectorLoaded) TnIcons.X else TnIcons.Photo,
+            text = if (projectorLoaded) "Release" else "Load",
+            enabled = textModelLoaded
+        )
     }
 }
