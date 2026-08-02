@@ -21,6 +21,15 @@ data class DecodingMetrics(
     val contextTokensUsed: Int = 0,
     val contextTokensMax: Int = 0,
     val contextUsagePercent: Float = 0f,
+    val vlmImageCount: Int = 0,
+    val vlmOriginalWidth: Int = 0,
+    val vlmOriginalHeight: Int = 0,
+    val vlmProcessedWidth: Int = 0,
+    val vlmProcessedHeight: Int = 0,
+    val vlmOriginalBytes: Int = 0,
+    val vlmProcessedBytes: Int = 0,
+    val vlmPreprocessMs: Long = 0,
+    val vlmQuality: String = "",
 )
 
 /** Convert library DecodingMetrics to local serializable version */

@@ -2,7 +2,6 @@ package com.dark.tool_neuron.ui.screen.home
 import com.dark.tool_neuron.i18n.tn
 
 import android.content.Intent
-import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dark.tool_neuron.activity.RagActivity
+import com.dark.tool_neuron.data.AppSettingsDataStore
 import com.dark.tool_neuron.global.AppPaths
 import com.dark.tool_neuron.global.Standards
 import com.dark.tool_neuron.models.ModelType
@@ -69,11 +69,13 @@ import com.dark.tool_neuron.viewmodel.MemoryViewModel
 import com.dark.tool_neuron.viewmodel.PluginViewModel
 import com.dark.tool_neuron.viewmodel.RagViewModel
 import com.dark.tool_neuron.worker.LlmModelWorker
+import com.dark.tool_neuron.vlm.VlmImagePayload
+import com.dark.tool_neuron.vlm.VlmImagePreprocessor
 import com.dark.tool_neuron.vlm.VlmProjectorMatcher
-import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // ── BottomBar ───────────────────────────────────────────────────────────────────
 
@@ -88,6 +90,10 @@ internal fun BottomBar(
     toolCallingEnabled: Boolean = true
 ) {
     val context = LocalContext.current
+    val appSettings = remember(context) { AppSettingsDataStore(context.applicationContext) }
+    val vlmImageQuality by appSettings.vlmImageQuality.collectAsStateWithLifecycle(
+        initialValue = com.dark.tool_neuron.vlm.VlmImageQuality.BALANCED
+    )
     var value by remember { mutableStateOf("") }
     val installedModels by llmModelViewModel.installedModels.collectAsStateWithLifecycle(emptyList())
     val currentModelID by llmModelViewModel.currentModelID.collectAsStateWithLifecycle()
@@ -129,15 +135,25 @@ internal fun BottomBar(
     // More Options overlay state
     var showMoreOptions by remember { mutableStateOf(false) }
     var showAttachmentMenu by remember { mutableStateOf(false) }
-    var selectedImageData by remember { mutableStateOf<List<ByteArray>>(emptyList()) }
+    var selectedImageData by remember { mutableStateOf<List<VlmImagePayload>>(emptyList()) }
     var vlmProjectors by remember { mutableStateOf(emptyList<java.io.File>()) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                selectedImageData = listOf(input.readBytes())
+            scope.launch {
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        context.contentResolver.openInputStream(uri)?.use { input ->
+                            VlmImagePreprocessor.preprocess(input.readBytes(), vlmImageQuality)
+                        }
+                    }
+                }.onSuccess { payload ->
+                    if (payload != null) selectedImageData = listOf(payload)
+                }.onFailure {
+                    AppStateManager.setError("Failed to prepare image: ${it.message}")
+                }
             }
         }
     }
@@ -146,9 +162,19 @@ internal fun BottomBar(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
         if (bitmap != null) {
-            val output = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 88, output)
-            selectedImageData = listOf(output.toByteArray())
+            scope.launch {
+                runCatching {
+                    withContext(Dispatchers.Default) {
+                        val output = java.io.ByteArrayOutputStream()
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, output)
+                        VlmImagePreprocessor.preprocess(output.toByteArray(), vlmImageQuality)
+                    }
+                }.onSuccess { payload ->
+                    selectedImageData = listOf(payload)
+                }.onFailure {
+                    AppStateManager.setError("Failed to prepare photo: ${it.message}")
+                }
+            }
         }
     }
 
@@ -346,8 +372,16 @@ internal fun BottomBar(
                 )
 
                 AnimatedVisibility(visible = selectedImageData.isNotEmpty()) {
+                    val firstImage = selectedImageData.firstOrNull()
                     Text(
-                        text = tn("${selectedImageData.size} image attached"),
+                        text = if (firstImage != null) {
+                            tn("${selectedImageData.size} image attached") +
+                                    " · ${firstImage.originalWidth}x${firstImage.originalHeight}" +
+                                    " -> ${firstImage.processedWidth}x${firstImage.processedHeight}" +
+                                    " · ${firstImage.quality.label}"
+                        } else {
+                            tn("${selectedImageData.size} image attached")
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = Standards.SpacingMd)

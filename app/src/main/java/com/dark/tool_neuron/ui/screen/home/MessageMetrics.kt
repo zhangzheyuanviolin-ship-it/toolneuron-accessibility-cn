@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.dark.tool_neuron.models.engine_schema.DecodingMetrics
 import com.dark.tool_neuron.models.messages.ImageGenerationMetrics
 import com.dark.tool_neuron.models.messages.MemoryMetrics
+import com.dark.tool_neuron.global.formatBytes
 import com.dark.tool_neuron.ui.components.ExpandCollapseIcon
 import com.dark.tool_neuron.ui.icons.TnIcons
 import com.dark.tool_neuron.ui.theme.Motion
@@ -155,6 +156,47 @@ internal fun MetricsDisplay(metrics: DecodingMetrics, memoryMetrics: MemoryMetri
                             label = "Time to First Token",
                             value = "${"%.0f".format(metrics.timeToFirstTokenMs)} ms"
                         )
+                    }
+
+                    if (metrics.vlmImageCount > 0) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = Standards.SpacingXs),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                        )
+                        Text(
+                            text = "Vision Input",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(bottom = Standards.SpacingXs)
+                        )
+                        MetricRow(
+                            icon = TnIcons.Photo,
+                            label = "Images",
+                            value = metrics.vlmImageCount.toString()
+                        )
+                        MetricRow(
+                            icon = TnIcons.Photo,
+                            label = "Image Size",
+                            value = "${metrics.vlmOriginalWidth}x${metrics.vlmOriginalHeight} -> ${metrics.vlmProcessedWidth}x${metrics.vlmProcessedHeight}"
+                        )
+                        MetricRow(
+                            icon = TnIcons.Database,
+                            label = "Image Bytes",
+                            value = "${formatBytes(metrics.vlmOriginalBytes)} -> ${formatBytes(metrics.vlmProcessedBytes)}"
+                        )
+                        MetricRow(
+                            icon = TnIcons.Gauge,
+                            label = "VLM Quality",
+                            value = metrics.vlmQuality.ifBlank { "Balanced" }
+                        )
+                        if (metrics.vlmPreprocessMs > 0) {
+                            MetricRow(
+                                icon = TnIcons.Clock,
+                                label = "Image Prep",
+                                value = "${metrics.vlmPreprocessMs} ms"
+                            )
+                        }
                     }
 
                     formattedTime?.let { time ->

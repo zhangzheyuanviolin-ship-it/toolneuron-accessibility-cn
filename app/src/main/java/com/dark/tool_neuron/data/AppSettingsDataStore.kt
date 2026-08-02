@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.dark.tool_neuron.global.PerformanceMode
+import com.dark.tool_neuron.vlm.VlmImageQuality
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -33,6 +34,7 @@ class AppSettingsDataStore(private val context: Context) {
         private val HARDWARE_TUNING_ENABLED = booleanPreferencesKey("hardware_tuning_enabled")
         private val PERFORMANCE_MODE = stringPreferencesKey("performance_mode")
         private val ASK_MODEL_RELOAD_DIALOG = booleanPreferencesKey("ask_model_reload_dialog")
+        private val VLM_IMAGE_QUALITY = stringPreferencesKey("vlm_image_quality")
     }
 
     val streamingEnabled: Flow<Boolean> = context.appSettingsDataStore.data.map { prefs ->
@@ -53,6 +55,10 @@ class AppSettingsDataStore(private val context: Context) {
 
     val imageBlurEnabled: Flow<Boolean> = context.appSettingsDataStore.data.map { prefs ->
         prefs[IMAGE_BLUR_ENABLED] ?: true
+    }
+
+    val vlmImageQuality: Flow<VlmImageQuality> = context.appSettingsDataStore.data.map { prefs ->
+        VlmImageQuality.from(prefs[VLM_IMAGE_QUALITY])
     }
 
     val loadTTSOnStart: Flow<Boolean> = context.appSettingsDataStore.data.map { prefs ->
@@ -81,6 +87,10 @@ class AppSettingsDataStore(private val context: Context) {
 
     suspend fun updateImageBlurEnabled(enabled: Boolean) {
         context.appSettingsDataStore.edit { it[IMAGE_BLUR_ENABLED] = enabled }
+    }
+
+    suspend fun updateVlmImageQuality(quality: VlmImageQuality) {
+        context.appSettingsDataStore.edit { it[VLM_IMAGE_QUALITY] = quality.value }
     }
 
     suspend fun updateLoadTTSOnStart(enabled: Boolean) {

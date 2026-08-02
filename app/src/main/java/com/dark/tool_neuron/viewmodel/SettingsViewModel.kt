@@ -22,6 +22,7 @@ import com.dark.tool_neuron.state.AppStateManager
 import com.dark.tool_neuron.tts.TTSDataStore
 import com.dark.tool_neuron.tts.TTSManager
 import com.dark.tool_neuron.tts.TTSSettings
+import com.dark.tool_neuron.vlm.VlmImageQuality
 import com.dark.tool_neuron.worker.SystemBackupManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -93,6 +94,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val imageBlurEnabled: StateFlow<Boolean> = appSettingsDataStore.imageBlurEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val vlmImageQuality: StateFlow<VlmImageQuality> = appSettingsDataStore.vlmImageQuality
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VlmImageQuality.BALANCED)
+
     val loadTTSOnStart: StateFlow<Boolean> = appSettingsDataStore.loadTTSOnStart
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
@@ -160,6 +164,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun setImageBlurEnabled(enabled: Boolean) {
         viewModelScope.launch { appSettingsDataStore.updateImageBlurEnabled(enabled) }
+    }
+
+    fun setVlmImageQuality(quality: VlmImageQuality) {
+        viewModelScope.launch { appSettingsDataStore.updateVlmImageQuality(quality) }
     }
 
     fun setLoadTTSOnStart(enabled: Boolean) {

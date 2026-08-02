@@ -31,6 +31,7 @@ import com.dark.tool_neuron.worker.DiffusionInferenceParams
 import com.dark.tool_neuron.models.ModelType
 import com.dark.tool_neuron.tts.TTSManager
 import com.dark.tool_neuron.tts.TTSSettings
+import com.dark.tool_neuron.vlm.VlmImagePayload
 import com.dark.tool_neuron.worker.LlmModelWorker
 import com.dark.tool_neuron.models.engine_schema.DecodingMetrics
 import com.dark.gguf_lib.toolcalling.ToolCall
@@ -462,7 +463,7 @@ class ChatViewModel @Inject constructor(
      * @param prompt User's text prompt
      * @param imageData List of raw image file bytes (JPEG/PNG)
      */
-    fun sendChatWithImages(prompt: String, imageData: List<ByteArray>) {
+    fun sendChatWithImages(prompt: String, imagePayloads: List<VlmImagePayload>) {
         if (!LlmModelWorker.isGgufModelLoaded.value) {
             reportError("Please load a text generation model first")
             return
@@ -499,10 +500,11 @@ class ChatViewModel @Inject constructor(
                 // Insert image marker into prompt for VLM
                 val marker = LlmModelWorker.getVlmDefaultMarker()
                 val vlmPrompt = if (prompt.contains(marker)) prompt
-                    else marker.repeat(imageData.size) + "\n" + prompt
+                    else marker.repeat(imagePayloads.size) + "\n" + prompt
 
                 val conversationMessages = buildConversationMessages(vlmPrompt)
                 val jsonArray = JSONArray(conversationMessages)
+                val imageData = imagePayloads.map { it.bytes }
 
                 AppStateManager.setGeneratingText()
 
@@ -524,7 +526,7 @@ class ChatViewModel @Inject constructor(
                         is GenerationEvent.Done -> {
                             _streamingAssistantMessage.value = resultBuilder.toString()
                         }
-                        is GenerationEvent.Metrics -> { currentMetrics = event.metrics }
+                        is GenerationEvent.Metrics -> { currentMetrics = withVlmMetrics(event.metrics, imagePayloads) }
                         is GenerationEvent.Progress -> { /* progress tracked elsewhere */ }
                         is GenerationEvent.Error -> {
                             Log.e(TAG, "VLM generation error: ${event.message}")
@@ -568,6 +570,24 @@ class ChatViewModel @Inject constructor(
                 resetStreamingState()
             }
         }
+    }
+
+    private fun withVlmMetrics(
+        metrics: DecodingMetrics,
+        imagePayloads: List<VlmImagePayload>
+    ): DecodingMetrics {
+        val first = imagePayloads.firstOrNull() ?: return metrics
+        return metrics.copy(
+            vlmImageCount = imagePayloads.size,
+            vlmOriginalWidth = first.originalWidth,
+            vlmOriginalHeight = first.originalHeight,
+            vlmProcessedWidth = first.processedWidth,
+            vlmProcessedHeight = first.processedHeight,
+            vlmOriginalBytes = imagePayloads.sumOf { it.originalBytes },
+            vlmProcessedBytes = imagePayloads.sumOf { it.processedBytes },
+            vlmPreprocessMs = imagePayloads.sumOf { it.preprocessingMs },
+            vlmQuality = first.quality.label
+        )
     }
 
     /**

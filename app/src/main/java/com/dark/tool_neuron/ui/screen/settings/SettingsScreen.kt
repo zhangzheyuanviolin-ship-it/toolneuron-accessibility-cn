@@ -45,6 +45,7 @@ fun SettingsScreen(
     val toolCallingEnabled by viewModel.toolCallingEnabled.collectAsStateWithLifecycle()
     val toolCallingBypassEnabled by viewModel.toolCallingBypassEnabled.collectAsStateWithLifecycle()
     val imageBlurEnabled by viewModel.imageBlurEnabled.collectAsStateWithLifecycle()
+    val vlmImageQuality by viewModel.vlmImageQuality.collectAsStateWithLifecycle()
     val loadTTSOnStart by viewModel.loadTTSOnStart.collectAsStateWithLifecycle()
     val codeHighlightEnabled by viewModel.codeHighlightEnabled.collectAsStateWithLifecycle()
     val aiMemoryEnabled by viewModel.aiMemoryEnabled.collectAsStateWithLifecycle()
@@ -166,6 +167,7 @@ fun SettingsScreen(
             // ── Image Generation ──
             imageGenerationSection(
                 imageBlurEnabled = imageBlurEnabled,
+                vlmImageQuality = vlmImageQuality,
                 viewModel = viewModel
             )
 

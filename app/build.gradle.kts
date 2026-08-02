@@ -27,8 +27,8 @@ android {
         applicationId = "com.dark.tool_neuron.intelligencelabtest"
         minSdk = 29
         targetSdk = 36
-        versionCode = 45
-        versionName = "2.5.5-tool-settings-vlm"
+        versionCode = 46
+        versionName = "2.5.6-vlm-image-fast"
         ndk {
             abiFilters += intelligenceLabAbiFilters
         }

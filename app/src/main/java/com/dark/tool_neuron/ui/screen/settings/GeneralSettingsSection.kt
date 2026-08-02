@@ -34,6 +34,7 @@ import com.dark.tool_neuron.ui.components.StandardCard
 import com.dark.tool_neuron.ui.components.SwitchRow
 import com.dark.tool_neuron.ui.icons.TnIcons
 import com.dark.tool_neuron.viewmodel.SettingsViewModel
+import com.dark.tool_neuron.vlm.VlmImageQuality
 
 // ── General Settings Section ──
 
@@ -383,6 +384,7 @@ internal fun LazyListScope.aiMemorySection(
 
 internal fun LazyListScope.imageGenerationSection(
     imageBlurEnabled: Boolean,
+    vlmImageQuality: VlmImageQuality,
     viewModel: SettingsViewModel
 ) {
     item { Spacer(Modifier.height(Standards.SpacingSm)) }
@@ -396,6 +398,21 @@ internal fun LazyListScope.imageGenerationSection(
             checked = imageBlurEnabled,
             onCheckedChange = { viewModel.setImageBlurEnabled(it) }
         )
+    }
+
+    item {
+        StandardCard(
+            title = "Vision Image Quality",
+            description = "Resize images before VLM inference. Lower sizes start faster.",
+            icon = TnIcons.Photo
+        ) {
+            ActionToggleGroup(
+                items = VlmImageQuality.entries.toList(),
+                selectedItem = vlmImageQuality,
+                onItemSelected = { viewModel.setVlmImageQuality(it) },
+                itemLabel = { it.label }
+            )
+        }
     }
 }
 
