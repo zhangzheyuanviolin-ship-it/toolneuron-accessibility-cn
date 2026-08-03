@@ -1,24 +1,15 @@
-# ToolNeuron
+# Intelligence Lab
 
-This repository is an auditable derivative project focused on accessibility and Chinese localization.
-Upstream source and license details are documented in `docs/UPSTREAM_ATTRIBUTION.md`.
-Release snapshots and rollback-friendly version logs are tracked in `docs/releases/` and `CHANGELOG.md`.
+Intelligence Lab, shown in Chinese as `智能实验室`, is an Android app for local GGUF model testing, mobile LLM inference, tool calling, model-store downloads, and VLM image-to-text experiments.
 
-**Offline AI assistant for Android.** Run LLMs, generate images, search documents — all on-device. No cloud. No subscriptions. No data leaves your phone.
+This repository is a maintained derivative of the upstream ToolNeuron codebase. It is not currently linked as a GitHub fork, so the source relationship is documented explicitly in `docs/UPSTREAM_ATTRIBUTION.md`, `docs/releases/`, and `CHANGELOG.md`.
 
-[![Platform](https://img.shields.io/badge/Platform-Android_12%2B-3DDC84?logo=android&logoColor=white)](https://github.com/Siddhesh2377/ToolNeuron)
+Current stable mobile target: Redmi K70 Pro, 24 GB RAM, Android/MIUI environment, with validated local loading and inference for selected 30B-class GGUF MoE models.
+
+[![Platform](https://img.shields.io/badge/Platform-Android_12%2B-3DDC84?logo=android&logoColor=white)](https://github.com/zhangzheyuanviolin-ship-it/intelligence-lab-android)
 [![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/mVPwHDhrAP)
 
-<p align="left">
-  <a href="https://play.google.com/store/apps/details?id=com.dark.tool_neuron">
-    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-         alt="Get it on Google Play"
-         height="80"/>
-  </a>
-</p>
-
-[Download APK](https://github.com/Siddhesh2377/ToolNeuron/releases) · [Discord](https://discord.gg/mVPwHDhrAP) · [Report Issue](https://github.com/Siddhesh2377/ToolNeuron/issues)
+Latest stable release APKs are published from this repository's GitHub Releases. Historical phone-local APK archives are intentionally kept outside the git repository under the user's shared-storage release archive.
 
 ---
 
@@ -51,7 +42,7 @@ Release snapshots and rollback-friendly version logs are tracked in `docs/releas
 
 ### 1. Install
 
-[Google Play](https://play.google.com/store/apps/details?id=com.dark.tool_neuron) or [GitHub Releases](https://github.com/Siddhesh2377/ToolNeuron/releases).
+Install the APK from this repository's GitHub Releases or from the maintained phone-local archive.
 
 ### 2. Get a model
 
@@ -62,7 +53,7 @@ Release snapshots and rollback-friendly version logs are tracked in `docs/releas
 
 **Or manually:**
 1. Download a `.gguf` file from [HuggingFace](https://huggingface.co/models?other=gguf)
-2. Use the model picker in ToolNeuron to load it
+2. Use the model picker in Intelligence Lab to load it
 
 ### 3. Chat
 
@@ -164,14 +155,14 @@ Export everything to an encrypted `.tnbackup` file (PBKDF2 + AES-256-GCM):
 ### Build
 
 ```bash
-git clone https://github.com/Siddhesh2377/ToolNeuron.git
-cd ToolNeuron
+git clone https://github.com/zhangzheyuanviolin-ship-it/intelligence-lab-android.git
+cd intelligence-lab-android
 
 # Debug
 ./gradlew assembleDebug
 ./gradlew installDebug
 
-# Release
+# Release, with release signing variables configured
 ./gradlew assembleRelease
 ```
 
@@ -241,7 +232,7 @@ See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the project ecosystem and related rep
 
 If you find a security vulnerability:
 1. **Do not** open a public GitHub issue
-2. Email siddheshsonar2377@gmail.com
+2. Contact the current repository maintainer privately
 3. Include reproduction steps
 4. Allow reasonable time for a fix before disclosure
 
@@ -256,6 +247,7 @@ If you find a security vulnerability:
 - [SillyTavern](https://github.com/SillyTavern/SillyTavern) — Character card format reference
 - [Apache POI](https://poi.apache.org/), [PDFBox-Android](https://github.com/TomRoush/PdfBox-Android), [EpubLib](https://github.com/psiegman/epublib) — Document parsing
 - [Jetpack Compose](https://developer.android.com/jetpack/compose), [Room](https://developer.android.com/training/data-storage/room), [Hilt](https://dagger.dev/hilt/), [OkHttp](https://square.github.io/okhttp/), [Coil 3](https://coil-kt.github.io/coil/), [Jsoup](https://jsoup.org/)
+- [ToolNeuron](https://github.com/Siddhesh2377/ToolNeuron) by [Siddhesh Sonar](https://github.com/Siddhesh2377) — upstream source baseline
 
 ---
 
@@ -265,6 +257,4 @@ If you find a security vulnerability:
 
 ---
 
-Built by [Siddhesh Sonar](https://github.com/Siddhesh2377)
-
-[Star the repo](https://github.com/Siddhesh2377/ToolNeuron) · [Report a bug](https://github.com/Siddhesh2377/ToolNeuron/issues) · [Join Discord](https://discord.gg/mVPwHDhrAP)
+Maintained as Intelligence Lab / 智能实验室.

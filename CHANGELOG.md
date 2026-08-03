@@ -2,6 +2,26 @@
 
 All notable changes in this repository are documented here for auditability and rollback.
 
+## [v2.5.6-vlm-image-fast] - 2026-08-03
+
+### Stable Application Name
+- Renamed the maintained app identity in repository documentation to Intelligence Lab / 智能实验室.
+- Recorded the repository as an independent maintained derivative of `Siddhesh2377/ToolNeuron` rather than a GitHub-linked fork.
+
+### Validated Stable APK
+- Package: `com.dark.tool_neuron.intelligencelabtest`
+- Version code: `46`
+- Version name: `2.5.6-vlm-image-fast`
+- Cloud build workflow run: `30750899684`
+- APK build commit: `27b2902fd7bd4cfab9a4be5f329dc6c7ce13d8fa`
+- APK SHA-256: `e21cb6f496a8e6fc0a14a489bc6fb264d6bde7c0135920722fa8e289f34d485c`
+
+### Stabilized Capabilities
+- Preserved the MIUI foreground stability strategy that was validated for 30B-class GGUF MoE loading and inference.
+- Kept the stable GGUF loading path and native inference engine used by the validated phone build.
+- Added VLM image preprocessing quality presets so image-to-text prompts can downscale large gallery images before native VLM inference.
+- Added VLM input metrics showing original image size, processed image size, byte reduction, selected quality preset, and image preprocessing time.
+
 ## [v2.0.0-a11y-zh.2] - 2026-03-17
 
 ### Source Baseline
