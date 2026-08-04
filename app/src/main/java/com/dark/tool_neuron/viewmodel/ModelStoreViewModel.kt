@@ -18,6 +18,7 @@ import com.dark.tool_neuron.repo.HuggingFaceExplorerRepository
 import com.dark.tool_neuron.repo.ModelRepositoryDataStore
 import com.dark.tool_neuron.repo.ModelStoreRepository
 import com.dark.tool_neuron.repo.RepositoryValidator
+import com.dark.tool_neuron.repo.UnsupportedModelFilter
 import com.dark.tool_neuron.repo.ValidationResult
 import com.dark.tool_neuron.service.ModelDownloadService
 import com.dark.tool_neuron.ui.screen.model_store.StoreTab
@@ -176,7 +177,7 @@ class ModelStoreViewModel @Inject constructor(
                 val repos = repositories.first()
                 cachedRepos = repos
                 repository.refreshModels(repos).onSuccess { modelsList ->
-                    _models.value = modelsList
+                    _models.value = modelsList.filterNot { UnsupportedModelFilter.isUnsupportedGemma4Model(it) }
                     applyAllFilters()
                 }.onFailure { exception ->
                     _error.value = exception.message
@@ -198,7 +199,7 @@ class ModelStoreViewModel @Inject constructor(
                 val repos = repositories.first()
                 cachedRepos = repos
                 repository.getAvailableModels(repos).onSuccess { modelsList ->
-                    _models.value = modelsList
+                    _models.value = modelsList.filterNot { UnsupportedModelFilter.isUnsupportedGemma4Model(it) }
                     applyAllFilters()
                 }.onFailure { exception ->
                     _error.value = exception.message
@@ -225,7 +226,7 @@ class ModelStoreViewModel @Inject constructor(
 
     private fun applyAllFilters() {
         viewModelScope.launch {
-            var filtered = _models.value
+            var filtered = _models.value.filterNot { UnsupportedModelFilter.isUnsupportedGemma4Model(it) }
 
             // Model type filter (GGUF, SD, TTS)
             _selectedModelType.value?.let { type ->

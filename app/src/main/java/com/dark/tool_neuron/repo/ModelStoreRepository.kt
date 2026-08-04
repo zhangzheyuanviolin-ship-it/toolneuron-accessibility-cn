@@ -23,7 +23,7 @@ data class ModelStoreCache(
 ) {
     companion object {
         // Bump this when filtering logic changes to auto-invalidate stale caches
-        const val CURRENT_VERSION = 3
+        const val CURRENT_VERSION = 4
     }
 }
 
@@ -110,14 +110,15 @@ class ModelStoreRepository(private val context: Context) {
     ): Result<List<HuggingFaceModel>> {
         // Return in-memory cache if available and not force-refresh
         if (!forceRefresh && cachedModels != null) {
-            return Result.success(cachedModels!!)
+            return Result.success(sanitizeModels(cachedModels!!))
         }
 
         // Load from disk cache if not force-refresh
         if (!forceRefresh) {
             loadDiskCache()?.let { cached ->
-                cachedModels = cached
-                return Result.success(cached)
+                val sanitized = sanitizeModels(cached)
+                cachedModels = sanitized
+                return Result.success(sanitized)
             }
         }
 
@@ -136,15 +137,16 @@ class ModelStoreRepository(private val context: Context) {
         return try {
             val models = mutableListOf<HuggingFaceModel>()
 
-            val sdModels = getSDModels(repositories.filter { it.modelType == ModelType.SD && it.isEnabled })
-            val ggufModels = getGGUFModels(repositories.filter { it.modelType == ModelType.GGUF && it.isEnabled })
+            val sanitizedRepos = repositories.filterNot { UnsupportedModelFilter.isUnsupportedGemma4Repository(it) }
+            val sdModels = getSDModels(sanitizedRepos.filter { it.modelType == ModelType.SD && it.isEnabled })
+            val ggufModels = getGGUFModels(sanitizedRepos.filter { it.modelType == ModelType.GGUF && it.isEnabled })
             val ttsModels = getTTSModels()
 
             models.addAll(sdModels)
             models.addAll(ggufModels)
             models.addAll(ttsModels)
 
-            val modelList = models.toList()
+            val modelList = sanitizeModels(models.toList())
             cachedModels = modelList
             writeDiskCache(modelList)
 
@@ -164,7 +166,7 @@ class ModelStoreRepository(private val context: Context) {
                 cacheFile.delete()
                 return null
             }
-            cache.models.ifEmpty { null }
+            sanitizeModels(cache.models).ifEmpty { null }
         } catch (e: Exception) {
             Log.e("ModelStoreRepository", "Failed to load disk cache", e)
             null
@@ -174,7 +176,7 @@ class ModelStoreRepository(private val context: Context) {
     private fun writeDiskCache(models: List<HuggingFaceModel>) {
         try {
             val cache = ModelStoreCache(
-                models = models,
+                models = sanitizeModels(models),
                 timestamp = System.currentTimeMillis(),
                 cacheVersion = ModelStoreCache.CURRENT_VERSION
             )
@@ -192,8 +194,7 @@ class ModelStoreRepository(private val context: Context) {
 
     private fun isImageTextRepo(repo: HFModelRepository, hasProjector: Boolean): Boolean {
         return hasProjector ||
-                repo.repoPath.contains("medgemma", ignoreCase = true) ||
-                repo.repoPath.contains("gemma-4-26B-A4B-it-GGUF", ignoreCase = true)
+                repo.repoPath.contains("medgemma", ignoreCase = true)
     }
 
     private fun isReasoningRepo(repo: HFModelRepository, fileName: String): Boolean {
@@ -204,8 +205,11 @@ class ModelStoreRepository(private val context: Context) {
     }
 
     private fun isExperimentalGguf(repo: HFModelRepository): Boolean {
-        return repo.repoPath.contains("gemma-4", ignoreCase = true) ||
-                repo.name.contains("Gemma 4", ignoreCase = true)
+        return false
+    }
+
+    private fun sanitizeModels(models: List<HuggingFaceModel>): List<HuggingFaceModel> {
+        return models.filterNot { UnsupportedModelFilter.isUnsupportedGemma4Model(it) }
     }
 
     private fun quantTypeFrom(fileName: String): String {

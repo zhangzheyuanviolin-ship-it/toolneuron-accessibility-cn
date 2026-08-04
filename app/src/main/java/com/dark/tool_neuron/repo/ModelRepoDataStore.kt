@@ -50,17 +50,11 @@ class ModelRepositoryDataStore(private val context: Context) {
             category = category
         )
 
-        private fun isUnsupportedGemma4Repository(repo: HFModelRepository): Boolean {
-            return repo.id.contains("gemma4", ignoreCase = true) ||
-                    repo.name.contains("Gemma 4", ignoreCase = true) ||
-                    repo.id.contains("financegemma-e4b", ignoreCase = true) ||
-                    repo.name.contains("FinanceGemma E4B", ignoreCase = true) ||
-                    repo.repoPath.contains("FinanceGemma-E4B", ignoreCase = true) ||
-                    repo.repoPath.contains("gemma-4", ignoreCase = true)
-        }
-
         val DEFAULT_REPOSITORIES = listOf(
             // === GENERAL ===
+            ggufRepository("unsloth-qwen3-0_6b", "Qwen3 0.6B", "unsloth/Qwen3-0.6B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-1_7b", "Qwen3 1.7B", "unsloth/Qwen3-1.7B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-4b", "Qwen3 4B", "unsloth/Qwen3-4B-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3_5-0_8b", "Qwen3.5 0.8B", "unsloth/Qwen3.5-0.8B-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3_5-2b", "Qwen3.5 2B", "unsloth/Qwen3.5-2B-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3_5-4b", "Qwen3.5 4B", "unsloth/Qwen3.5-4B-GGUF", ModelCategory.GENERAL),
@@ -70,9 +64,16 @@ class ModelRepositoryDataStore(private val context: Context) {
             ggufRepository("qwen3_6-35b-a3b-mtp", "Qwen3.6 35B A3B MTP", "saidonnet/Qwen3.6-35B-A3B-MTP-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3-30b-a3b-instruct-2507", "Qwen3 30B A3B Instruct 2507", "unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF", ModelCategory.GENERAL),
             ggufRepository("bartowski-qwen3-30b-a3b-instruct-2507", "Qwen3 30B A3B Instruct Bartowski", "bartowski/Qwen_Qwen3-30B-A3B-Instruct-2507-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-30b-a3b-thinking-2507", "Qwen3 30B A3B Thinking 2507", "unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3-14b", "Qwen3 14B", "unsloth/Qwen3-14B-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3-8b", "Qwen3 8B", "unsloth/Qwen3-8B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("bartowski-qwen3-4b", "Qwen3 4B Bartowski", "bartowski/Qwen_Qwen3-4B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("bartowski-qwen3-8b", "Qwen3 8B Bartowski", "bartowski/Qwen_Qwen3-8B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("bartowski-qwen3-14b", "Qwen3 14B Bartowski", "bartowski/Qwen_Qwen3-14B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-vl-2b-instruct", "Qwen3 VL 2B Instruct", "unsloth/Qwen3-VL-2B-Instruct-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3-vl-4b-instruct", "Qwen3 VL 4B Instruct", "unsloth/Qwen3-VL-4B-Instruct-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-vl-8b-instruct", "Qwen3 VL 8B Instruct", "unsloth/Qwen3-VL-8B-Instruct-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-vl-30b-a3b-instruct", "Qwen3 VL 30B A3B Instruct", "unsloth/Qwen3-VL-30B-A3B-Instruct-GGUF", ModelCategory.GENERAL),
             ggufRepository("lfm2-24b-a2b-bartowski", "LFM2 24B A2B MoE", "bartowski/LiquidAI_LFM2-24B-A2B-GGUF", ModelCategory.GENERAL),
             // === MEDICAL ===
             ggufRepository("medgemma-4b-it", "MedGemma 4B IT", "unsloth/medgemma-4b-it-GGUF", ModelCategory.MEDICAL),
@@ -99,6 +100,10 @@ class ModelRepositoryDataStore(private val context: Context) {
             ggufRepository("qwen3_5-9b-data-science", "Qwen3.5 9B Data Science", "murataksit34/Qwen3.5-9B-Data-Science-Insight-16.5K-Q4_K_M-GGUF", ModelCategory.RESEARCH),
             ggufRepository("qwen3_5-9b-researcher", "Qwen3.5 9B Researcher", "utareen/Qwen3.5-9B-Researcher-v1-GGUF", ModelCategory.RESEARCH),
             // === CODING ===
+            ggufRepository("unsloth-qwen3-coder-30b-a3b-instruct", "Qwen3 Coder 30B A3B Instruct", "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF", ModelCategory.CODING),
+            ggufRepository("unsloth-qwen2_5-coder-7b-instruct", "Qwen2.5 Coder 7B Instruct", "unsloth/Qwen2.5-Coder-7B-Instruct-GGUF", ModelCategory.CODING),
+            ggufRepository("unsloth-qwen2_5-coder-14b-instruct", "Qwen2.5 Coder 14B Instruct", "unsloth/Qwen2.5-Coder-14B-Instruct-GGUF", ModelCategory.CODING),
+            ggufRepository("unsloth-qwen2_5-coder-32b-instruct", "Qwen2.5 Coder 32B Instruct", "unsloth/Qwen2.5-Coder-32B-Instruct-GGUF", ModelCategory.CODING),
             ggufRepository("qwen3_5-9b-coder", "Qwen3.5 9B Coder", "mradermacher/Qwen3.5-9B-Coder-GGUF", ModelCategory.CODING),
             ggufRepository("qwen3_5-9b-coder-i1", "Qwen3.5 9B Coder i1", "mradermacher/Qwen3.5-9B-Coder-i1-GGUF", ModelCategory.CODING),
             ggufRepository("qwen3_5-4b-agentic-coder-v4", "Qwen3.5 4B Agentic Coder v4", "mradermacher/qwen3.5-4b-agentic-coder-v4-GGUF", ModelCategory.CODING),
@@ -153,7 +158,7 @@ class ModelRepositoryDataStore(private val context: Context) {
             sdRepository("sd-mistoonanime-qnn", "MistoonAnime v3.0 (NPU)", "Mr-J-369/mistoonAnime_v30-SD1.5-qnn2.28", ModelCategory.UNCENSORED),
             sdRepository("sd-cyberrealistic-qnn", "CyberRealistic Classic (NPU)", "Mr-J-369/cyberrealistic-classic-SD1.5-qnn2.28", ModelCategory.UNCENSORED),
             sdRepository("sd-realhotspice-qnn", "RealHotSpice (NPU)", "Mr-J-369/RealHotSpice-SD1.5-qnn2.28", ModelCategory.UNCENSORED)
-        )
+        ).filterNot { UnsupportedModelFilter.isUnsupportedGemma4Repository(it) }
     }
 
     val repositories: Flow<List<HFModelRepository>> =
@@ -167,7 +172,7 @@ class ModelRepositoryDataStore(private val context: Context) {
             if (json != null) {
                 try {
                     val saved = Json.decodeFromString<List<HFModelRepository>>(json)
-                        .filterNot { isUnsupportedGemma4Repository(it) }
+                        .filterNot { UnsupportedModelFilter.isUnsupportedGemma4Repository(it) }
                     val savedIds = saved.map { it.id }.toSet()
                     val newDefaults = DEFAULT_REPOSITORIES.filter {
                         it.id !in savedIds && it.id !in deletedIds
@@ -183,7 +188,9 @@ class ModelRepositoryDataStore(private val context: Context) {
 
     suspend fun saveRepositories(repos: List<HFModelRepository>) {
         context.modelRepoDataStore.edit { preferences ->
-            preferences[MODEL_REPOS_KEY] = Json.encodeToString(repos)
+            preferences[MODEL_REPOS_KEY] = Json.encodeToString(
+                repos.filterNot { UnsupportedModelFilter.isUnsupportedGemma4Repository(it) }
+            )
         }
     }
 
