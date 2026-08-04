@@ -6,12 +6,12 @@ import org.junit.Test
 
 class VlmImageQualityTest {
     @Test
-    fun defaultQualityUsesBalanced512Preset() {
+    fun defaultQualityUsesCompact256Preset() {
         val quality = VlmImageQuality.from(null)
 
-        assertEquals(VlmImageQuality.BALANCED, quality)
-        assertEquals(512, quality.maxLongEdge)
-        assertEquals(85, quality.jpegQuality)
+        assertEquals(VlmImageQuality.COMPACT, quality)
+        assertEquals(256, quality.maxLongEdge)
+        assertEquals(80, quality.jpegQuality)
     }
 
     @Test
@@ -20,7 +20,7 @@ class VlmImageQualityTest {
     }
 
     @Test
-    fun invalidStoredValueFallsBackToBalanced() {
-        assertEquals(VlmImageQuality.BALANCED, VlmImageQuality.from("bad-value"))
+    fun invalidStoredValueFallsBackToCompact() {
+        assertEquals(VlmImageQuality.COMPACT, VlmImageQuality.from("bad-value"))
     }
 }

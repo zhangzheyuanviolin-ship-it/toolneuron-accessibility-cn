@@ -50,6 +50,15 @@ class ModelRepositoryDataStore(private val context: Context) {
             category = category
         )
 
+        private fun isUnsupportedGemma4Repository(repo: HFModelRepository): Boolean {
+            return repo.id.contains("gemma4", ignoreCase = true) ||
+                    repo.name.contains("Gemma 4", ignoreCase = true) ||
+                    repo.id.contains("financegemma-e4b", ignoreCase = true) ||
+                    repo.name.contains("FinanceGemma E4B", ignoreCase = true) ||
+                    repo.repoPath.contains("FinanceGemma-E4B", ignoreCase = true) ||
+                    repo.repoPath.contains("gemma-4", ignoreCase = true)
+        }
+
         val DEFAULT_REPOSITORIES = listOf(
             // === GENERAL ===
             ggufRepository("unsloth-qwen3_5-0_8b", "Qwen3.5 0.8B", "unsloth/Qwen3.5-0.8B-GGUF", ModelCategory.GENERAL),
@@ -59,11 +68,11 @@ class ModelRepositoryDataStore(private val context: Context) {
             ggufRepository("unsloth-qwen3_5-35b-a3b", "Qwen3.5 35B A3B MoE", "unsloth/Qwen3.5-35B-A3B-GGUF", ModelCategory.GENERAL),
             ggufRepository("unsloth-qwen3_5-35b-a3b-mtp", "Qwen3.5 35B A3B MTP", "unsloth/Qwen3.5-35B-A3B-MTP-GGUF", ModelCategory.GENERAL),
             ggufRepository("qwen3_6-35b-a3b-mtp", "Qwen3.6 35B A3B MTP", "saidonnet/Qwen3.6-35B-A3B-MTP-GGUF", ModelCategory.GENERAL),
-            ggufRepository("gemma4-e2b-assistant", "Gemma 4 E2B Assistant", "nypgd/mebi-gemma-4-e2b-assistant-gguf", ModelCategory.GENERAL),
-            ggufRepository("gemma4-e4b-tamil", "Gemma 4 E4B", "mradermacher/gemma-4-E4B-tamil-GGUF", ModelCategory.GENERAL),
-            ggufRepository("gemma4-12b-mirozdanie", "Gemma 4 12B", "estread11/gemma-4-12b-mirozdanie-nvfp4-gguf", ModelCategory.GENERAL),
-            ggufRepository("gemma4-26b-a4b", "Gemma 4 26B A4B MoE", "AtomicChat/gemma-4-26B-A4B-it-GGUF", ModelCategory.GENERAL),
-            ggufRepository("unsloth-gemma4-26b-a4b-vlm", "Gemma 4 26B A4B MoE VLM", "unsloth/gemma-4-26B-A4B-it-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-30b-a3b-instruct-2507", "Qwen3 30B A3B Instruct 2507", "unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF", ModelCategory.GENERAL),
+            ggufRepository("bartowski-qwen3-30b-a3b-instruct-2507", "Qwen3 30B A3B Instruct Bartowski", "bartowski/Qwen_Qwen3-30B-A3B-Instruct-2507-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-14b", "Qwen3 14B", "unsloth/Qwen3-14B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-8b", "Qwen3 8B", "unsloth/Qwen3-8B-GGUF", ModelCategory.GENERAL),
+            ggufRepository("unsloth-qwen3-vl-4b-instruct", "Qwen3 VL 4B Instruct", "unsloth/Qwen3-VL-4B-Instruct-GGUF", ModelCategory.GENERAL),
             ggufRepository("lfm2-24b-a2b-bartowski", "LFM2 24B A2B MoE", "bartowski/LiquidAI_LFM2-24B-A2B-GGUF", ModelCategory.GENERAL),
             // === MEDICAL ===
             ggufRepository("medgemma-4b-it", "MedGemma 4B IT", "unsloth/medgemma-4b-it-GGUF", ModelCategory.MEDICAL),
@@ -105,9 +114,9 @@ class ModelRepositoryDataStore(private val context: Context) {
             ggufRepository("businessgpt-qwen3_5-2b-v14", "BusinessGPT Qwen3.5 2B v14", "vXofi/businessgpt-v14-dpo-qwen3.5-2b-gguf", ModelCategory.BUSINESS),
             ggufRepository("businessgpt-qwen3_5-2b-v11", "BusinessGPT Qwen3.5 2B v11", "vXofi/businessgpt-v11-qwen3.5-2b-gguf", ModelCategory.BUSINESS),
             ggufRepository("businessgpt-qwen3_5-9b-v16", "BusinessGPT Qwen3.5 9B v16", "vXofi/businessgpt-v16-qwen3.5-9b-gguf", ModelCategory.BUSINESS),
-            ggufRepository("tracealchemy-gemma4-e4b-finance", "TraceAlchemy Gemma 4 E4B Finance", "trjxter/TraceAlchemy-Gemma-4-E4B-Finance-IT-gguf", ModelCategory.BUSINESS),
-            ggufRepository("financegemma-e4b", "FinanceGemma E4B", "mradermacher/FinanceGemma-E4B-GGUF", ModelCategory.BUSINESS),
-            ggufRepository("finance-gemma4-e2b", "Finance Gemma 4 E2B", "mradermacher/finance-gemma4-e2b-GGUF", ModelCategory.BUSINESS),
+            ggufRepository("qwen3_5-legal-q5", "Qwen3.5 Legal Q5", "Reytian/qwen3.5-legal-q5_k_m-gguf", ModelCategory.BUSINESS),
+            ggufRepository("qwen3-4b-thinking-2507-business", "Qwen3 4B Thinking 2507 Business", "unsloth/Qwen3-4B-Thinking-2507-GGUF", ModelCategory.BUSINESS),
+            ggufRepository("deepseek-r1-qwen3-8b-business", "DeepSeek R1 Qwen3 8B Business", "unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF", ModelCategory.BUSINESS),
             ggufRepository("legal-qwen3_5-9b", "Legal Qwen3.5 9B", "scottyjmp5/Legal-Qwen3.5-9B-Abliterated-GGUF", ModelCategory.BUSINESS),
             ggufRepository("legal-ai-qwen3_5-q8", "Legal AI Qwen3.5 Q8", "claspi2509/legal-AI-advanced-qwen3.5-q8-gguf", ModelCategory.BUSINESS),
             ggufRepository("qwen3-4b-sales-strategist", "Qwen3 4B Sales Strategist", "mradermacher/Qwen3-4B-Thinking-2507-Sales-Strategist-v1-GGUF", ModelCategory.BUSINESS),
@@ -121,10 +130,10 @@ class ModelRepositoryDataStore(private val context: Context) {
             ggufRepository("huihui-qwen3_5-35b-a3b-abliterated", "Huihui Qwen3.5 35B A3B Abliterated", "mradermacher/Huihui-Qwen3.5-35B-A3B-abliterated-GGUF", ModelCategory.UNCENSORED),
             ggufRepository("qwen3_6-35b-a3b-uncensored", "Qwen3.6 35B A3B Uncensored", "llmfan46/Qwen3.6-35B-A3B-uncensored-heretic-GGUF", ModelCategory.UNCENSORED),
             ggufRepository("qwen3_6-35b-a3b-uncensored-apex", "Qwen3.6 35B A3B Uncensored APEX", "SC117/Qwen3.6-35B-A3B-uncensored-heretic-Native-MTP-Preserved-APEX-GGUF", ModelCategory.UNCENSORED),
-            ggufRepository("gemma4-12b-heretic-abliterated", "Gemma 4 12B Heretic Abliterated", "culturerevolt/gemma-4-12b-heretic-abliterated-GGUF", ModelCategory.UNCENSORED),
-            ggufRepository("huihui-gemma4-12b-abliterated", "Huihui Gemma 4 12B Abliterated", "huihui-ai/Huihui-gemma-4-12B-it-qat-q4_0-unquantized-abliterated-GGUF", ModelCategory.UNCENSORED),
-            ggufRepository("huihui-gemma4-26b-a4b-abliterated", "Huihui Gemma 4 26B A4B Abliterated", "huihui-ai/Huihui-gemma-4-26B-A4B-it-qat-q4_0-unquantized-abliterated-GGUF", ModelCategory.UNCENSORED),
-            ggufRepository("gemma4-26b-a4b-abliterix", "Gemma 4 26B A4B Abliterix", "0xA50C1A1/gemma-4-26B-A4B-it-abliterix-gguf", ModelCategory.UNCENSORED),
+            ggufRepository("qwen3_5-9b-highiq-thinking-uncensored", "Qwen3.5 9B HighIQ Thinking Uncensored", "mradermacher/Qwen3.5-9B-Claude-4.6-HighIQ-THINKING-HERETIC-UNCENSORED-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("qwen3_5-9b-deckard-uncensored", "Qwen3.5 9B Deckard Uncensored", "DavidAU/Qwen3.5-9B-Claude-4.6-Opus-Deckard-V4.2-Uncensored-Heretic-Thinking-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("qwen3-30b-a3b-erotic-abliterated", "Qwen3 30B A3B Abliterated Erotic", "mradermacher/Qwen3-30B-A3B-abliterated-erotic-i1-GGUF", ModelCategory.UNCENSORED),
+            ggufRepository("huihui-qwen3-coder-30b-a3b-abliterated", "Huihui Qwen3 Coder 30B A3B Abliterated", "mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-i1-GGUF", ModelCategory.UNCENSORED),
             // === CYBERSECURITY ===
             ggufRepository("qwen3_5-0_8b-cyber", "Qwen3.5 0.8B Cyber", "reaperdoesntknow/Qwen3.5-0.8-Cyber-GGUF", ModelCategory.CYBERSECURITY),
             ggufRepository("qwen3_5-9b-cyber-v3", "Qwen3.5 9B Cyber v3", "mradermacher/Qwen3.5-9B-Uncensored-cyber-v3-GGUF", ModelCategory.CYBERSECURITY),
@@ -158,6 +167,7 @@ class ModelRepositoryDataStore(private val context: Context) {
             if (json != null) {
                 try {
                     val saved = Json.decodeFromString<List<HFModelRepository>>(json)
+                        .filterNot { isUnsupportedGemma4Repository(it) }
                     val savedIds = saved.map { it.id }.toSet()
                     val newDefaults = DEFAULT_REPOSITORIES.filter {
                         it.id !in savedIds && it.id !in deletedIds

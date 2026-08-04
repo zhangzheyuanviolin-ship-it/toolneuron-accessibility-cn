@@ -95,7 +95,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val vlmImageQuality: StateFlow<VlmImageQuality> = appSettingsDataStore.vlmImageQuality
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VlmImageQuality.BALANCED)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VlmImageQuality.COMPACT)
 
     val loadTTSOnStart: StateFlow<Boolean> = appSettingsDataStore.loadTTSOnStart
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)

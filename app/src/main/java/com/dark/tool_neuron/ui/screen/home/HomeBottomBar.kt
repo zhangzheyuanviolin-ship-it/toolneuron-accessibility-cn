@@ -92,7 +92,7 @@ internal fun BottomBar(
     val context = LocalContext.current
     val appSettings = remember(context) { AppSettingsDataStore(context.applicationContext) }
     val vlmImageQuality by appSettings.vlmImageQuality.collectAsStateWithLifecycle(
-        initialValue = com.dark.tool_neuron.vlm.VlmImageQuality.BALANCED
+        initialValue = com.dark.tool_neuron.vlm.VlmImageQuality.COMPACT
     )
     var value by remember { mutableStateOf("") }
     val installedModels by llmModelViewModel.installedModels.collectAsStateWithLifecycle(emptyList())
@@ -138,23 +138,35 @@ internal fun BottomBar(
     var selectedImageData by remember { mutableStateOf<List<VlmImagePayload>>(emptyList()) }
     var vlmProjectors by remember { mutableStateOf(emptyList<java.io.File>()) }
 
+    fun prepareImageFromUri(uri: android.net.Uri) {
+        scope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.use { input ->
+                        VlmImagePreprocessor.preprocess(input.readBytes(), vlmImageQuality)
+                    }
+                }
+            }.onSuccess { payload ->
+                if (payload != null) selectedImageData = listOf(payload)
+            }.onFailure {
+                AppStateManager.setError("Failed to prepare image: ${it.message}")
+            }
+        }
+    }
+
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            scope.launch {
-                runCatching {
-                    withContext(Dispatchers.IO) {
-                        context.contentResolver.openInputStream(uri)?.use { input ->
-                            VlmImagePreprocessor.preprocess(input.readBytes(), vlmImageQuality)
-                        }
-                    }
-                }.onSuccess { payload ->
-                    if (payload != null) selectedImageData = listOf(payload)
-                }.onFailure {
-                    AppStateManager.setError("Failed to prepare image: ${it.message}")
-                }
-            }
+            prepareImageFromUri(uri)
+        }
+    }
+
+    val fileImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            prepareImageFromUri(uri)
         }
     }
 
@@ -469,6 +481,13 @@ internal fun BottomBar(
                                     onClick = {
                                         showAttachmentMenu = false
                                         galleryLauncher.launch("image/*")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(tn("Pick image from files")) },
+                                    onClick = {
+                                        showAttachmentMenu = false
+                                        fileImageLauncher.launch(arrayOf("image/*"))
                                     }
                                 )
                                 DropdownMenuItem(
